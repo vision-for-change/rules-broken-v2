@@ -19,8 +19,7 @@ func _ready() -> void:
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
 
 func _update_visual() -> void:
-	var is_locked = (locked_by != "" and RuleManager.is_rule_active(locked_by)) or
-					(requires_tag != "" and not EntityRegistry.has_tag("player", requires_tag))
+	var is_locked = (locked_by != "" and RuleManager.is_rule_active(locked_by)) or (requires_tag != "" and not EntityRegistry.has_tag("player", requires_tag))
 	if is_locked:
 		body_rect.color = Color(0.6, 0.1, 0.1)
 		label.text = "EXIT\nLOCKED"

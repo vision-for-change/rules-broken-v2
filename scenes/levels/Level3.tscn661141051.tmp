@@ -95,19 +95,20 @@ position = Vector2(25, 90)
 [node name="Watchdog1" parent="." unique_id=1031613320 instance=ExtResource("3")]
 position = Vector2(80, 140)
 patrol_points = [Vector2(25, 140), Vector2(130, 140)]
+entity_id = "watchdog_01"
 view_range = 55.0
 
 [node name="Watchdog2" parent="." unique_id=1793080602 instance=ExtResource("3")]
 position = Vector2(255, 55)
 patrol_points = [Vector2(200, 35), Vector2(305, 35), Vector2(305, 75), Vector2(200, 75)]
-view_range = 52.0
 entity_id = "watchdog_02"
+view_range = 52.0
 
 [node name="Watchdog3" parent="." unique_id=1961021763 instance=ExtResource("3")]
 position = Vector2(255, 135)
 patrol_points = [Vector2(210, 135), Vector2(305, 135)]
-view_range = 48.0
 entity_id = "watchdog_03"
+view_range = 48.0
 
 [node name="Sign_NoRunning" parent="." unique_id=1646710648 instance=ExtResource("4")]
 position = Vector2(55, 22)

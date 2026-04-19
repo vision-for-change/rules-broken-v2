@@ -12,6 +12,8 @@ extends Node2D
 @onready var title_label: Label = $TitleLabel
 
 var _complete := false
+const TRANSITION_IN_TIME := 0.35
+const TRANSITION_OUT_TIME := 0.45
 
 func _ready() -> void:
 	RuleManager.clear_rules()
@@ -27,6 +29,7 @@ func _ready() -> void:
 	EventBus.integrity_changed.connect(_on_integrity_changed, CONNECT_ONE_SHOT)
 
 	_show_title()
+	_play_enter_transition()
 	EventBus.log("// SECTOR %d INITIALISED //" % level_number, "info")
 	EventBus.log("Active rules: %d" % initial_rules.size(), "info")
 
@@ -47,7 +50,8 @@ func _on_level_complete() -> void:
 	AudioManager.play_sfx("level_complete")
 	ScreenFX.flash_screen(Color(0.1, 1.0, 0.4, 0.5), 0.5)
 	EventBus.log("// SECTOR %d CLEARED //" % level_number, "exploit")
-	await get_tree().create_timer(1.8).timeout
+	await get_tree().create_timer(1.1).timeout
+	await _play_exit_transition()
 	var next = "res://scenes/levels/Level%d.tscn" % (level_number + 1)
 	if ResourceLoader.exists(next):
 		get_tree().change_scene_to_file(next)
@@ -70,3 +74,28 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+
+func _play_enter_transition() -> void:
+	var overlay = _create_transition_overlay()
+	overlay.color = Color(0.0, 0.0, 0.0, 1.0)
+	var t = create_tween()
+	t.tween_property(overlay, "color:a", 0.0, TRANSITION_IN_TIME)
+	t.tween_callback(func(): overlay.get_parent().queue_free())
+
+func _play_exit_transition() -> void:
+	var overlay = _create_transition_overlay()
+	overlay.color = Color(0.0, 0.0, 0.0, 0.0)
+	var t = create_tween()
+	t.tween_property(overlay, "color:a", 1.0, TRANSITION_OUT_TIME)
+	await t.finished
+
+func _create_transition_overlay() -> ColorRect:
+	var layer := CanvasLayer.new()
+	layer.layer = 200
+	add_child(layer)
+
+	var overlay := ColorRect.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(overlay)
+	return overlay

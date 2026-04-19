@@ -187,7 +187,7 @@ func _set_state(new_state: WatchdogState) -> void:
 	var nw  = WatchdogState.keys()[new_state]
 	_state = new_state
 	EntityRegistry.set_state(entity_id, nw.to_lower())
-	EntityRegistry.set_meta(entity_id, "state", nw.to_lower())
+	EntityRegistry.set_entity_meta(entity_id, "state", nw.to_lower())
 	EventBus.watchdog_state_changed.emit(entity_id, old, nw)
 
 	match new_state:

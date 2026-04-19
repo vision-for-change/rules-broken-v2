@@ -21,7 +21,7 @@ var _log_lines: Array[String] = []
 @onready var rules_container:  VBoxContainer      = $Panel/VBox/RulesScroll/RulesContainer
 @onready var tags_label:       Label              = $Panel/VBox/TagsLabel
 @onready var log_container:    VBoxContainer      = $LogPanel/LogScroll/LogContainer
-@onready var log_panel:        Panel              = $LogPanel
+@onready var log_panel:        PanelContainer     = $LogPanel
 
 func _ready() -> void:
 	EventBus.rule_registered.connect(_on_rule_changed.bind(true))
@@ -29,6 +29,7 @@ func _ready() -> void:
 	EventBus.integrity_changed.connect(_on_integrity_changed)
 	EventBus.log_event.connect(_on_log_event)
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
+	_style_static_labels()
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(1.0, 0.0)
@@ -37,13 +38,14 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("log_toggle"):
 		log_panel.visible = not log_panel.visible
 
-
-	# Style static labels
+func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
 				$Panel/VBox/TagsLabel, $Panel/VBox/HintLabel]:
-		lbl.add_theme_font_size_override("font_size", 6)
-		lbl.add_theme_color_override("font_color", Color(0.5, 0.75, 0.6))
-	$Panel/VBox/SysLabel.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+		lbl.add_theme_font_size_override("font_size", 14)
+		lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 0.9))
+		lbl.add_theme_color_override("outline_color", Color.BLACK)
+		lbl.add_theme_constant_override("outline_size", 1)
+	$Panel/VBox/SysLabel.add_theme_color_override("font_color", Color(0.2, 1.0, 0.6))
 
 func _on_rule_changed(_rule: Dictionary, _added: bool) -> void:
 	_refresh_rules()
@@ -52,18 +54,18 @@ func _refresh_rules() -> void:
 	for c in rules_container.get_children():
 		c.queue_free()
 
-	var header := _make_label("// ACTIVE RULES", Color(0.4, 1.0, 0.6), 7)
+	var header := _make_label("// ACTIVE RULES", Color(0.4, 1.0, 0.6), 12)
 	rules_container.add_child(header)
 
 	var rules = RuleManager.get_all_rules()
 	if rules.is_empty():
-		rules_container.add_child(_make_label("  [NONE]", Color(0.4, 0.4, 0.5), 6))
+		rules_container.add_child(_make_label("  [NONE]", Color(0.4, 0.4, 0.5), 10))
 	else:
 		for rule in rules:
 			var col = Color(1.0, 0.4, 0.3) if rule["severity"] == "hard" else \
 					  Color(1.0, 0.7, 0.1) if rule["severity"] == "soft" else Color(1.0, 0.1, 0.1)
 			var txt = "  [%s] p=%d" % [rule["id"], rule["priority"]]
-			rules_container.add_child(_make_label(txt, col, 6))
+			rules_container.add_child(_make_label(txt, col, 10))
 
 func _refresh_tags() -> void:
 	var tags = EntityRegistry.get_tags("player")
@@ -97,7 +99,7 @@ func _rebuild_log(latest_col: Color) -> void:
 	for i in _log_lines.size():
 		var is_latest = (i == _log_lines.size() - 1)
 		var col = latest_col if is_latest else Color(0.5, 0.5, 0.5)
-		log_container.add_child(_make_label(_log_lines[i], col, 6))
+		log_container.add_child(_make_label(_log_lines[i], col, 10))
 
 func _on_tag_changed(entity_id: String, _tag: String, _added: bool) -> void:
 	if entity_id == "player":
@@ -109,6 +111,9 @@ func _make_label(text: String, color: Color, size: int = 7) -> Label:
 	lbl.add_theme_font_size_override("font_size", size)
 	lbl.add_theme_color_override("font_color", color)
 	lbl.clip_text = true
+	lbl.add_theme_color_override("outline_color", Color.BLACK)
+	lbl.add_theme_constant_override("outline_size", 1)
+	lbl.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 	return lbl
 
 
