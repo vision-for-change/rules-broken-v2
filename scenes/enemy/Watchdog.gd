@@ -28,6 +28,7 @@ const ALERT_DUR     = 4.0
 @onready var body_rect: ColorRect  = $BodyRect
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	_home_pos = global_position
 	if patrol_points.is_empty():
 		patrol_points = [global_position, global_position + Vector2(64, 0)]

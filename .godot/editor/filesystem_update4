@@ -8,3 +8,4 @@ res://scenes/ui/HUD.gd
 res://scenes/levels/Level2.tscn
 res://autoloads/InputSetup.gd
 res://scenes/levels/BaseLevel.gd
+res://scenes/ui/HUD.tscn

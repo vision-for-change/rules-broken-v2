@@ -16,7 +16,7 @@ const SEVERITY_COLORS = {
 
 var _log_lines: Array[String] = []
 
-@onready var integrity_bar:    TextureProgressBar = $Panel/VBox/IntegrityBar
+@onready var integrity_bar:    ProgressBar        = $HealthBar
 @onready var integrity_label:  Label              = $Panel/VBox/IntegrityLabel
 @onready var rules_container:  VBoxContainer      = $Panel/VBox/RulesScroll/RulesContainer
 @onready var tags_label:       Label              = $Panel/VBox/TagsLabel
@@ -82,7 +82,7 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 		col = Color(1.0, 0.7, 0.1)
 	else:
 		col = Color(1.0, 0.2, 0.1)
-	integrity_label.text = "SYS INTEGRITY: %d%%" % int(new_val * 100.0)
+	integrity_label.text = "SYSTEM HEALTH: %d/100" % int(new_val * 100.0)
 	integrity_label.add_theme_color_override("font_color", col)
 
 func _on_log_event(message: String, severity: String) -> void:

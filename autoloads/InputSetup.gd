@@ -1,9 +1,11 @@
 extends Node
 func _ready() -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	_add("run",      [KEY_SHIFT])
 	_add("interact", [KEY_E, KEY_F])
 	_add("inspect",  [KEY_TAB])
 	_add("log_toggle", [KEY_QUOTELEFT])
+	_add("pause_main_menu", [KEY_M])
 	_add_to_existing("ui_left", [KEY_A])
 	_add_to_existing("ui_right", [KEY_D])
 	_add_to_existing("ui_up", [KEY_W])
