@@ -1,0 +1,132 @@
+[gd_scene load_steps=8 format=3 uid="uid://lv4_001"]
+
+[ext_resource type="Script" path="res://scenes/levels/BaseLevel.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/enemy/Watchdog.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/objects/RuleSign.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/objects/Exit.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/objects/Terminal.tscn" id="7"]
+
+[sub_resource type="RectangleShape2D" id="hw"]
+size = Vector2(320, 10)
+[sub_resource type="RectangleShape2D" id="vw"]
+size = Vector2(10, 180)
+[sub_resource type="RectangleShape2D" id="b1"]
+size = Vector2(80, 10)
+[sub_resource type="RectangleShape2D" id="b2"]
+size = Vector2(10, 80)
+[sub_resource type="RectangleShape2D" id="b3"]
+size = Vector2(100, 10)
+
+[node name="Level4" type="Node2D"]
+script = ExtResource("1")
+level_number = 4
+level_title_text = "SECTOR 04 // IDENTITY SPOOF"
+initial_rules = ["no_running", "no_access", "watchdog_enforce", "restricted_zone"]
+
+[node name="HUD" parent="." instance=ExtResource("6")]
+
+[node name="TitleLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 10.0
+offset_right = 80.0
+offset_bottom = 24.0
+horizontal_alignment = 1
+text = "SECTOR 04"
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -10
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.05, 0.05, 0.10, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+[node name="Top" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Top"]
+position = Vector2(160, 5)
+shape = SubResource("hw")
+[node name="Bottom" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Bottom"]
+position = Vector2(160, 175)
+shape = SubResource("hw")
+[node name="Left" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Left"]
+position = Vector2(5, 90)
+shape = SubResource("vw")
+[node name="Right" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Right"]
+position = Vector2(315, 90)
+shape = SubResource("vw")
+[node name="IW1" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/IW1"]
+position = Vector2(110, 50)
+shape = SubResource("b1")
+[node name="IW2" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/IW2"]
+position = Vector2(110, 130)
+shape = SubResource("b1")
+[node name="IW3" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/IW3"]
+position = Vector2(165, 90)
+shape = SubResource("b2")
+[node name="IW4" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/IW4"]
+position = Vector2(245, 50)
+shape = SubResource("b3")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(25, 90)
+
+[node name="Watchdog1" parent="." instance=ExtResource("3")]
+position = Vector2(70, 90)
+patrol_points = [Vector2(20, 90), Vector2(100, 90)]
+entity_id = "watchdog_01"
+
+[node name="Watchdog2" parent="." instance=ExtResource("3")]
+position = Vector2(205, 90)
+patrol_points = [Vector2(180, 90), Vector2(305, 90)]
+entity_id = "watchdog_02"
+
+[node name="Watchdog3" parent="." instance=ExtResource("3")]
+position = Vector2(260, 140)
+patrol_points = [Vector2(185, 140), Vector2(305, 140), Vector2(305, 165), Vector2(185, 165)]
+entity_id = "watchdog_03"
+
+[node name="Watchdog4" parent="." instance=ExtResource("3")]
+position = Vector2(255, 25)
+patrol_points = [Vector2(200, 20), Vector2(305, 20)]
+entity_id = "watchdog_04"
+
+[node name="Sign_NoRunning" parent="." instance=ExtResource("4")]
+position = Vector2(50, 22)
+rule_id = "no_running"
+display_text = "NO RUNNING"
+sign_color = Color(0.85, 0.15, 0.15, 1)
+grants_rule_id = "permit_run"
+
+[node name="Sign_NoAccess" parent="." instance=ExtResource("4")]
+position = Vector2(210, 160)
+rule_id = "no_access"
+display_text = "NO ACCESS"
+sign_color = Color(0.7, 0.3, 0.1, 1)
+
+[node name="Terminal_Spoof" parent="." instance=ExtResource("7")]
+position = Vector2(140, 90)
+terminal_id = "terminal_spoof"
+terminal_commands = ["SPOOF_IDENTITY", "INJECT_PERMIT"]
+
+[node name="Exit" parent="." instance=ExtResource("5")]
+position = Vector2(295, 90)
+exit_id = "exit_04"
+requires_tag = "administrator"

@@ -1,0 +1,117 @@
+[gd_scene load_steps=8 format=3 uid="uid://lv3_001"]
+
+[ext_resource type="Script" path="res://scenes/levels/BaseLevel.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/enemy/Watchdog.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/objects/RuleSign.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/objects/Exit.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/objects/Terminal.tscn" id="7"]
+
+[sub_resource type="RectangleShape2D" id="hw"]
+size = Vector2(320, 10)
+[sub_resource type="RectangleShape2D" id="vw"]
+size = Vector2(10, 180)
+[sub_resource type="RectangleShape2D" id="block1"]
+size = Vector2(60, 10)
+[sub_resource type="RectangleShape2D" id="block2"]
+size = Vector2(10, 60)
+[sub_resource type="RectangleShape2D" id="block3"]
+size = Vector2(90, 10)
+
+[node name="Level3" type="Node2D"]
+script = ExtResource("1")
+level_number = 3
+level_title_text = "SECTOR 03 // WATCHDOG DISABLE"
+initial_rules = ["no_running", "watchdog_enforce", "restricted_zone"]
+
+[node name="HUD" parent="." instance=ExtResource("6")]
+
+[node name="TitleLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 10.0
+offset_right = 80.0
+offset_bottom = 24.0
+horizontal_alignment = 1
+text = "SECTOR 03"
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -10
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.07, 0.05, 0.12, 1)
+
+[node name="Walls" type="Node2D" parent="."]
+[node name="Top" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Top"]
+position = Vector2(160, 5)
+shape = SubResource("hw")
+[node name="Bottom" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Bottom"]
+position = Vector2(160, 175)
+shape = SubResource("hw")
+[node name="Left" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Left"]
+position = Vector2(5, 90)
+shape = SubResource("vw")
+[node name="Right" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Right"]
+position = Vector2(315, 90)
+shape = SubResource("vw")
+[node name="Block1" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Block1"]
+position = Vector2(130, 70)
+shape = SubResource("block1")
+[node name="Block2" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Block2"]
+position = Vector2(200, 110)
+shape = SubResource("block1")
+[node name="Block3" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+[node name="Col" type="CollisionShape2D" parent="Walls/Block3"]
+position = Vector2(165, 90)
+shape = SubResource("block2")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(25, 90)
+
+[node name="Watchdog1" parent="." instance=ExtResource("3")]
+position = Vector2(80, 140)
+patrol_points = [Vector2(25, 140), Vector2(130, 140)]
+entity_id = "watchdog_01"
+view_range = 55.0
+
+[node name="Watchdog2" parent="." instance=ExtResource("3")]
+position = Vector2(255, 55)
+patrol_points = [Vector2(200, 35), Vector2(305, 35), Vector2(305, 75), Vector2(200, 75)]
+entity_id = "watchdog_02"
+view_range = 52.0
+
+[node name="Watchdog3" parent="." instance=ExtResource("3")]
+position = Vector2(255, 135)
+patrol_points = [Vector2(210, 135), Vector2(305, 135)]
+entity_id = "watchdog_03"
+view_range = 48.0
+
+[node name="Sign_NoRunning" parent="." instance=ExtResource("4")]
+position = Vector2(55, 22)
+rule_id = "no_running"
+display_text = "NO RUNNING"
+sign_color = Color(0.85, 0.15, 0.15, 1)
+
+[node name="Terminal_Disable" parent="." instance=ExtResource("7")]
+position = Vector2(90, 80)
+terminal_id = "terminal_disable"
+terminal_commands = ["DISABLE_WATCHDOG"]
+
+[node name="Exit" parent="." instance=ExtResource("5")]
+position = Vector2(295, 90)
+exit_id = "exit_03"

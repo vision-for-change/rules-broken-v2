@@ -1,0 +1,3 @@
+res://autoloads/EntityRegistry.gd
+res://scenes/levels/BaseLevel.gd
+res://scenes/ui/MainMenu.tscn

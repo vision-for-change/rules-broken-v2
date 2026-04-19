@@ -1,0 +1,48 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="SYSTEM//BREACH"
+config/description="A systemic rule-exploitation stealth game."
+run/main_scene="res://scenes/ui/MainMenu.tscn"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[audio]
+
+RuleDefinitions="*res://autoloads/RuleDefinitions.gd"
+
+[autoload]
+
+EventBus="*res://autoloads/EventBus.gd"
+RuleManager="*res://autoloads/RuleManager.gd"
+ActionBus="*res://autoloads/ActionBus.gd"
+EntityRegistry="*res://autoloads/EntityRegistry.gd"
+AudioManager="*res://autoloads/AudioManager.gd"
+ScreenFX="*res://autoloads/ScreenFX.gd"
+InputSetup="*res://autoloads/InputSetup.gd"
+
+[display]
+
+window/size/viewport_width=320
+window/size/viewport_height=180
+window/stretch/mode="canvas_items"
+
+[physics]
+
+2d/default_gravity=0
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+2d/snap/snap_2d_transforms_to_pixel=true
+2d/snap/snap_2d_vertices_to_pixel=true

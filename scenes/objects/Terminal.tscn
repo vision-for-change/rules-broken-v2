@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3 uid="uid://terminal001"]
+
+[ext_resource type="Script" path="res://scenes/objects/Terminal.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="rect1"]
+size = Vector2(14, 18)
+
+[sub_resource type="GDScript" id="label_script"]
+script/source = "extends Label
+func _ready() -> void:
+	add_theme_font_size_override(\"font_size\", 6)
+	add_theme_color_override(\"font_color\", Color(0.2, 1, 0.5, 1))
+"
+
+[node name="Terminal" type="StaticBody2D"]
+collision_layer = 2
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("rect1")
+
+[node name="BodyRect" type="ColorRect" parent="."]
+offset_left = -7.0
+offset_top = -9.0
+offset_right = 7.0
+offset_bottom = 9.0
+color = Color(0.05, 0.1, 0.15, 1)
+
+[node name="ScreenRect" type="ColorRect" parent="."]
+offset_left = -5.0
+offset_top = -7.0
+offset_right = 5.0
+offset_bottom = 4.0
+color = Color(0.0, 0.5, 0.25, 1)
+
+[node name="GlowRect" type="ColorRect" parent="."]
+offset_left = -5.0
+offset_top = -7.0
+offset_right = 5.0
+offset_bottom = 4.0
+color = Color(0.1, 1.0, 0.5, 0.6)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -20.0
+offset_top = -22.0
+offset_right = 20.0
+offset_bottom = -11.0
+horizontal_alignment = 1
+text = "[TERM]"
+script = SubResource("label_script")

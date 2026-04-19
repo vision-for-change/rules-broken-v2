@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://go001"]
+
+[sub_resource type="GDScript" id="s1"]
+script/source = "extends Control
+func _ready() -> void:
+	ScreenFX.flash_screen(Color(1,0,0.1,0.6), 0.5)
+	AudioManager.switch_music(\"stable\")
+	$VBox/TitleLabel.add_theme_font_size_override(\"font_size\", 16)
+	$VBox/TitleLabel.add_theme_color_override(\"font_color\", Color(1,0.2,0.2,1))
+	$VBox/Sub.add_theme_font_size_override(\"font_size\", 8)
+	$VBox/Sub.add_theme_color_override(\"font_color\", Color(0.7,0.5,0.5,1))
+	$VBox/Hint.add_theme_font_size_override(\"font_size\", 7)
+	$VBox/Hint.add_theme_color_override(\"font_color\", Color(0.4,0.4,0.5,1))
+func _input(event):
+	if event.is_action_pressed(\"ui_accept\"): get_tree().change_scene_to_file(\"res://scenes/levels/Level1.tscn\")
+	if event.is_action_pressed(\"ui_cancel\"): get_tree().change_scene_to_file(\"res://scenes/ui/MainMenu.tscn\")
+"
+
+[node name="GameOver" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = SubResource("s1")
+
+[node name="Background" type="ColorRect" parent="."]
+color = Color(0.08, 0.03, 0.04, 1)
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -35.0
+offset_right = 90.0
+offset_bottom = 35.0
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="VBox"]
+horizontal_alignment = 1
+text = "ACCESS REVOKED"
+
+[node name="Sub" type="Label" parent="VBox"]
+horizontal_alignment = 1
+text = "Watchdog enforcement successful."
+
+[node name="Hint" type="Label" parent="VBox"]
+horizontal_alignment = 1
+text = "[ ENTER ] Retry Sector 01    [ ESC ] Menu"

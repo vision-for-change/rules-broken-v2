@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#0d0d1a"/>
+  <rect x="8" y="8" width="112" height="112" fill="none" stroke="#00ff88" stroke-width="2"/>
+  <text x="64" y="52" font-family="monospace" font-size="11" fill="#00ff88" text-anchor="middle">SYSTEM</text>
+  <line x1="20" y1="64" x2="108" y2="64" stroke="#ff3366" stroke-width="3"/>
+  <text x="64" y="90" font-family="monospace" font-size="11" fill="#ff3366" text-anchor="middle">BREACH</text>
+  <text x="64" y="112" font-family="monospace" font-size="7" fill="#4444aa" text-anchor="middle">// rules are meant to be broken</text>
+</svg>

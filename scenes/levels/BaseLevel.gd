@@ -1,0 +1,72 @@
+## BaseLevel.gd
+## Manages level lifecycle: loads rule set, connects events, handles transitions.
+## Each level script extends this and declares its own rules/entities.
+extends Node2D
+
+## Override in subclasses to define which rules start active
+@export var initial_rules: Array[String] = []
+@export var level_number: int = 1
+@export var level_title_text: String = "SECTOR 01"
+
+@onready var hud: CanvasLayer = $HUD
+@onready var title_label: Label = $TitleLabel
+
+var _complete := false
+
+func _ready() -> void:
+	RuleManager.clear_rules()
+	EntityRegistry.clear_all()
+
+	for rule_id in initial_rules:
+		var rule = RuleDefinitions.get_rule(rule_id)
+		if not rule.is_empty():
+			RuleManager.register_rule(rule)
+
+	EventBus.level_complete.connect(_on_level_complete, CONNECT_ONE_SHOT)
+	EventBus.player_caught.connect(_on_player_caught, CONNECT_ONE_SHOT)
+	EventBus.integrity_changed.connect(_on_integrity_changed, CONNECT_ONE_SHOT)
+
+	_show_title()
+	EventBus.log("// SECTOR %d INITIALISED //" % level_number, "info")
+	EventBus.log("Active rules: %d" % initial_rules.size(), "info")
+
+func _show_title() -> void:
+	title_label.text = level_title_text
+	title_label.add_theme_font_size_override("font_size", 12)
+	title_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+	title_label.modulate.a = 0.0
+	var t = create_tween()
+	t.tween_property(title_label, "modulate:a", 1.0, 0.4)
+	t.tween_interval(1.8)
+	t.tween_property(title_label, "modulate:a", 0.0, 0.4)
+
+func _on_level_complete() -> void:
+	if _complete:
+		return
+	_complete = true
+	AudioManager.play_sfx("level_complete")
+	ScreenFX.flash_screen(Color(0.1, 1.0, 0.4, 0.5), 0.5)
+	EventBus.log("// SECTOR %d CLEARED //" % level_number, "exploit")
+	await get_tree().create_timer(1.8).timeout
+	var next = "res://scenes/levels/Level%d.tscn" % (level_number + 1)
+	if ResourceLoader.exists(next):
+		get_tree().change_scene_to_file(next)
+	else:
+		get_tree().change_scene_to_file("res://scenes/ui/WinScreen.tscn")
+
+func _on_player_caught(_catcher_id: String) -> void:
+	# Player.gd handles its own caught animation + scene change
+	pass
+
+func _on_integrity_changed(new_val: float, _delta: float) -> void:
+	if new_val <= 0.15 and not RuleManager.is_rule_active("integrity_lockdown"):
+		var rule = RuleDefinitions.get_rule("integrity_lockdown")
+		if not rule.is_empty():
+			RuleManager.register_rule(rule)
+			EventBus.log("!! INTEGRITY LOCKDOWN TRIGGERED !!", "error")
+			ScreenFX.screen_shake(8.0, 0.4)
+			AudioManager.play_sfx("lockdown")
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
