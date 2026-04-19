@@ -22,14 +22,19 @@ var _log_lines: Array[String] = []
 @onready var tags_label:       Label              = $Panel/VBox/TagsLabel
 @onready var log_container:    VBoxContainer      = $LogPanel/LogScroll/LogContainer
 @onready var log_panel:        PanelContainer     = $LogPanel
+@onready var pause_btn:        Button             = $PauseBtn
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	pause_btn.process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.rule_registered.connect(_on_rule_changed.bind(true))
 	EventBus.rule_removed.connect(func(_id): _refresh_rules())
 	EventBus.integrity_changed.connect(_on_integrity_changed)
 	EventBus.log_event.connect(_on_log_event)
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
 	_style_static_labels()
+	_style_pause_button()
+	pause_btn.pressed.connect(_on_pause_pressed)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(1.0, 0.0)
@@ -46,6 +51,19 @@ func _style_static_labels() -> void:
 		lbl.add_theme_color_override("outline_color", Color.BLACK)
 		lbl.add_theme_constant_override("outline_size", 1)
 	$Panel/VBox/SysLabel.add_theme_color_override("font_color", Color(0.2, 1.0, 0.6))
+
+func _style_pause_button() -> void:
+	pause_btn.add_theme_font_size_override("font_size", 14)
+	pause_btn.add_theme_color_override("font_color", Color(0.15, 1.0, 0.45))
+	pause_btn.add_theme_color_override("font_hover_color", Color(0.3, 1.0, 0.6))
+	pause_btn.add_theme_color_override("font_pressed_color", Color(0.1, 0.9, 0.35))
+	pause_btn.add_theme_color_override("font_outline_color", Color.BLACK)
+	pause_btn.add_theme_constant_override("outline_size", 1)
+
+func _on_pause_pressed() -> void:
+	var current = get_tree().current_scene
+	if current != null and current.has_method("request_pause_toggle"):
+		current.request_pause_toggle()
 
 func _on_rule_changed(_rule: Dictionary, _added: bool) -> void:
 	_refresh_rules()

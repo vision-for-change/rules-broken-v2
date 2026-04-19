@@ -102,6 +102,7 @@ func _setup_pause_overlay() -> void:
 	var dim = ColorRect.new()
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.color = Color(0.0, 0.0, 0.0, 0.6)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pause_layer.add_child(dim)
 
 	_pause_label = Label.new()
@@ -109,6 +110,7 @@ func _setup_pause_overlay() -> void:
 	_pause_label.text = "PAUSED\n[ESC] RESUME\n[M] MAIN MENU"
 	_pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pause_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_pause_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pause_label.add_theme_font_size_override("font_size", 18)
 	_pause_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	_pause_label.add_theme_color_override("outline_color", Color.BLACK)
@@ -126,6 +128,9 @@ func _toggle_pause() -> void:
 	_set_non_player_pause_override(_paused)
 	if is_instance_valid(_pause_layer):
 		_pause_layer.visible = _paused
+
+func request_pause_toggle() -> void:
+	_toggle_pause()
 
 func _set_player_pause_override(paused_state: bool) -> void:
 	var players = get_tree().get_nodes_in_group("player")

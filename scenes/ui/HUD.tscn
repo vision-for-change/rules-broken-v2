@@ -72,6 +72,15 @@ show_percentage = false
 theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
 
+[node name="PauseBtn" type="Button" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -156.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 48.0
+text = "[ESC] PAUSE"
+
 [node name="LogScroll" type="ScrollContainer" parent="LogPanel"]
 layout_mode = 2
 
