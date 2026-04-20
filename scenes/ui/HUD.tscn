@@ -50,7 +50,7 @@ custom_minimum_size = Vector2(204, 120)
 layout_mode = 2
 
 [node name="HintLabel" type="Label" parent="Panel/VBox"]
-text = "` = toggle log"
+text = "` = toggle log | TAB = hacked client"
 
 [node name="LogPanel" type="PanelContainer" parent="."]
 visible = false
@@ -80,6 +80,36 @@ offset_top = 12.0
 offset_right = -12.0
 offset_bottom = 48.0
 text = "[ESC] PAUSE"
+
+[node name="HackPanel" type="PanelContainer" parent="."]
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -304.0
+offset_top = 56.0
+offset_right = -12.0
+offset_bottom = 206.0
+
+[node name="HackVBox" type="VBoxContainer" parent="HackPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HackTitle" type="Label" parent="HackPanel/HackVBox"]
+text = "HACKED CLIENT"
+horizontal_alignment = 1
+
+[node name="HackHint" type="Label" parent="HackPanel/HackVBox"]
+text = "[TAB] CLOSE"
+horizontal_alignment = 1
+
+[node name="SuperSpeedToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+text = "SUPER SPEED"
+
+[node name="InvincibleToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+text = "INVINCIBLE"
+
+[node name="HackStatus" type="Label" parent="HackPanel/HackVBox"]
+text = "// ACTIVE: NONE"
 
 [node name="LogScroll" type="ScrollContainer" parent="LogPanel"]
 layout_mode = 2

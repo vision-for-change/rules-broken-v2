@@ -11,3 +11,5 @@ res://scenes/levels/BaseLevel.gd
 res://scenes/ui/HUD.tscn
 res://scenes/player/Player.tscn
 res://tutorial.tscn
+res://scenes/player/Player.gd
+res://box.tscn

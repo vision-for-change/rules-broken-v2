@@ -23,6 +23,12 @@ var _log_lines: Array[String] = []
 @onready var log_container:    VBoxContainer      = $LogPanel/LogScroll/LogContainer
 @onready var log_panel:        PanelContainer     = $LogPanel
 @onready var pause_btn:        Button             = $PauseBtn
+@onready var hack_panel:       PanelContainer     = $HackPanel
+@onready var super_speed_toggle: CheckBox         = $HackPanel/HackVBox/SuperSpeedToggle
+@onready var invincible_toggle: CheckBox          = $HackPanel/HackVBox/InvincibleToggle
+@onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
+
+var _syncing_hack_ui := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -34,14 +40,20 @@ func _ready() -> void:
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
 	_style_static_labels()
 	_style_pause_button()
+	_style_hack_panel()
 	pause_btn.pressed.connect(_on_pause_pressed)
+	super_speed_toggle.toggled.connect(_on_hack_toggled)
+	invincible_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(1.0, 0.0)
+	call_deferred("_sync_hacks_from_player")
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("log_toggle"):
 		log_panel.visible = not log_panel.visible
+	if event.is_action_pressed("inspect"):
+		hack_panel.visible = not hack_panel.visible
 
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
@@ -59,6 +71,55 @@ func _style_pause_button() -> void:
 	pause_btn.add_theme_color_override("font_pressed_color", Color(0.1, 0.9, 0.35))
 	pause_btn.add_theme_color_override("font_outline_color", Color.BLACK)
 	pause_btn.add_theme_constant_override("outline_size", 1)
+
+func _style_hack_panel() -> void:
+	for lbl in [$HackPanel/HackVBox/HackTitle, $HackPanel/HackVBox/HackHint, hack_status]:
+		lbl.add_theme_color_override("outline_color", Color.BLACK)
+		lbl.add_theme_constant_override("outline_size", 1)
+	$HackPanel/HackVBox/HackTitle.add_theme_font_size_override("font_size", 14)
+	$HackPanel/HackVBox/HackTitle.add_theme_color_override("font_color", Color(0.15, 1.0, 0.85))
+	$HackPanel/HackVBox/HackHint.add_theme_font_size_override("font_size", 10)
+	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
+	hack_status.add_theme_font_size_override("font_size", 10)
+	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
+	for toggle in [super_speed_toggle, invincible_toggle]:
+		toggle.add_theme_font_size_override("font_size", 11)
+		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
+		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
+
+func _sync_hacks_from_player() -> void:
+	var player = _get_player()
+	if player == null or not player.has_method("get_hacked_client_modes"):
+		_update_hack_status()
+		return
+	var modes: Dictionary = player.get_hacked_client_modes()
+	_syncing_hack_ui = true
+	super_speed_toggle.button_pressed = modes.get("super_speed", false)
+	invincible_toggle.button_pressed = modes.get("invincible", false)
+	_syncing_hack_ui = false
+	_update_hack_status()
+
+func _on_hack_toggled(_enabled: bool) -> void:
+	if _syncing_hack_ui:
+		return
+	var player = _get_player()
+	if player != null and player.has_method("set_hacked_client_modes"):
+		player.set_hacked_client_modes(super_speed_toggle.button_pressed, invincible_toggle.button_pressed)
+	_update_hack_status()
+
+func _update_hack_status() -> void:
+	var states: Array[String] = []
+	if super_speed_toggle.button_pressed:
+		states.append("SUPER SPEED")
+	if invincible_toggle.button_pressed:
+		states.append("INVINCIBLE")
+	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
+
+func _get_player() -> Node:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return null
+	return players[0]
 
 func _on_pause_pressed() -> void:
 	var current = get_tree().current_scene

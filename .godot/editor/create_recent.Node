@@ -1,3 +1,6 @@
+ColorRect
+CollisionShape2D
+CharacterBody2D
 TileMapLayer
 CanvasLayer
 VBoxContainer

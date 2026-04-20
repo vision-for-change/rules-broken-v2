@@ -15,8 +15,8 @@
 | Key | Action |
 |-----|--------|
 | Arrow Keys / WASD | Move |
-| Shift | Run |
 | E / F | Interact with objects |
+| Tab | Toggle hacked client panel |
 | ` (backtick) | Toggle system log |
 | Escape | Back to menu |
 

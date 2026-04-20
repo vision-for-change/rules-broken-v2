@@ -3,14 +3,17 @@
 ## bypass — nothing happens without passing the rule pipeline.
 extends CharacterBody2D
 
-const SPEED_WALK = 55.0
-const SPEED_RUN  = 100.0
+const SPEED_MOVE = 100.0
+const ACCELERATION = 700.0
+const DECELERATION = 900.0
+const HACK_SPEED_MULT = 2.4
 const ENTITY_ID  = "player"
 
 var is_alive   := true
-var is_running := false
 var _interact_target: Node = null
 var _footstep_t := 0.0
+var _hack_super_speed := false
+var _hack_invincible := false
 const FOOTSTEP_INT = 0.38
 
 @onready var body_rect: ColorRect      = $BodyRect
@@ -42,45 +45,36 @@ func _physics_process(delta: float) -> void:
 		Input.get_axis("ui_left", "ui_right"),
 		Input.get_axis("ui_up", "ui_down")
 	).normalized()
-
-	is_running = Input.is_action_pressed("run")
+	var target_velocity := Vector2.ZERO
 
 	# MOVE action goes through ActionBus
 	if dir.length() > 0.05:
 		var ctx = {
 			"actor_id":  ENTITY_ID,
-			"direction": dir,
-			"running":   is_running
+			"direction": dir
 		}
 		var result = ActionBus.submit(ActionBus.MOVE,
 			EntityRegistry.get_tags(ENTITY_ID), ctx)
 
 		if result["allowed"]:
-			var speed = SPEED_RUN if (is_running and result.get("loophole","") == "") else SPEED_WALK
-			# If running was allowed via loophole, use full speed
-			if is_running and result.get("loophole","") != "":
-				speed = SPEED_RUN
-			velocity = dir * speed
+			target_velocity = dir * SPEED_MOVE
 		else:
 			# Blocked: dampen to slow walk
-			velocity = dir * (SPEED_WALK * 0.4)
-
-		# Update registry tag for AI detection
-		if is_running:
-			EntityRegistry.add_tag(ENTITY_ID, "running")
-		else:
-			EntityRegistry.remove_tag(ENTITY_ID, "running")
+			target_velocity = dir * (SPEED_MOVE * 0.4)
+		if _hack_super_speed:
+			target_velocity *= HACK_SPEED_MULT
 
 		# Footstep audio
 		_footstep_t += delta
 		if _footstep_t >= FOOTSTEP_INT:
 			_footstep_t = 0.0
 			AudioManager.play_sfx("footstep")
-	else:
-		velocity = velocity.move_toward(Vector2.ZERO, 300.0 * delta)
-		EntityRegistry.remove_tag(ENTITY_ID, "running")
+	var smoothing := ACCELERATION if target_velocity != Vector2.ZERO else DECELERATION
+	velocity = velocity.move_toward(target_velocity, smoothing * delta)
 
+	var move_speed := velocity.length()
 	move_and_slide()
+	_push_colliders(dir, move_speed)
 
 	if dir.x != 0:
 		body_rect.scale.x = sign(dir.x)
@@ -88,6 +82,17 @@ func _physics_process(delta: float) -> void:
 	# Interact input
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
+
+func _push_colliders(dir: Vector2, move_speed: float) -> void:
+	if dir.length_squared() == 0.0:
+		return
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		if collision == null:
+			continue
+		var collider := collision.get_collider()
+		if collider != null and collider.has_method("receive_push"):
+			collider.receive_push(dir, move_speed)
 
 func _do_interact() -> void:
 	if _interact_target == null or not is_instance_valid(_interact_target):
@@ -120,6 +125,10 @@ func _on_action_denied(action: Dictionary, reason: String) -> void:
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 
 func _on_caught(_catcher_id: String) -> void:
+	if _hack_invincible:
+		ScreenFX.flash_screen(Color(0.2, 1.0, 1.0, 0.25), 0.1)
+		EventBus.log("HACK CLIENT: INVINCIBILITY prevented capture", "exploit")
+		return
 	if not is_alive:
 		return
 	is_alive = false
@@ -131,3 +140,13 @@ func _on_caught(_catcher_id: String) -> void:
 	t.tween_property(body_rect, "modulate:a", 0.0, 0.6)
 	await get_tree().create_timer(1.5).timeout
 	get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn")
+
+func set_hacked_client_modes(super_speed_enabled: bool, invincible_enabled: bool) -> void:
+	_hack_super_speed = super_speed_enabled
+	_hack_invincible = invincible_enabled
+
+func get_hacked_client_modes() -> Dictionary:
+	return {
+		"super_speed": _hack_super_speed,
+		"invincible": _hack_invincible
+	}
