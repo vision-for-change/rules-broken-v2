@@ -8,6 +8,7 @@ var _shake_tween: Tween
 var _glitch_timer := 0.0
 var _integrity_ratio := 1.0
 var _vignette: ColorRect
+var _slowmo_end_ms := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -33,6 +34,22 @@ func _process(delta: float) -> void:
 				glitch_flash(0.08)
 			else:
 				_scanline_flash()
+	_update_slowmo()
+
+func _exit_tree() -> void:
+	Engine.time_scale = 1.0
+
+func slow_motion_pulse(scale: float = 0.3, duration: float = 0.22) -> void:
+	Engine.time_scale = clampf(scale, 0.05, 1.0)
+	var now_ms := Time.get_ticks_msec()
+	var duration_ms := int(maxf(duration, 0.01) * 1000.0)
+	_slowmo_end_ms = max(_slowmo_end_ms, now_ms) + duration_ms
+
+func _update_slowmo() -> void:
+	if Engine.time_scale >= 1.0:
+		return
+	if Time.get_ticks_msec() >= _slowmo_end_ms:
+		Engine.time_scale = 1.0
 
 func screen_shake(intensity: float = 6.0, duration: float = 0.25) -> void:
 	if not is_instance_valid(_camera):

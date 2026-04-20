@@ -15,6 +15,7 @@
 | Key | Action |
 |-----|--------|
 | Arrow Keys / WASD | Move |
+| Spacebar | Dash (speed boost) |
 | E / F | Interact with objects |
 | Left Click | Shoot |
 | Tab | Toggle hacked client panel |

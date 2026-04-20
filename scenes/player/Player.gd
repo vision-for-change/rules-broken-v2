@@ -5,6 +5,9 @@ extends CharacterBody2D
 
 const SPEED_MOVE = 360.0
 const HACK_SPEED_MULT = 2.4
+const DASH_SPEED_MULT = 2.2
+const DASH_DURATION := 0.16
+const DASH_COOLDOWN := 0.5
 const HACK_BULLET_SPEED_MULT = 2.2
 const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
@@ -24,6 +27,9 @@ var _hack_faster_bullets := false
 var _hack_super_vision := false
 var _shoot_cd := 0.0
 var _ghost_timer := 0.0
+var _dash_timer := 0.0
+var _dash_cd := 0.0
+var _dash_direction := Vector2.ZERO
 const FOOTSTEP_INT = 0.38
 
 @onready var body_rect: ColorRect      = $BodyRect
@@ -54,26 +60,41 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_facing_to_mouse()
 	_shoot_cd = max(0.0, _shoot_cd - delta)
+	_dash_cd = max(0.0, _dash_cd - delta)
+	_dash_timer = max(0.0, _dash_timer - delta)
 
 	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if Input.is_action_just_pressed("dash") and _dash_cd <= 0.0 and dir.length() > 0.05:
+		_dash_direction = dir.normalized()
+		_dash_timer = DASH_DURATION
+		_dash_cd = DASH_COOLDOWN
+	elif _dash_timer <= 0.0:
+		_dash_direction = Vector2.ZERO
+
+	var move_dir := dir
+	if _dash_timer > 0.0 and _dash_direction.length() > 0.05:
+		move_dir = _dash_direction
+
 	var target_velocity := Vector2.ZERO
 
 	# MOVE action goes through ActionBus
-	if dir.length() > 0.05:
+	if move_dir.length() > 0.05:
 		var ctx = {
 			"actor_id":  ENTITY_ID,
-			"direction": dir
+			"direction": move_dir
 		}
 		var result = ActionBus.submit(ActionBus.MOVE,
 			EntityRegistry.get_tags(ENTITY_ID), ctx)
 
 		if result["allowed"]:
-			target_velocity = dir * SPEED_MOVE
+			target_velocity = move_dir * SPEED_MOVE
 		else:
 			# Blocked: dampen to slow walk
-			target_velocity = dir * (SPEED_MOVE * 0.4)
+			target_velocity = move_dir * (SPEED_MOVE * 0.4)
 		if _hack_super_speed:
 			target_velocity *= HACK_SPEED_MULT
+		if _dash_timer > 0.0:
+			target_velocity *= DASH_SPEED_MULT
 
 		# Footstep audio
 		_footstep_t += delta
@@ -222,3 +243,6 @@ func _spawn_player_ghost() -> void:
 	var tween := ghost_root.create_tween()
 	tween.tween_property(ghost_root, "modulate:a", 0.0, GHOST_LIFETIME)
 	tween.tween_callback(ghost_root.queue_free)
+
+func is_dashing() -> bool:
+	return _dash_timer > 0.0

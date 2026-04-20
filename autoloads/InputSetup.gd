@@ -3,6 +3,7 @@ func _ready() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	_add("interact", [KEY_E, KEY_F])
 	_add_mouse("shoot", [MOUSE_BUTTON_LEFT])
+	_add("dash", [KEY_SPACE])
 	_add("inspect",  [KEY_TAB])
 	_add("pause_main_menu", [KEY_M])
 	_add_to_existing("ui_left", [KEY_A])
