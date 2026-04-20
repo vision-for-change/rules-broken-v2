@@ -22,7 +22,8 @@ const SEVERITY_CRITICAL = "critical" # triggers immediate response
 
 var _rules: Dictionary = {}           # rule_id -> rule dict
 var _conflict_log: Array[Dictionary] = []
-var system_integrity: float = 1.0     # 0.0 - 1.0
+const MAX_SYSTEM_INTEGRITY := 2.0
+var system_integrity: float = MAX_SYSTEM_INTEGRITY
 const HACK_DRAIN_PER_SECOND := 0.02
 
 func _ready() -> void:
@@ -134,6 +135,24 @@ func check_conflict(rule_id_a: String, rule_id_b: String) -> bool:
 func get_integrity() -> float:
 	return system_integrity
 
+func get_max_integrity() -> float:
+	return MAX_SYSTEM_INTEGRITY
+
+func get_integrity_ratio() -> float:
+	if MAX_SYSTEM_INTEGRITY <= 0.0:
+		return 0.0
+	return system_integrity / MAX_SYSTEM_INTEGRITY
+
+func apply_integrity_damage(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	_adjust_integrity(-amount)
+
+func apply_integrity_heal(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	_adjust_integrity(amount)
+
 # ─── Private ──────────────────────────────────────────────────────
 
 func _validate_rule_schema(rule: Dictionary) -> bool:
@@ -208,12 +227,14 @@ func _check_new_conflicts(new_id: String) -> void:
 
 func _adjust_integrity(delta: float) -> void:
 	var old = system_integrity
-	system_integrity = clampf(system_integrity + delta, 0.0, 1.0)
+	system_integrity = clampf(system_integrity + delta, 0.0, MAX_SYSTEM_INTEGRITY)
 	EventBus.integrity_changed.emit(system_integrity, delta)
-	if system_integrity < 0.25 and old >= 0.25:
+	var critical_threshold := MAX_SYSTEM_INTEGRITY * 0.25
+	var unstable_threshold := MAX_SYSTEM_INTEGRITY * 0.5
+	if system_integrity < critical_threshold and old >= critical_threshold:
 		EventBus.system_critical.emit()
 		EventBus.log("!! SYSTEM CRITICAL — integrity below 25%", "error")
-	elif system_integrity < 0.5 and old >= 0.5:
+	elif system_integrity < unstable_threshold and old >= unstable_threshold:
 		EventBus.system_unstable.emit()
 		EventBus.log("! SYSTEM UNSTABLE — integrity below 50%", "warn")
 
@@ -224,8 +245,8 @@ func _recalculate_integrity() -> void:
 func clear_rules() -> void:
 	_rules.clear()
 	_conflict_log.clear()
-	system_integrity = 1.0
-	EventBus.integrity_changed.emit(1.0, 0.0)
+	system_integrity = MAX_SYSTEM_INTEGRITY
+	EventBus.integrity_changed.emit(system_integrity, 0.0)
 
 func _count_active_player_hacks() -> int:
 	var players = get_tree().get_nodes_in_group("player")

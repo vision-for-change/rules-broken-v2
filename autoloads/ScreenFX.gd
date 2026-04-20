@@ -6,13 +6,15 @@ var _overlay_layer: CanvasLayer
 var _glitch_active := false
 var _shake_tween: Tween
 var _glitch_timer := 0.0
-var _integrity := 1.0
+var _integrity_ratio := 1.0
+var _vignette: ColorRect
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_overlay_layer = CanvasLayer.new()
 	_overlay_layer.layer = 99
 	add_child(_overlay_layer)
+	_setup_vignette()
 	EventBus.integrity_changed.connect(_on_integrity_changed)
 	EventBus.rule_conflict_detected.connect(func(_a, _b): glitch_flash(0.2))
 	EventBus.action_exploited.connect(func(_a, _b): exploit_flash())
@@ -22,12 +24,12 @@ func register_camera(cam: Camera2D) -> void:
 
 func _process(delta: float) -> void:
 	# Ambient glitch based on system integrity
-	if _integrity < 0.5:
+	if _integrity_ratio < 0.5:
 		_glitch_timer -= delta
 		if _glitch_timer <= 0.0:
-			var freq = lerp(4.0, 0.3, _integrity / 0.5)
+			var freq = lerp(4.0, 0.3, _integrity_ratio / 0.5)
 			_glitch_timer = randf_range(freq * 0.5, freq)
-			if _integrity < 0.25:
+			if _integrity_ratio < 0.25:
 				glitch_flash(0.08)
 			else:
 				_scanline_flash()
@@ -92,4 +94,33 @@ func _scanline_flash() -> void:
 	t.tween_callback(r.queue_free)
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
-	_integrity = new_val
+	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
+	_integrity_ratio = new_val / max_integrity if max_integrity > 0.0 else 0.0
+
+func _setup_vignette() -> void:
+	_vignette = ColorRect.new()
+	_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var shader := Shader.new()
+	shader.code = """
+shader_type canvas_item;
+render_mode unshaded;
+
+uniform vec4 vignette_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform float strength : hint_range(0.0, 1.0) = 0.65;
+uniform float radius : hint_range(0.0, 1.5) = 0.64;
+uniform float softness : hint_range(0.01, 1.0) = 0.22;
+
+void fragment() {
+	vec2 uv = SCREEN_UV * 2.0 - vec2(1.0);
+	float dist = length(uv);
+	float edge = smoothstep(radius, radius + softness, dist);
+	COLOR = vec4(vignette_color.rgb, edge * strength);
+}
+"""
+
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	_vignette.material = mat
+	_overlay_layer.add_child(_vignette)

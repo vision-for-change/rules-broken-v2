@@ -3,14 +3,17 @@
 ## bypass — nothing happens without passing the rule pipeline.
 extends CharacterBody2D
 
-const SPEED_MOVE = 150.0
+const SPEED_MOVE = 360.0
 const HACK_SPEED_MULT = 2.4
 const HACK_BULLET_SPEED_MULT = 2.2
 const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
 const ENTITY_ID  = "player"
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
-const SHOOT_COOLDOWN := 0.12
+const SHOOT_COOLDOWN := 0.05
+const GHOST_INTERVAL := 0.045
+const GHOST_LIFETIME := 0.16
+const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.32)
 
 var is_alive   := true
 var _interact_target: Node = null
@@ -20,12 +23,14 @@ var _hack_invincible := false
 var _hack_faster_bullets := false
 var _hack_super_vision := false
 var _shoot_cd := 0.0
+var _ghost_timer := 0.0
 const FOOTSTEP_INT = 0.38
 
 @onready var body_rect: ColorRect      = $BodyRect
 @onready var interact_area: Area2D     = $InteractArea
 @onready var camera: Camera2D          = $Camera2D
 @onready var hint_label: Label         = $HintLabel
+@onready var gun_sprite: Node2D        = $Sprite2D
 
 func _ready() -> void:
 	add_to_group("player")
@@ -47,6 +52,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_alive:
 		return
+	_update_facing_to_mouse()
 	_shoot_cd = max(0.0, _shoot_cd - delta)
 
 	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
@@ -77,6 +83,8 @@ func _physics_process(delta: float) -> void:
 	velocity = target_velocity
 
 	move_and_slide()
+	if velocity.length_squared() > 16.0:
+		_ghost_step(delta)
 
 	# Interact input
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
@@ -84,10 +92,18 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("shoot"):
 		_shoot()
 
+func _update_facing_to_mouse() -> void:
+	var aim_dir := get_global_mouse_position() - global_position
+	if aim_dir.length_squared() < 0.001:
+		return
+	rotation = aim_dir.angle()
+	hint_label.rotation = -rotation
+
 func _shoot() -> void:
 	if _shoot_cd > 0.0:
 		return
-	var shot_dir := get_global_mouse_position() - global_position
+	var muzzle_pos := gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
+	var shot_dir := get_global_mouse_position() - muzzle_pos
 	if shot_dir.length_squared() == 0.0:
 		shot_dir = Vector2.RIGHT
 	var bullet = BULLET_SCENE.instantiate()
@@ -95,7 +111,7 @@ func _shoot() -> void:
 		return
 	if get_tree().current_scene == null:
 		return
-	var spawn_pos := global_position + shot_dir.normalized() * 12.0
+	var spawn_pos := muzzle_pos
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = spawn_pos
 	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
@@ -174,3 +190,35 @@ func _apply_camera_modes() -> void:
 	if camera == null:
 		return
 	camera.zoom = SUPER_VISION_CAMERA_ZOOM if _hack_super_vision else DEFAULT_CAMERA_ZOOM
+
+func _ghost_step(delta: float) -> void:
+	_ghost_timer -= delta
+	if _ghost_timer > 0.0:
+		return
+	_ghost_timer = GHOST_INTERVAL
+	_spawn_player_ghost()
+
+func _spawn_player_ghost() -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var ghost_root := Node2D.new()
+	ghost_root.global_position = global_position
+	ghost_root.global_rotation = global_rotation
+	ghost_root.scale = scale
+	ghost_root.z_index = z_index - 1
+	ghost_root.modulate = GHOST_COLOR
+	scene_root.add_child(ghost_root)
+
+	if is_instance_valid(body_rect):
+		var body_ghost := body_rect.duplicate()
+		if body_ghost is Control:
+			(body_ghost as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ghost_root.add_child(body_ghost)
+
+	if is_instance_valid(gun_sprite):
+		ghost_root.add_child(gun_sprite.duplicate())
+
+	var tween := ghost_root.create_tween()
+	tween.tween_property(ghost_root, "modulate:a", 0.0, GHOST_LIFETIME)
+	tween.tween_callback(ghost_root.queue_free)

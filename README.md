@@ -18,7 +18,6 @@
 | E / F | Interact with objects |
 | Left Click | Shoot |
 | Tab | Toggle hacked client panel |
-| ` (backtick) | Toggle system log |
 | Escape | Back to menu |
 
 ---
@@ -178,7 +177,7 @@ SYSTEM//BREACH/
 │   │   ├── BaseLevel.gd     # Level orchestrator
 │   │   └── Level2.tscn      # playable sector
 │   └── ui/
-│       ├── HUD.tscn         # Live rule inspector + system log
+│       ├── HUD.tscn         # Live rule inspector
 │       ├── MainMenu.tscn
 │       ├── GameOver.tscn
 │       └── WinScreen.tscn

@@ -31,7 +31,7 @@ func _ready() -> void:
 
 	EventBus.level_complete.connect(_on_level_complete, CONNECT_ONE_SHOT)
 	EventBus.player_caught.connect(_on_player_caught, CONNECT_ONE_SHOT)
-	EventBus.integrity_changed.connect(_on_integrity_changed, CONNECT_ONE_SHOT)
+	EventBus.integrity_changed.connect(_on_integrity_changed)
 	_setup_pause_overlay()
 
 	_show_title()
@@ -72,7 +72,13 @@ func _on_player_caught(_catcher_id: String) -> void:
 	pass
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
-	if new_val <= 0.15 and not RuleManager.is_rule_active("integrity_lockdown"):
+	if new_val <= 0.0:
+		EventBus.log("!! SYSTEM FAILURE — shutting down !!", "error")
+		get_tree().quit()
+		return
+	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
+	var lockdown_threshold := max_integrity * 0.15
+	if new_val <= lockdown_threshold and not RuleManager.is_rule_active("integrity_lockdown"):
 		var rule = RuleDefinitions.get_rule("integrity_lockdown")
 		if not rule.is_empty():
 			RuleManager.register_rule(rule)

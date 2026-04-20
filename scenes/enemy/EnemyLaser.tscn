@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ryrejdjtk5aa"]
+
+[ext_resource type="Script" path="res://scenes/enemy/EnemyLaser.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(10, 3)
+
+[node name="EnemyLaser" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+z_index = 6
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+[node name="Beam" type="ColorRect" parent="."]
+offset_left = -5.0
+offset_top = -1.5
+offset_right = 5.0
+offset_bottom = 1.5
+color = Color(1, 0.2, 0.2, 1)
