@@ -11,3 +11,4 @@ res://scenes/player/Bullet.gd
 res://scenes/player/Player.tscn
 res://scenes/player/Bullet.tscn
 res://scenes/objects/HealthPickup.gd
+res://scenes/levels/Level2.gd
