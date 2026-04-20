@@ -24,11 +24,17 @@ var _log_lines: Array[String] = []
 @onready var log_panel:        PanelContainer     = $LogPanel
 @onready var pause_btn:        Button             = $PauseBtn
 @onready var hack_panel:       PanelContainer     = $HackPanel
+@onready var minimap_panel:    PanelContainer     = $MinimapPanel
+@onready var minimap_texture:  TextureRect        = $MinimapPanel/MinimapTexture
+@onready var minimap_dot:      ColorRect          = $MinimapPanel/PlayerDot
 @onready var super_speed_toggle: CheckBox         = $HackPanel/HackVBox/SuperSpeedToggle
 @onready var invincible_toggle: CheckBox          = $HackPanel/HackVBox/InvincibleToggle
+@onready var fast_bullets_toggle: CheckBox        = $HackPanel/HackVBox/FastBulletsToggle
+@onready var super_vision_toggle: CheckBox        = $HackPanel/HackVBox/SuperVisionToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
 
 var _syncing_hack_ui := false
+var _minimap_world_size := Vector2.ZERO
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -44,10 +50,17 @@ func _ready() -> void:
 	pause_btn.pressed.connect(_on_pause_pressed)
 	super_speed_toggle.toggled.connect(_on_hack_toggled)
 	invincible_toggle.toggled.connect(_on_hack_toggled)
+	fast_bullets_toggle.toggled.connect(_on_hack_toggled)
+	super_vision_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(1.0, 0.0)
 	call_deferred("_sync_hacks_from_player")
+	call_deferred("_sync_minimap")
+
+func _process(_delta: float) -> void:
+	_sync_minimap()
+	_update_minimap_player_dot()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("log_toggle"):
@@ -82,10 +95,43 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, invincible_toggle]:
+	for toggle in [super_speed_toggle, invincible_toggle, fast_bullets_toggle, super_vision_toggle]:
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
+
+func _sync_minimap() -> void:
+	var level = get_tree().current_scene
+	if level == null or not level.has_method("get_minimap_texture"):
+		minimap_panel.visible = false
+		return
+
+	var tex: Texture2D = level.get_minimap_texture()
+	if tex == null:
+		minimap_panel.visible = false
+		return
+
+	minimap_panel.visible = true
+	if minimap_texture.texture != tex:
+		minimap_texture.texture = tex
+
+	if level.has_method("get_world_size"):
+		_minimap_world_size = level.get_world_size()
+
+func _update_minimap_player_dot() -> void:
+	if not minimap_panel.visible:
+		return
+	if _minimap_world_size.x <= 0.0 or _minimap_world_size.y <= 0.0:
+		return
+	var player := _get_player() as Node2D
+	if player == null:
+		return
+	var x_ratio := clampf(player.global_position.x / _minimap_world_size.x, 0.0, 1.0)
+	var y_ratio := clampf(player.global_position.y / _minimap_world_size.y, 0.0, 1.0)
+	var tex_pos := minimap_texture.position
+	var tex_size := minimap_texture.size
+	var dot_size := minimap_dot.size
+	minimap_dot.position = tex_pos + Vector2(x_ratio * tex_size.x, y_ratio * tex_size.y) - dot_size * 0.5
 
 func _sync_hacks_from_player() -> void:
 	var player = _get_player()
@@ -96,6 +142,8 @@ func _sync_hacks_from_player() -> void:
 	_syncing_hack_ui = true
 	super_speed_toggle.button_pressed = modes.get("super_speed", false)
 	invincible_toggle.button_pressed = modes.get("invincible", false)
+	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false)
+	super_vision_toggle.button_pressed = modes.get("super_vision", false)
 	_syncing_hack_ui = false
 	_update_hack_status()
 
@@ -104,7 +152,12 @@ func _on_hack_toggled(_enabled: bool) -> void:
 		return
 	var player = _get_player()
 	if player != null and player.has_method("set_hacked_client_modes"):
-		player.set_hacked_client_modes(super_speed_toggle.button_pressed, invincible_toggle.button_pressed)
+		player.set_hacked_client_modes(
+			super_speed_toggle.button_pressed,
+			invincible_toggle.button_pressed,
+			fast_bullets_toggle.button_pressed,
+			super_vision_toggle.button_pressed
+		)
 	_update_hack_status()
 
 func _update_hack_status() -> void:
@@ -113,6 +166,10 @@ func _update_hack_status() -> void:
 		states.append("SUPER SPEED")
 	if invincible_toggle.button_pressed:
 		states.append("INVINCIBLE")
+	if fast_bullets_toggle.button_pressed:
+		states.append("FASTER BULLETS")
+	if super_vision_toggle.button_pressed:
+		states.append("SUPER VISION")
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _get_player() -> Node:

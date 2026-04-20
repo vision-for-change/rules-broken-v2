@@ -136,7 +136,7 @@ func _set_player_pause_override(paused_state: bool) -> void:
 	var players = get_tree().get_nodes_in_group("player")
 	for p in players:
 		if p is Node:
-			p.process_mode = Node.PROCESS_MODE_ALWAYS if paused_state else Node.PROCESS_MODE_INHERIT
+			p.process_mode = Node.PROCESS_MODE_PAUSABLE if paused_state else Node.PROCESS_MODE_INHERIT
 
 func _set_non_player_pause_override(paused_state: bool) -> void:
 	var always_nodes: Array = [

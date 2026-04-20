@@ -81,6 +81,38 @@ offset_right = -12.0
 offset_bottom = 48.0
 text = "[ESC] PAUSE"
 
+[node name="MinimapPanel" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = -12.0
+offset_bottom = -12.0
+
+[node name="MinimapLabel" type="Label" parent="MinimapPanel"]
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 200.0
+offset_bottom = 22.0
+text = "MINIMAP"
+
+[node name="MinimapTexture" type="TextureRect" parent="MinimapPanel"]
+offset_left = 8.0
+offset_top = 24.0
+offset_right = 200.0
+offset_bottom = 160.0
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PlayerDot" type="ColorRect" parent="MinimapPanel"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 2.0
+offset_bottom = 2.0
+color = Color(1, 0.25, 0.2, 1)
+
 [node name="HackPanel" type="PanelContainer" parent="."]
 visible = false
 anchor_left = 1.0
@@ -88,7 +120,7 @@ anchor_right = 1.0
 offset_left = -304.0
 offset_top = 56.0
 offset_right = -12.0
-offset_bottom = 206.0
+offset_bottom = 258.0
 
 [node name="HackVBox" type="VBoxContainer" parent="HackPanel"]
 layout_mode = 2
@@ -107,6 +139,12 @@ text = "SUPER SPEED"
 
 [node name="InvincibleToggle" type="CheckBox" parent="HackPanel/HackVBox"]
 text = "INVINCIBLE"
+
+[node name="FastBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+text = "FASTER BULLETS"
+
+[node name="SuperVisionToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+text = "SUPER VISION"
 
 [node name="HackStatus" type="Label" parent="HackPanel/HackVBox"]
 text = "// ACTIVE: NONE"

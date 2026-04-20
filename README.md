@@ -16,6 +16,7 @@
 |-----|--------|
 | Arrow Keys / WASD | Move |
 | E / F | Interact with objects |
+| Left Click | Shoot |
 | Tab | Toggle hacked client panel |
 | ` (backtick) | Toggle system log |
 | Escape | Back to menu |
@@ -175,7 +176,7 @@ SYSTEM//BREACH/
 │   │   └── Exit.tscn        # Exit (validated via ActionBus)
 │   ├── levels/
 │   │   ├── BaseLevel.gd     # Level orchestrator
-│   │   └── Level1-4.tscn    # 4 playable sectors
+│   │   └── Level2.tscn      # playable sector
 │   └── ui/
 │       ├── HUD.tscn         # Live rule inspector + system log
 │       ├── MainMenu.tscn

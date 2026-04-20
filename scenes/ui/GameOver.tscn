@@ -12,7 +12,7 @@ func _ready() -> void:
 	$VBox/Hint.add_theme_font_size_override(\"font_size\", 7)
 	$VBox/Hint.add_theme_color_override(\"font_color\", Color(0.4,0.4,0.5,1))
 func _input(event):
-	if event.is_action_pressed(\"ui_accept\"): get_tree().change_scene_to_file(\"res://scenes/levels/Level1.tscn\")
+	if event.is_action_pressed(\"ui_accept\"): get_tree().change_scene_to_file(\"res://scenes/levels/Level2.tscn\")
 	if event.is_action_pressed(\"ui_cancel\"): get_tree().change_scene_to_file(\"res://scenes/ui/MainMenu.tscn\")
 "
 
@@ -43,8 +43,8 @@ text = "ACCESS REVOKED"
 
 [node name="Sub" type="Label" parent="VBox"]
 horizontal_alignment = 1
-text = "Watchdog enforcement successful."
+text = "Bug enforcement successful."
 
 [node name="Hint" type="Label" parent="VBox"]
 horizontal_alignment = 1
-text = "[ ENTER ] Retry Sector 01    [ ESC ] Menu"
+text = "[ ENTER ] Retry Sector 02    [ ESC ] Menu"

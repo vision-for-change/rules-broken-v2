@@ -23,9 +23,20 @@ const SEVERITY_CRITICAL = "critical" # triggers immediate response
 var _rules: Dictionary = {}           # rule_id -> rule dict
 var _conflict_log: Array[Dictionary] = []
 var system_integrity: float = 1.0     # 0.0 - 1.0
+const HACK_DRAIN_PER_SECOND := 0.02
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+func _process(delta: float) -> void:
+	if get_tree().paused:
+		return
+	if system_integrity <= 0.0:
+		return
+	var active_hacks := _count_active_player_hacks()
+	if active_hacks <= 0:
+		return
+	_adjust_integrity(-HACK_DRAIN_PER_SECOND * float(active_hacks) * delta)
 
 # ─── Public API ───────────────────────────────────────────────────
 
@@ -215,3 +226,17 @@ func clear_rules() -> void:
 	_conflict_log.clear()
 	system_integrity = 1.0
 	EventBus.integrity_changed.emit(1.0, 0.0)
+
+func _count_active_player_hacks() -> int:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return 0
+	var player = players[0]
+	if player == null or not player.has_method("get_hacked_client_modes"):
+		return 0
+	var modes: Dictionary = player.get_hacked_client_modes()
+	var count := 0
+	for enabled in modes.values():
+		if bool(enabled):
+			count += 1
+	return count

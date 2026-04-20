@@ -1,9 +1,8 @@
-[gd_scene format=4 uid="uid://cn1vyt7kaf2y7"]
+[gd_scene format=4 uid="uid://cwy2l3xoqxs2t"]
 
 [ext_resource type="Texture2D" uid="uid://bd35lq7i486sx" path="res://Dungeon_Tileset.png" id="1_7n6eb"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="2_ehuit"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="3_5mrt3"]
-[ext_resource type="PackedScene" uid="uid://cfljayddefdfp" path="res://box.tscn" id="4_5mrt3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yb1ct"]
 texture = ExtResource("1_7n6eb")
@@ -340,6 +339,3 @@ visible = false
 
 [node name="Player" parent="." unique_id=220046822 instance=ExtResource("3_5mrt3")]
 position = Vector2(25, 90)
-
-[node name="Box" parent="." unique_id=2141974758 instance=ExtResource("4_5mrt3")]
-position = Vector2(76, 90)

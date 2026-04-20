@@ -3,17 +3,23 @@
 ## bypass — nothing happens without passing the rule pipeline.
 extends CharacterBody2D
 
-const SPEED_MOVE = 100.0
-const ACCELERATION = 700.0
-const DECELERATION = 900.0
+const SPEED_MOVE = 150.0
 const HACK_SPEED_MULT = 2.4
+const HACK_BULLET_SPEED_MULT = 2.2
+const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
+const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
 const ENTITY_ID  = "player"
+const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
+const SHOOT_COOLDOWN := 0.12
 
 var is_alive   := true
 var _interact_target: Node = null
 var _footstep_t := 0.0
 var _hack_super_speed := false
 var _hack_invincible := false
+var _hack_faster_bullets := false
+var _hack_super_vision := false
+var _shoot_cd := 0.0
 const FOOTSTEP_INT = 0.38
 
 @onready var body_rect: ColorRect      = $BodyRect
@@ -36,15 +42,14 @@ func _ready() -> void:
 	interact_area.body_exited.connect(_on_interact_exit)
 
 	AudioManager.play_music("stable")
+	_apply_camera_modes()
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
 		return
+	_shoot_cd = max(0.0, _shoot_cd - delta)
 
-	var dir := Vector2(
-		Input.get_axis("ui_left", "ui_right"),
-		Input.get_axis("ui_up", "ui_down")
-	).normalized()
+	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var target_velocity := Vector2.ZERO
 
 	# MOVE action goes through ActionBus
@@ -69,30 +74,34 @@ func _physics_process(delta: float) -> void:
 		if _footstep_t >= FOOTSTEP_INT:
 			_footstep_t = 0.0
 			AudioManager.play_sfx("footstep")
-	var smoothing := ACCELERATION if target_velocity != Vector2.ZERO else DECELERATION
-	velocity = velocity.move_toward(target_velocity, smoothing * delta)
+	velocity = target_velocity
 
-	var move_speed := velocity.length()
 	move_and_slide()
-	_push_colliders(dir, move_speed)
-
-	if dir.x != 0:
-		body_rect.scale.x = sign(dir.x)
 
 	# Interact input
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
+	if Input.is_action_just_pressed("shoot"):
+		_shoot()
 
-func _push_colliders(dir: Vector2, move_speed: float) -> void:
-	if dir.length_squared() == 0.0:
+func _shoot() -> void:
+	if _shoot_cd > 0.0:
 		return
-	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		if collision == null:
-			continue
-		var collider := collision.get_collider()
-		if collider != null and collider.has_method("receive_push"):
-			collider.receive_push(dir, move_speed)
+	var shot_dir := get_global_mouse_position() - global_position
+	if shot_dir.length_squared() == 0.0:
+		shot_dir = Vector2.RIGHT
+	var bullet = BULLET_SCENE.instantiate()
+	if bullet == null:
+		return
+	if get_tree().current_scene == null:
+		return
+	var spawn_pos := global_position + shot_dir.normalized() * 12.0
+	get_tree().current_scene.add_child(bullet)
+	bullet.global_position = spawn_pos
+	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
+	if bullet.has_method("setup"):
+		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
+	_shoot_cd = SHOOT_COOLDOWN
 
 func _do_interact() -> void:
 	if _interact_target == null or not is_instance_valid(_interact_target):
@@ -141,12 +150,27 @@ func _on_caught(_catcher_id: String) -> void:
 	await get_tree().create_timer(1.5).timeout
 	get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn")
 
-func set_hacked_client_modes(super_speed_enabled: bool, invincible_enabled: bool) -> void:
+func set_hacked_client_modes(
+	super_speed_enabled: bool,
+	invincible_enabled: bool,
+	faster_bullets_enabled: bool = false,
+	super_vision_enabled: bool = false
+) -> void:
 	_hack_super_speed = super_speed_enabled
 	_hack_invincible = invincible_enabled
+	_hack_faster_bullets = faster_bullets_enabled
+	_hack_super_vision = super_vision_enabled
+	_apply_camera_modes()
 
 func get_hacked_client_modes() -> Dictionary:
 	return {
 		"super_speed": _hack_super_speed,
-		"invincible": _hack_invincible
+		"invincible": _hack_invincible,
+		"faster_bullets": _hack_faster_bullets,
+		"super_vision": _hack_super_vision
 	}
+
+func _apply_camera_modes() -> void:
+	if camera == null:
+		return
+	camera.zoom = SUPER_VISION_CAMERA_ZOOM if _hack_super_vision else DEFAULT_CAMERA_ZOOM

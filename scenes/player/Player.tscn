@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bfhhinyybc56j" path="res://scenes/player/Player.gd" id="1"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wr5hl"]
+
 [sub_resource type="CircleShape2D" id="circ1"]
 radius = 23.0
 
@@ -11,9 +13,6 @@ func _ready() -> void:
 	add_theme_font_size_override(\"font_size\", 7)
 	add_theme_color_override(\"font_color\", Color(0.4, 1.0, 0.6, 1))
 "
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wr5hl"]
-size = Vector2(20, 20)
 
 [node name="Player" type="CharacterBody2D" unique_id=220046822]
 collision_mask = 3
@@ -39,7 +38,7 @@ position = Vector2(0, 1)
 shape = SubResource("circ1")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1540102074]
-zoom = Vector2(2.5, 2.5)
+zoom = Vector2(1.5, 1.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 7.0
 
