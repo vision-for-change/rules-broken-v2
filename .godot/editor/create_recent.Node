@@ -1,5 +1,11 @@
-Sprite2D
+Node2D
+Node
+Button
+HBoxContainer
+Label
 ColorRect
+Control
+Sprite2D
 CollisionShape2D
 CharacterBody2D
 TileMapLayer

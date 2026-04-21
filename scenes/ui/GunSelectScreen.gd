@@ -5,7 +5,6 @@ var _cards := {}
 
 func _ready() -> void:
 	_selected_id = PlayerState.selected_gun_id
-
 	$Background.color = Color(0.04, 0.05, 0.09)
 	$Background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	$TitleLabel.add_theme_font_size_override("font_size", 18)
@@ -28,14 +27,13 @@ func _build_cards() -> void:
 
 func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	var card = PanelContainer.new()
-	card.custom_minimum_size = Vector2(100, 140)
+	card.custom_minimum_size = Vector2(100, 130)
 
 	var vbox = VBoxContainer.new()
 	card.add_child(vbox)
 
-	# Gun image using your actual sprites
 	var tex = TextureRect.new()
-	tex.custom_minimum_size = Vector2(90, 65)
+	tex.custom_minimum_size = Vector2(90, 60)
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var path = gun.get("sprite", "")
 	if ResourceLoader.exists(path):
@@ -55,6 +53,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	stats.add_theme_font_size_override("font_size", 9)
 	vbox.add_child(stats)
 
+	# Illegal weapon tag
 	if gun.get("illegal", false):
 		var tag = Label.new()
 		tag.text = "!! ILLEGAL !!"
@@ -77,7 +76,10 @@ func _refresh() -> void:
 	for gid in _cards:
 		var gun = GunDatabase.GUNS[gid]
 		var panel = _cards[gid]
-		panel.self_modulate = gun.get("color", Color.WHITE) if gid == _selected_id else Color(0.5, 0.5, 0.5)
+		if gid == _selected_id:
+			panel.self_modulate = gun.get("color", Color.WHITE)
+		else:
+			panel.self_modulate = Color(0.5, 0.5, 0.5)
 
 func _on_deploy() -> void:
 	PlayerState.selected_gun_id = _selected_id
@@ -86,5 +88,3 @@ func _on_deploy() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_just_pressed("ui_accept"):
 		_on_deploy()
-	if event.is_action_just_pressed("ui_cancel"):
-		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")

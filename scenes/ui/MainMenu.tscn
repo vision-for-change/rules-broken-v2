@@ -57,5 +57,9 @@ layout_mode = 2
 text = "Arrows:Move  Shift:Run  E:Interact  `:Toggle Log  Esc:Menu"
 horizontal_alignment = 1
 
+[node name="SelectWeaponBtn" type="Button" parent="VBox" unique_id=1854518489]
+layout_mode = 2
+text = "Select Weapon"
+
 [connection signal="pressed" from="VBox/PlayBtn" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="VBox/QuitBtn" to="." method="_on_quit_pressed"]
