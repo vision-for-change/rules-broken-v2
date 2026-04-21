@@ -10,3 +10,7 @@ res://scenes/player/Bullet.tscn
 res://scenes/player/Bullet.gd
 res://scenes/player/Inventory.gd
 res://scenes/player/Player.tscn
+res://scenes/levels/BaseLevel.gd
+res://scenes/ui/HUD.gd
+res://autoloads/GunDatabase.gd
+res://scenes/levels/Level2.tscn
