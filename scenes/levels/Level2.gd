@@ -258,8 +258,8 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	_spawn_floor_door(interactable_root, door_room)
 
 	for room in rooms:
-		# Keep the floor door room clear so the teleporter is never obstructed.
-		if room != door_room:
+		# Keep both the spawn room and floor door room clear.
+		if room != door_room and room != main_room:
 			_spawn_room_obstacles(obstacle_root, room)
 		if room != main_room:
 			_spawn_room_bugs(enemy_root, room)

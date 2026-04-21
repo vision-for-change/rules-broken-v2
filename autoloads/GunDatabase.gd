@@ -40,3 +40,9 @@ var guns := {
 
 func get_gun(id: String) -> Dictionary:
 	return guns.get(id, {})
+
+func get_all_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for id in guns.keys():
+		ids.append(String(id))
+	return ids

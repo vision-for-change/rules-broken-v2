@@ -5,6 +5,9 @@ extends CharacterBody2D
 @export var shoot_cooldown := 0.4
 @export var laser_spawn_distance := 12.0
 @export var entity_id := "bug_01"
+@export var max_health := 1
+@export var hit_flash_duration := 0.1
+@export var hit_flash_color := Color(1.0, 0.3, 0.3, 1.0)
 const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
 const GHOST_INTERVAL := 0.045
 const GHOST_LIFETIME := 0.16
@@ -16,11 +19,14 @@ var _player_ref: CharacterBody2D = null
 var _shoot_cd := 0.0
 var _ghost_timer := 0.0
 var _defeated := false
+var _health := 0
+var _hit_flash_tween: Tween = null
 
 @onready var body_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 func _ready() -> void:
 	add_to_group("enemy")
+	_health = maxi(1, max_health)
 	_player_ref = get_tree().get_first_node_in_group("player") as CharacterBody2D
 	EntityRegistry.register(
 		entity_id,
@@ -29,6 +35,26 @@ func _ready() -> void:
 		["enforcer", "watchdog", "bug", "mobile"],
 		{"integrity_contribution": -0.03}
 	)
+
+func take_damage(amount: int) -> bool:
+	if _defeated:
+		return false
+	var final_damage: int = maxi(1, amount)
+	_health = maxi(0, _health - final_damage)
+	_play_hit_flash()
+	if _health > 0:
+		return false
+	shatter()
+	return true
+
+func _play_hit_flash() -> void:
+	if not is_instance_valid(body_sprite):
+		return
+	if is_instance_valid(_hit_flash_tween):
+		_hit_flash_tween.kill()
+	body_sprite.modulate = hit_flash_color
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.tween_property(body_sprite, "modulate", Color.WHITE, hit_flash_duration)
 
 func _exit_tree() -> void:
 	EntityRegistry.unregister(entity_id)

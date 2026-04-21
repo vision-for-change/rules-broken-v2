@@ -31,12 +31,17 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _on_body_entered(body: Node) -> void:
-	if body != null and body.is_in_group("enemy"):
+	if body == null or body == _owner_body:
+		return
+	if body.is_in_group("enemy"):
 		if body.has_method("take_damage"):
-			body.take_damage(damage)
+			var defeated := bool(body.call("take_damage", damage))
+			if defeated:
+				_try_spawn_health_pickup(body)
 		else:
 			body.queue_free()
-		_try_spawn_health_pickup(body)
+			_try_spawn_health_pickup(body)
+	queue_free()
 
 func _try_spawn_health_pickup(enemy: Node) -> void:
 	if randi() % HEALTH_DROP_CHANCE_DENOM != 0:

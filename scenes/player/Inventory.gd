@@ -15,7 +15,14 @@ const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
 
 func _ready() -> void:
 	# Load gun player picked on the select screen
+	if GunDatabase == null:
+		push_error("GunDatabase autoload is missing.")
+		return
 	var starting = GunDatabase.get_gun(PlayerState.selected_gun_id)
+	if starting.is_empty():
+		var all_ids: Array[String] = GunDatabase.get_all_ids()
+		if not all_ids.is_empty():
+			starting = GunDatabase.get_gun(all_ids[0])
 	if not starting.is_empty():
 		add_gun(starting)
 
@@ -48,17 +55,19 @@ func _input(event: InputEvent) -> void:
 			_try_shoot()
 
 	# Switch slots
-	if event.is_action_just_pressed("slot_1"): switch_to(0)
-	if event.is_action_just_pressed("slot_2"): switch_to(1)
-	if event.is_action_just_pressed("slot_3"): switch_to(2)
-	if event.is_action_just_pressed("next_weapon") and not slots.is_empty():
+	if event.is_action_pressed("slot_1"): switch_to(0)
+	if event.is_action_pressed("slot_2"): switch_to(1)
+	if event.is_action_pressed("slot_3"): switch_to(2)
+	if event.is_action_pressed("next_weapon") and not slots.is_empty():
 		switch_to((current_slot + 1) % slots.size())
 
 	# Reload
-	if event.is_action_just_pressed("reload"):
+	if event.is_action_pressed("reload"):
 		start_reload()
 
 func add_gun(gun_data: Dictionary) -> bool:
+	gun_data = _normalize_gun_data(gun_data)
+
 	# Already have it — top up ammo
 	for i in slots.size():
 		if slots[i]["id"] == gun_data["id"]:
@@ -72,7 +81,7 @@ func add_gun(gun_data: Dictionary) -> bool:
 	if slots.size() >= MAX_SLOTS:
 		return false
 
-	slots.append(gun_data.duplicate(true))
+	slots.append(gun_data)
 
 	if slots.size() == 1:
 		switch_to(0)
@@ -97,7 +106,7 @@ func start_reload() -> void:
 	if slots.is_empty() or is_reloading:
 		return
 	var gun = slots[current_slot]
-	if gun["ammo"] >= gun["max_ammo"]:
+	if int(gun.get("ammo", 0)) >= int(gun.get("max_ammo", 0)):
 		return
 	is_reloading = true
 	_reload_timer = gun.get("reload_time", 1.5)
@@ -105,11 +114,11 @@ func start_reload() -> void:
 func can_shoot() -> bool:
 	if slots.is_empty() or is_reloading or _fire_timer > 0.0:
 		return false
-	return slots[current_slot]["ammo"] > 0
+	return int(slots[current_slot].get("ammo", 0)) > 0
 
 func _try_shoot() -> void:
 	if not can_shoot():
-		if not slots.is_empty() and slots[current_slot]["ammo"] <= 0:
+		if not slots.is_empty() and int(slots[current_slot].get("ammo", 0)) <= 0:
 			start_reload()
 		return
 
@@ -137,3 +146,17 @@ func _try_shoot() -> void:
 		bullet.set_damage(gun["damage"])
 
 	ScreenFX.screen_shake(1.5, 0.05)
+
+func _normalize_gun_data(gun_data: Dictionary) -> Dictionary:
+	var normalized := gun_data.duplicate(true)
+	var max_ammo := int(normalized.get("max_ammo", 0))
+	normalized["max_ammo"] = max_ammo
+	normalized["ammo"] = int(normalized.get("ammo", max_ammo))
+	normalized["fire_rate"] = float(normalized.get("fire_rate", 0.2))
+	normalized["damage"] = int(normalized.get("damage", 1))
+	normalized["bullet_speed"] = float(normalized.get("bullet_speed", 300.0))
+	normalized["reload_time"] = float(normalized.get("reload_time", 1.5))
+	normalized["auto_fire"] = bool(normalized.get("auto_fire", false))
+	if not normalized.has("id"):
+		normalized["id"] = "unknown"
+	return normalized

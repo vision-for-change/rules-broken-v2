@@ -86,5 +86,5 @@ func _on_deploy() -> void:
 	get_tree().change_scene_to_file("res://scenes/levels/Level1.tscn")
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_just_pressed("ui_accept"):
+	if event.is_action_pressed("ui_accept"):
 		_on_deploy()
