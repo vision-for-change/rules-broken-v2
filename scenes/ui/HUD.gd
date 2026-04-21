@@ -17,6 +17,7 @@ extends CanvasLayer
 @onready var super_speed_toggle: CheckBox         = $HackPanel/HackVBox/SuperSpeedToggle
 @onready var invincible_toggle: CheckBox          = $HackPanel/HackVBox/InvincibleToggle
 @onready var fast_bullets_toggle: CheckBox        = $HackPanel/HackVBox/FastBulletsToggle
+@onready var ultimate_bullets_toggle: CheckBox    = $HackPanel/HackVBox/UltimateBulletsToggle
 @onready var super_vision_toggle: CheckBox        = $HackPanel/HackVBox/SuperVisionToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
 
@@ -40,6 +41,7 @@ func _ready() -> void:
 	super_speed_toggle.toggled.connect(_on_hack_toggled)
 	invincible_toggle.toggled.connect(_on_hack_toggled)
 	fast_bullets_toggle.toggled.connect(_on_hack_toggled)
+	ultimate_bullets_toggle.toggled.connect(_on_hack_toggled)
 	super_vision_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
@@ -82,7 +84,7 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, invincible_toggle, fast_bullets_toggle, super_vision_toggle]:
+	for toggle in [super_speed_toggle, invincible_toggle, fast_bullets_toggle, ultimate_bullets_toggle, super_vision_toggle]:
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
@@ -129,6 +131,7 @@ func _sync_hacks_from_player() -> void:
 	super_speed_toggle.button_pressed = modes.get("super_speed", false)
 	invincible_toggle.button_pressed = modes.get("invincible", false)
 	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false)
+	ultimate_bullets_toggle.button_pressed = modes.get("ultimate_bullets", false)
 	super_vision_toggle.button_pressed = modes.get("super_vision", false)
 	_syncing_hack_ui = false
 	_update_hack_status()
@@ -142,6 +145,7 @@ func _on_hack_toggled(_enabled: bool) -> void:
 			super_speed_toggle.button_pressed,
 			invincible_toggle.button_pressed,
 			fast_bullets_toggle.button_pressed,
+			ultimate_bullets_toggle.button_pressed,
 			super_vision_toggle.button_pressed
 		)
 	_update_hack_status()
@@ -154,6 +158,8 @@ func _update_hack_status() -> void:
 		states.append("INVINCIBLE")
 	if fast_bullets_toggle.button_pressed:
 		states.append("FASTER BULLETS")
+	if ultimate_bullets_toggle.button_pressed:
+		states.append("ULTIMATE BULLETS")
 	if super_vision_toggle.button_pressed:
 		states.append("SUPER VISION")
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")

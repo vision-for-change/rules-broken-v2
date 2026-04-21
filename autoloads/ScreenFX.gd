@@ -125,7 +125,7 @@ shader_type canvas_item;
 render_mode unshaded;
 
 uniform vec4 vignette_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
-uniform float strength : hint_range(0.0, 1.0) = 0.65;
+uniform float strength : hint_range(0.0, 1.0) = 0.4;
 uniform float radius : hint_range(0.0, 1.5) = 0.64;
 uniform float softness : hint_range(0.01, 1.0) = 0.22;
 
