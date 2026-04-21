@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bfhhinyybc56j" path="res://scenes/player/Player.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://5thoi1jvta6w" path="res://assets/matrix_gun.webp" id="2_gfjak"]
+[ext_resource type="Script" uid="uid://c8i75u04u3dmu" path="res://scenes/player/Inventory.gd" id="3_4kuee"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wr5hl"]
 size = Vector2(24, 24)
@@ -58,3 +59,6 @@ script = SubResource("hint_script")
 position = Vector2(25.999998, 0)
 scale = Vector2(0.78125, 0.75)
 texture = ExtResource("2_gfjak")
+
+[node name="Inventory" type="Node2D" parent="." unique_id=1030946937]
+script = ExtResource("3_4kuee")

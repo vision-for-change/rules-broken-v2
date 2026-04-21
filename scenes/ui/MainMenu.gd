@@ -39,6 +39,7 @@ func _ready() -> void:
 	_style_label($VBox/TitleLabel, 40, Color(0.2, 1.0, 0.5, 1))
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
 	_style_label($VBox/PlayBtn, 20)
+	_style_label($VBox/SelectWeaponBtn, 20, Color(0.3, 0.9, 1.0))
 	_style_label($VBox/QuitBtn, 20)
 	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
 	move_child($VBox, get_child_count() - 1)
@@ -124,3 +125,6 @@ func _on_quit_pressed() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		_on_play_pressed()
+
+func _on_select_weapon_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/GunSelectScreen.tscn")
