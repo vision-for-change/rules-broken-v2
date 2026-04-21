@@ -13,10 +13,17 @@ const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
 const ENTITY_ID  = "player"
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
-const SHOOT_COOLDOWN := 0.05
+const SHOOT_COOLDOWN := 0.2
 const GHOST_INTERVAL := 0.045
+const DASH_GHOST_INTERVAL := 0.015
 const GHOST_LIFETIME := 0.16
+const DASH_GHOST_LIFETIME := 0.22
 const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.32)
+const DASH_GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.5)
+const SHOOT_SHAKE_INTENSITY := 1.2
+const SHOOT_SHAKE_DURATION := 0.06
+const DASH_SHAKE_INTENSITY := 3.2
+const DASH_SHAKE_DURATION := 0.1
 
 var is_alive   := true
 var _interact_target: Node = null
@@ -24,6 +31,7 @@ var _footstep_t := 0.0
 var _hack_super_speed := false
 var _hack_invincible := false
 var _hack_faster_bullets := false
+var _hack_ultimate_bullets := false
 var _hack_super_vision := false
 var _shoot_cd := 0.0
 var _ghost_timer := 0.0
@@ -68,6 +76,7 @@ func _physics_process(delta: float) -> void:
 		_dash_direction = dir.normalized()
 		_dash_timer = DASH_DURATION
 		_dash_cd = DASH_COOLDOWN
+		ScreenFX.screen_shake(DASH_SHAKE_INTENSITY, DASH_SHAKE_DURATION)
 	elif _dash_timer <= 0.0:
 		_dash_direction = Vector2.ZERO
 
@@ -110,7 +119,7 @@ func _physics_process(delta: float) -> void:
 	# Interact input
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
-	if Input.is_action_just_pressed("shoot"):
+	if Input.is_action_pressed("shoot"):
 		_shoot()
 
 func _update_facing_to_mouse() -> void:
@@ -138,7 +147,8 @@ func _shoot() -> void:
 	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
-	_shoot_cd = SHOOT_COOLDOWN
+	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
+	_shoot_cd = 0.0 if _hack_ultimate_bullets else SHOOT_COOLDOWN
 
 func _do_interact() -> void:
 	if _interact_target == null or not is_instance_valid(_interact_target):
@@ -191,11 +201,15 @@ func set_hacked_client_modes(
 	super_speed_enabled: bool,
 	invincible_enabled: bool,
 	faster_bullets_enabled: bool = false,
+	ultimate_bullets_enabled: bool = false,
 	super_vision_enabled: bool = false
 ) -> void:
 	_hack_super_speed = super_speed_enabled
 	_hack_invincible = invincible_enabled
 	_hack_faster_bullets = faster_bullets_enabled
+	_hack_ultimate_bullets = ultimate_bullets_enabled
+	if _hack_ultimate_bullets:
+		_shoot_cd = 0.0
 	_hack_super_vision = super_vision_enabled
 	_apply_camera_modes()
 
@@ -204,6 +218,7 @@ func get_hacked_client_modes() -> Dictionary:
 		"super_speed": _hack_super_speed,
 		"invincible": _hack_invincible,
 		"faster_bullets": _hack_faster_bullets,
+		"ultimate_bullets": _hack_ultimate_bullets,
 		"super_vision": _hack_super_vision
 	}
 
@@ -213,13 +228,15 @@ func _apply_camera_modes() -> void:
 	camera.zoom = SUPER_VISION_CAMERA_ZOOM if _hack_super_vision else DEFAULT_CAMERA_ZOOM
 
 func _ghost_step(delta: float) -> void:
+	var dash_blur := is_dashing()
+	var ghost_interval := DASH_GHOST_INTERVAL if dash_blur else GHOST_INTERVAL
 	_ghost_timer -= delta
 	if _ghost_timer > 0.0:
 		return
-	_ghost_timer = GHOST_INTERVAL
-	_spawn_player_ghost()
+	_ghost_timer = ghost_interval
+	_spawn_player_ghost(dash_blur)
 
-func _spawn_player_ghost() -> void:
+func _spawn_player_ghost(dash_blur: bool = false) -> void:
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		return
@@ -228,7 +245,7 @@ func _spawn_player_ghost() -> void:
 	ghost_root.global_rotation = global_rotation
 	ghost_root.scale = scale
 	ghost_root.z_index = z_index - 1
-	ghost_root.modulate = GHOST_COLOR
+	ghost_root.modulate = DASH_GHOST_COLOR if dash_blur else GHOST_COLOR
 	scene_root.add_child(ghost_root)
 
 	if is_instance_valid(body_rect):
@@ -241,7 +258,8 @@ func _spawn_player_ghost() -> void:
 		ghost_root.add_child(gun_sprite.duplicate())
 
 	var tween := ghost_root.create_tween()
-	tween.tween_property(ghost_root, "modulate:a", 0.0, GHOST_LIFETIME)
+	var ghost_lifetime := DASH_GHOST_LIFETIME if dash_blur else GHOST_LIFETIME
+	tween.tween_property(ghost_root, "modulate:a", 0.0, ghost_lifetime)
 	tween.tween_callback(ghost_root.queue_free)
 
 func is_dashing() -> bool:

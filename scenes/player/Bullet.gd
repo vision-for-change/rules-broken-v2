@@ -6,6 +6,8 @@ const HEALTH_PICKUP_SCENE := preload("res://scenes/objects/HealthPickup.tscn")
 const HEALTH_DROP_CHANCE_DENOM := 3
 const GHOST_INTERVAL := 0.02
 const GHOST_LIFETIME := 0.28
+const ENEMY_DEFEAT_SHAKE_INTENSITY := 3.0
+const ENEMY_DEFEAT_SHAKE_DURATION := 0.1
 
 var _direction := Vector2.RIGHT
 var _owner_body: PhysicsBody2D = null
@@ -34,7 +36,11 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body != null and body.is_in_group("enemy"):
 		_try_spawn_health_pickup(body)
-		body.queue_free()
+		if body.has_method("shatter"):
+			body.shatter()
+		else:
+			body.queue_free()
+		ScreenFX.screen_shake(ENEMY_DEFEAT_SHAKE_INTENSITY, ENEMY_DEFEAT_SHAKE_DURATION)
 	queue_free()
 
 func _try_spawn_health_pickup(enemy: Node) -> void:

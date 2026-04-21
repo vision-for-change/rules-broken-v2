@@ -115,7 +115,7 @@ anchor_right = 1.0
 offset_left = -304.0
 offset_top = 56.0
 offset_right = -12.0
-offset_bottom = 258.0
+offset_bottom = 286.0
 
 [node name="HackVBox" type="VBoxContainer" parent="HackPanel"]
 layout_mode = 2
@@ -137,6 +137,9 @@ text = "INVINCIBLE"
 
 [node name="FastBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox"]
 text = "FASTER BULLETS"
+
+[node name="UltimateBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+text = "ULTIMATE BULLETS"
 
 [node name="SuperVisionToggle" type="CheckBox" parent="HackPanel/HackVBox"]
 text = "SUPER VISION"

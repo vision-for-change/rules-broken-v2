@@ -60,6 +60,7 @@ func _on_level_complete() -> void:
 	await _play_exit_transition()
 	get_tree().paused = false
 	_set_player_pause_override(false)
+	_set_enemy_pause_override(false)
 	_set_non_player_pause_override(false)
 	var next = "res://scenes/levels/Level%d.tscn" % (level_number + 1)
 	if ResourceLoader.exists(next):
@@ -94,6 +95,7 @@ func _input(event: InputEvent) -> void:
 		get_tree().paused = false
 		_paused = false
 		_set_player_pause_override(false)
+		_set_enemy_pause_override(false)
 		_set_non_player_pause_override(false)
 		if is_instance_valid(_pause_layer):
 			_pause_layer.visible = false
@@ -131,6 +133,7 @@ func _toggle_pause() -> void:
 	_paused = not _paused
 	get_tree().paused = _paused
 	_set_player_pause_override(_paused)
+	_set_enemy_pause_override(_paused)
 	_set_non_player_pause_override(_paused)
 	if is_instance_valid(_pause_layer):
 		_pause_layer.visible = _paused
@@ -143,6 +146,13 @@ func _set_player_pause_override(paused_state: bool) -> void:
 	for p in players:
 		if p is Node:
 			p.process_mode = Node.PROCESS_MODE_PAUSABLE if paused_state else Node.PROCESS_MODE_INHERIT
+
+func _set_enemy_pause_override(paused_state: bool) -> void:
+	for group_name in ["enemy", "enemy_projectile"]:
+		var enemies = get_tree().get_nodes_in_group(group_name)
+		for enemy in enemies:
+			if enemy is Node:
+				enemy.process_mode = Node.PROCESS_MODE_PAUSABLE if paused_state else Node.PROCESS_MODE_INHERIT
 
 func _set_non_player_pause_override(paused_state: bool) -> void:
 	var always_nodes: Array = [

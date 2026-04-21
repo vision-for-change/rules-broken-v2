@@ -19,6 +19,7 @@ var _dash_dodge_triggered := false
 @onready var beam: Sprite2D = $Beam
 
 func _ready() -> void:
+	add_to_group("enemy_projectile")
 	body_entered.connect(_on_body_entered)
 	_player_ref = get_tree().get_first_node_in_group("player") as Node2D
 

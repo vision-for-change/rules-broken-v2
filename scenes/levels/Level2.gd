@@ -176,6 +176,7 @@ func _build_walls(grid: Array) -> void:
 				run_start = -1
 		if run_start != -1:
 			_spawn_wall_span(walls, run_start, GRID_W - 1, y)
+	_spawn_outer_boundary_walls(walls)
 
 func _spawn_wall_span(parent: Node, start_x: int, end_x: int, cell_y: int) -> void:
 	var tile_count := end_x - start_x + 1
@@ -201,6 +202,38 @@ func _spawn_wall_span(parent: Node, start_x: int, end_x: int, cell_y: int) -> vo
 	block.material = _wall_material
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
+
+func _spawn_vertical_wall_span(parent: Node, cell_x: int, start_y: int, end_y: int) -> void:
+	var tile_count := end_y - start_y + 1
+	var span_h := float(tile_count) * TILE_SIZE
+	var body := StaticBody2D.new()
+	body.position = Vector2((cell_x + 0.5) * TILE_SIZE, (float(start_y) + float(tile_count) * 0.5) * TILE_SIZE)
+	body.collision_layer = 1
+	body.collision_mask = 0
+	parent.add_child(body)
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(TILE_SIZE, span_h)
+	shape.shape = rect
+	body.add_child(shape)
+
+	var block := ColorRect.new()
+	block.offset_left = -TILE_SIZE * 0.5
+	block.offset_top = -span_h * 0.5
+	block.offset_right = TILE_SIZE * 0.5
+	block.offset_bottom = span_h * 0.5
+	block.color = Color(1, 1, 1, 1)
+	block.material = _wall_material
+	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_child(block)
+
+func _spawn_outer_boundary_walls(parent: Node) -> void:
+	# Add a secondary wall ring beyond the edge walls so off-map space keeps the binary wall look.
+	_spawn_wall_span(parent, -1, GRID_W, -1)
+	_spawn_wall_span(parent, -1, GRID_W, GRID_H)
+	_spawn_vertical_wall_span(parent, -1, -1, GRID_H)
+	_spawn_vertical_wall_span(parent, GRID_W, -1, GRID_H)
 
 func _resize_background() -> void:
 	var bg := get_node_or_null("Background") as ColorRect
