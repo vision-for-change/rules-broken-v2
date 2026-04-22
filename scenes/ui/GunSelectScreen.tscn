@@ -28,11 +28,17 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="." unique_id=76477952]
-layout_mode = 0
-offset_left = 438.0
-offset_top = 350.0
-offset_right = 615.0
-offset_bottom = 373.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -88.5
+offset_top = -23.0
+offset_right = 88.5
+grow_horizontal = 2
+grow_vertical = 0
 text = "SELECT YOUR WEAPON"
 
 [node name="SubLabel" type="Label" parent="." unique_id=56532882]

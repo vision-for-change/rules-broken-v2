@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://31ynldcmi7vq"
-path="res://.godot/imported/AK47.png-c3ac638b66729d252ab1ebba7ffc73e7.ctex"
+uid="uid://4p0l7pue6kjv"
+path="res://.godot/imported/Pistol-removebg-preview (1).png-69223f6f2844229afafb3f62cf7bf601.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/AK47.png"
-dest_files=["res://.godot/imported/AK47.png-c3ac638b66729d252ab1ebba7ffc73e7.ctex"]
+source_file="res://assets/sprites/Pistol-removebg-preview (1).png"
+dest_files=["res://.godot/imported/Pistol-removebg-preview (1).png-69223f6f2844229afafb3f62cf7bf601.ctex"]
 
 [params]
 

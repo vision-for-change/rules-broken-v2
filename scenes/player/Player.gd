@@ -1,4 +1,3 @@
-## Player.gd
 extends CharacterBody2D
 
 const SPEED_MOVE = 360.0
@@ -37,15 +36,21 @@ var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
 var _dash_direction := Vector2.ZERO
+var damage := 10
+var max_ammo := 12
+var fire_rate := 0.3
+
 
 @onready var body_rect: ColorRect  = $BodyRect
 @onready var interact_area: Area2D = $InteractArea
 @onready var camera: Camera2D      = $Camera2D
 @onready var hint_label: Label     = $HintLabel
-@onready var gun_sprite: Node2D    = $Sprite2D
+@onready var gun_sprite: Sprite2D  = $Sprite2D   # GUN NODE
 
 func _ready() -> void:
 	add_to_group("player")
+	_load_selected_gun()   # ⭐ NEW — load gun sprite + stats
+
 	ScreenFX.register_camera(camera)
 	EntityRegistry.register(ENTITY_ID, "player", self,
 		["player", "agent", "mobile"],
@@ -176,6 +181,33 @@ func _on_caught(_catcher_id: String) -> void:
 		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
 		CONNECT_ONE_SHOT
 	)
+
+func _load_selected_gun() -> void:
+	var gid = PlayerState.selected_gun_id
+	var gun = GunDatabase.GUNS.get(gid, null)
+	if gun == null:
+		return
+
+	# Set gun sprite
+	if gun.has("sprite") and ResourceLoader.exists(gun["sprite"]):
+		gun_sprite.texture = load(gun["sprite"])
+
+		# ⭐ AUTO-SCALE GUN TO A GOOD SIZE
+		if gun_sprite.texture:
+			var tex_size = gun_sprite.texture.get_size()
+			var target_height := 20.0  # adjust this number if needed
+			var scale_factor: float = target_height / tex_size.y
+			gun_sprite.scale = Vector2(scale_factor, scale_factor)
+
+	# Apply stats if they exist
+	if gun.has("damage"):
+		damage = gun["damage"]
+	if gun.has("max_ammo"):
+		max_ammo = gun["max_ammo"]
+	if gun.has("fire_rate"):
+		fire_rate = gun["fire_rate"]
+
+
 
 func set_hacked_client_modes(
 	super_speed_enabled: bool,

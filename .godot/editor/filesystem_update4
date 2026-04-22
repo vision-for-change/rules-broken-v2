@@ -23,3 +23,4 @@ res://scenes/ui/GameOver.gd
 res://scenes/enemy/EnemyLaser.gd
 res://autoloads/RuleManager.gd
 res://scenes/objects/HealthPickup.gd
+res://Guns/AK47.tscn

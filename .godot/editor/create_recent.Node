@@ -1,12 +1,12 @@
+Sprite2D
+Node2D
 Button
 Label
 TextureRect
 Control
-Node2D
 Node
 HBoxContainer
 ColorRect
-Sprite2D
 CollisionShape2D
 CharacterBody2D
 TileMapLayer
