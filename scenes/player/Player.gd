@@ -86,7 +86,6 @@ func _physics_process(delta: float) -> void:
 
 	var target_velocity := Vector2.ZERO
 
-	# MOVE action goes through ActionBus
 	if move_dir.length() > 0.05:
 		var ctx = {
 			"actor_id":  ENTITY_ID,
@@ -98,25 +97,24 @@ func _physics_process(delta: float) -> void:
 		if result["allowed"]:
 			target_velocity = move_dir * SPEED_MOVE
 		else:
-			# Blocked: dampen to slow walk
 			target_velocity = move_dir * (SPEED_MOVE * 0.4)
+
 		if _hack_super_speed:
 			target_velocity *= HACK_SPEED_MULT
 		if _dash_timer > 0.0:
 			target_velocity *= DASH_SPEED_MULT
 
-		# Footstep audio
 		_footstep_t += delta
 		if _footstep_t >= FOOTSTEP_INT:
 			_footstep_t = 0.0
 			AudioManager.play_sfx("footstep")
-	velocity = target_velocity
 
+	velocity = target_velocity
 	move_and_slide()
+
 	if velocity.length_squared() > 16.0:
 		_ghost_step(delta)
 
-	# Interact input
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
 	if Input.is_action_pressed("shoot"):
@@ -180,22 +178,22 @@ func _on_action_denied(action: Dictionary, reason: String) -> void:
 		return
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 
+# ✅ UPDATED FUNCTION (REPLACED)
 func _on_caught(_catcher_id: String) -> void:
-	if _hack_invincible:
-		ScreenFX.flash_screen(Color(0.2, 1.0, 1.0, 0.25), 0.1)
-		EventBus.log("HACK CLIENT: INVINCIBILITY prevented capture", "exploit")
-		return
 	if not is_alive:
 		return
+
 	is_alive = false
 	velocity = Vector2.ZERO
+
 	ScreenFX.screen_shake(14.0, 0.6)
 	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
 	AudioManager.play_sfx("caught")
-	var t = create_tween()
-	t.tween_property(body_rect, "modulate:a", 0.0, 0.6)
-	await get_tree().create_timer(1.5).timeout
-	get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn")
+
+	get_tree().create_timer(1.5, false).timeout.connect(
+		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
+		CONNECT_ONE_SHOT
+	)
 
 func set_hacked_client_modes(
 	super_speed_enabled: bool,

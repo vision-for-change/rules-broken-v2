@@ -3,7 +3,6 @@
 ## Each level script extends this and declares its own rules/entities.
 extends Node2D
 
-## Override in subclasses to define which rules start active
 @export var initial_rules: Array[String] = []
 @export var level_number: int = 1
 @export var level_title_text: String = "SECTOR 01"
@@ -69,7 +68,6 @@ func _on_level_complete() -> void:
 		get_tree().change_scene_to_file("res://scenes/ui/WinScreen.tscn")
 
 func _on_player_caught(_catcher_id: String) -> void:
-	# Player.gd handles its own caught animation + scene change
 	pass
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
@@ -87,18 +85,11 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 			ScreenFX.screen_shake(8.0, 0.4)
 			AudioManager.play_sfx("lockdown")
 
+# ✅ REPLACED FUNCTION (clean, no pause system anymore)
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		_toggle_pause()
+	if not event is InputEventKey:
 		return
-	if _paused and event.is_action_pressed("pause_main_menu"):
-		get_tree().paused = false
-		_paused = false
-		_set_player_pause_override(false)
-		_set_enemy_pause_override(false)
-		_set_non_player_pause_override(false)
-		if is_instance_valid(_pause_layer):
-			_pause_layer.visible = false
+	if event.is_action_pressed("ui_cancel"):
 		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 
 func _setup_pause_overlay() -> void:

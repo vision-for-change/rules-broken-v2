@@ -30,8 +30,8 @@ AudioManager="*res://autoloads/AudioManager.gd"
 ScreenFX="*res://autoloads/ScreenFX.gd"
 InputSetup="*res://autoloads/InputSetup.gd"
 RuleDefinitions="*res://autoloads/RuleDefinitions.gd"
-PlayerState="*res://autoloads/PlayerState.gd"
-GunDatabase="*res://autoloads/GunDatabase.gd"
+GunDatabase="*uid://xh567m8fany3"
+PlayerState="*uid://btw5ks6sbr1a6"
 
 [display]
 
