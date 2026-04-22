@@ -216,22 +216,34 @@ var _death_triggered := false
 func _adjust_integrity(delta: float) -> void:
 	if _death_triggered:
 		return
+
 	var old = system_integrity
 	system_integrity = clampf(system_integrity + delta, 0.0, MAX_SYSTEM_INTEGRITY)
-	print("INTEGRITY: ", system_integrity, " | delta: ", delta)
+
+	print("INTEGRITY:", system_integrity, " | delta:", delta)
+
 	EventBus.integrity_changed.emit(system_integrity, delta)
+
 	var critical_threshold := MAX_SYSTEM_INTEGRITY * 0.25
 	var unstable_threshold := MAX_SYSTEM_INTEGRITY * 0.5
+
+	# Emit warnings when crossing thresholds
 	if system_integrity < critical_threshold and old >= critical_threshold:
 		EventBus.system_critical.emit()
 		EventBus.log("!! SYSTEM CRITICAL — integrity below 25%", "error")
 	elif system_integrity < unstable_threshold and old >= unstable_threshold:
 		EventBus.system_unstable.emit()
 		EventBus.log("! SYSTEM UNSTABLE — integrity below 50%", "warn")
-	if system_integrity <= 0.0 and old > 0.0:
+
+	# ⭐ NEW DEATH THRESHOLD ⭐
+	# Player dies when integrity < 5% instead of EXACTLY 0.0
+	var death_threshold := MAX_SYSTEM_INTEGRITY * 0.05
+
+	if system_integrity <= death_threshold and old > death_threshold:
 		_death_triggered = true
 		EventBus.log("!! INTEGRITY ZERO — PLAYER CAUGHT !!", "error")
 		EventBus.player_caught.emit("integrity_failure")
+
 
 func _recalculate_integrity() -> void:
 	_adjust_integrity(0.1)
@@ -239,6 +251,7 @@ func _recalculate_integrity() -> void:
 func clear_rules() -> void:
 	_rules.clear()
 	_conflict_log.clear()
+	_death_triggered = false
 	system_integrity = MAX_SYSTEM_INTEGRITY
 	EventBus.integrity_changed.emit(system_integrity, 0.0)
 

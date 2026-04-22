@@ -15,15 +15,14 @@ var is_reloading: bool = false
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
 
 func _ready() -> void:
-	# Load gun from select screen
-	if Engine.has_singleton("PlayerState") or get_node_or_null("/root/PlayerState") != null:
-		var starting = GunDatabase.get_gun(PlayerState.selected_gun_id)
-		if not starting.is_empty():
-			add_gun(starting)
-	elif get_node_or_null("/root/GunDatabase") != null:
-		var starting = GunDatabase.get_gun(GunDatabase.selected_gun_id)
-		if not starting.is_empty():
-			add_gun(starting)
+	var gun_id = "pistol"
+	if get_node_or_null("/root/GunDatabase") != null:
+		gun_id = GunDatabase.selected_gun_id
+	if get_node_or_null("/root/PlayerState") != null:
+		gun_id = PlayerState.selected_gun_id
+	var starting = GunDatabase.get_gun(gun_id)
+	if not starting.is_empty():
+		add_gun(starting)
 
 func _process(delta: float) -> void:
 	if _fire_timer > 0.0:

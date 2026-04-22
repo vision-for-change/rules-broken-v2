@@ -147,11 +147,10 @@ func _make_highlight_style(color: Color) -> StyleBoxFlat:
 func _on_deploy() -> void:
 	GunDatabase.selected_gun_id = _selected_id
 	PlayerState.selected_gun_id = _selected_id
-	# Fade out then switch scene
 	var t = create_tween()
 	t.tween_property(self, "modulate:a", 0.0, 0.3)
 	t.tween_callback(func():
-		get_tree().change_scene_to_file("res://scenes/levels/Level1.tscn")
+		get_tree().change_scene_to_file("res://scenes/levels/Level2.tscn")
 	)
 
 func _input(event: InputEvent) -> void:

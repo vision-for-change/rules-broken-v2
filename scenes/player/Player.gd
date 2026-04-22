@@ -1,6 +1,4 @@
 ## Player.gd
-## Player submits ALL actions through ActionBus. Movement, interaction,
-## bypass — nothing happens without passing the rule pipeline.
 extends CharacterBody2D
 
 const SPEED_MOVE = 360.0
@@ -11,7 +9,7 @@ const DASH_COOLDOWN := 0.5
 const HACK_BULLET_SPEED_MULT = 2.2
 const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
-const ENTITY_ID  = "player"
+const ENTITY_ID = "player"
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
 const SHOOT_COOLDOWN := 0.2
 const GHOST_INTERVAL := 0.045
@@ -24,8 +22,9 @@ const SHOOT_SHAKE_INTENSITY := 1.2
 const SHOOT_SHAKE_DURATION := 0.06
 const DASH_SHAKE_INTENSITY := 3.2
 const DASH_SHAKE_DURATION := 0.1
+const FOOTSTEP_INT = 0.38
 
-var is_alive   := true
+var is_alive := true
 var _interact_target: Node = null
 var _footstep_t := 0.0
 var _hack_super_speed := false
@@ -38,28 +37,24 @@ var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
 var _dash_direction := Vector2.ZERO
-const FOOTSTEP_INT = 0.38
 
-@onready var body_rect: ColorRect      = $BodyRect
-@onready var interact_area: Area2D     = $InteractArea
-@onready var camera: Camera2D          = $Camera2D
-@onready var hint_label: Label         = $HintLabel
-@onready var gun_sprite: Node2D        = $Sprite2D
+@onready var body_rect: ColorRect  = $BodyRect
+@onready var interact_area: Area2D = $InteractArea
+@onready var camera: Camera2D      = $Camera2D
+@onready var hint_label: Label     = $HintLabel
+@onready var gun_sprite: Node2D    = $Sprite2D
 
 func _ready() -> void:
 	add_to_group("player")
 	ScreenFX.register_camera(camera)
-
-	EntityRegistry.register(ENTITY_ID, "player",  self,
+	EntityRegistry.register(ENTITY_ID, "player", self,
 		["player", "agent", "mobile"],
 		{"integrity_contribution": 0.0}
 	)
-
 	EventBus.player_caught.connect(_on_caught)
 	EventBus.action_denied.connect(_on_action_denied)
 	interact_area.body_entered.connect(_on_interact_enter)
 	interact_area.body_exited.connect(_on_interact_exit)
-
 	AudioManager.play_music("stable")
 	_apply_camera_modes()
 
@@ -85,25 +80,17 @@ func _physics_process(delta: float) -> void:
 		move_dir = _dash_direction
 
 	var target_velocity := Vector2.ZERO
-
 	if move_dir.length() > 0.05:
-		var ctx = {
-			"actor_id":  ENTITY_ID,
-			"direction": move_dir
-		}
-		var result = ActionBus.submit(ActionBus.MOVE,
-			EntityRegistry.get_tags(ENTITY_ID), ctx)
-
+		var ctx = {"actor_id": ENTITY_ID, "direction": move_dir}
+		var result = ActionBus.submit(ActionBus.MOVE, EntityRegistry.get_tags(ENTITY_ID), ctx)
 		if result["allowed"]:
 			target_velocity = move_dir * SPEED_MOVE
 		else:
 			target_velocity = move_dir * (SPEED_MOVE * 0.4)
-
 		if _hack_super_speed:
 			target_velocity *= HACK_SPEED_MULT
 		if _dash_timer > 0.0:
 			target_velocity *= DASH_SPEED_MULT
-
 		_footstep_t += delta
 		if _footstep_t >= FOOTSTEP_INT:
 			_footstep_t = 0.0
@@ -114,7 +101,6 @@ func _physics_process(delta: float) -> void:
 
 	if velocity.length_squared() > 16.0:
 		_ghost_step(delta)
-
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
 	if Input.is_action_pressed("shoot"):
@@ -139,9 +125,8 @@ func _shoot() -> void:
 		return
 	if get_tree().current_scene == null:
 		return
-	var spawn_pos := muzzle_pos
 	get_tree().current_scene.add_child(bullet)
-	bullet.global_position = spawn_pos
+	bullet.global_position = muzzle_pos
 	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
@@ -153,12 +138,11 @@ func _do_interact() -> void:
 		return
 	var target_id = _interact_target.get("entity_id") if _interact_target.get("entity_id") != null else "unknown"
 	var ctx = {
-		"actor_id":  ENTITY_ID,
+		"actor_id": ENTITY_ID,
 		"target_id": target_id,
 		"target_node": _interact_target
 	}
-	var result = ActionBus.submit(ActionBus.INTERACT,
-		EntityRegistry.get_tags(ENTITY_ID), ctx)
+	var result = ActionBus.submit(ActionBus.INTERACT, EntityRegistry.get_tags(ENTITY_ID), ctx)
 	if result["allowed"] or result["loophole"] != "":
 		_interact_target.on_player_interact(result)
 
@@ -178,40 +162,19 @@ func _on_action_denied(action: Dictionary, reason: String) -> void:
 		return
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 
-# ✅ UPDATED FUNCTION (REPLACED)
 func _on_caught(_catcher_id: String) -> void:
 	if not is_alive:
 		return
-
 	is_alive = false
 	velocity = Vector2.ZERO
-
 	set_physics_process(false)
 	set_process(false)
-
 	ScreenFX.screen_shake(14.0, 0.6)
 	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
 	AudioManager.play_sfx("caught")
-
 	get_tree().create_timer(1.5, false).timeout.connect(
-		func():
-			if get_tree() != null:
-				get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
+		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
 		CONNECT_ONE_SHOT
-	)
-
-	is_alive = false
-	velocity = Vector2.ZERO
-
-	ScreenFX.screen_shake(14.0, 0.6)
-	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
-	AudioManager.play_sfx("caught")
-
-	get_tree().create_timer(1.5, false).timeout.connect(
-	func():
-		if get_tree() != null:
-			get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
-	CONNECT_ONE_SHOT
 	)
 
 func set_hacked_client_modes(
@@ -264,16 +227,13 @@ func _spawn_player_ghost(dash_blur: bool = false) -> void:
 	ghost_root.z_index = z_index - 1
 	ghost_root.modulate = DASH_GHOST_COLOR if dash_blur else GHOST_COLOR
 	scene_root.add_child(ghost_root)
-
 	if is_instance_valid(body_rect):
 		var body_ghost := body_rect.duplicate()
 		if body_ghost is Control:
 			(body_ghost as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ghost_root.add_child(body_ghost)
-
 	if is_instance_valid(gun_sprite):
 		ghost_root.add_child(gun_sprite.duplicate())
-
 	var tween := ghost_root.create_tween()
 	var ghost_lifetime := DASH_GHOST_LIFETIME if dash_blur else GHOST_LIFETIME
 	tween.tween_property(ghost_root, "modulate:a", 0.0, ghost_lifetime)

@@ -54,9 +54,11 @@ func _process(_delta: float) -> void:
 	_update_minimap_player_dot()
 
 func _input(event: InputEvent) -> void:
+	if not event is InputEventKey:
+		return
 	if event.is_action_pressed("inspect"):
 		hack_panel.visible = not hack_panel.visible
-
+		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
 				$Panel/VBox/TagsLabel, $Panel/VBox/HintLabel]:
