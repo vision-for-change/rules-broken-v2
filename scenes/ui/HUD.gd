@@ -24,6 +24,9 @@ extends CanvasLayer
 var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
+var _hack_slowmo_active := false
+
+const HACK_PANEL_TIME_SCALE := 0.2
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -53,11 +56,30 @@ func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
 
+func _exit_tree() -> void:
+	_set_hack_panel_visible(false)
+
 func _input(event: InputEvent) -> void:
-	if not event is InputEventKey:
+	if event is InputEventKey and event.is_action_pressed("inspect"):
+		_set_hack_panel_visible(not hack_panel.visible)
 		return
-	if event.is_action_pressed("inspect"):
-		hack_panel.visible = not hack_panel.visible
+	if not hack_panel.visible:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		var mouse_pos := get_viewport().get_mouse_position()
+		if not hack_panel.get_global_rect().has_point(mouse_pos):
+			_set_hack_panel_visible(false)
+
+func _set_hack_panel_visible(visible: bool) -> void:
+	hack_panel.visible = visible
+	if visible:
+		get_viewport().gui_release_focus()
+		ScreenFX.set_time_scale_override(HACK_PANEL_TIME_SCALE)
+		_hack_slowmo_active = true
+		return
+	if _hack_slowmo_active:
+		ScreenFX.clear_time_scale_override()
+		_hack_slowmo_active = false
 		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
@@ -90,6 +112,7 @@ func _style_hack_panel() -> void:
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
+		toggle.focus_mode = Control.FOCUS_NONE
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene

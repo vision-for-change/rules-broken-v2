@@ -22,7 +22,7 @@ const SEVERITY_CRITICAL = "critical"
 
 var _rules: Dictionary = {}
 var _conflict_log: Array[Dictionary] = []
-const MAX_SYSTEM_INTEGRITY := 2.0
+const MAX_SYSTEM_INTEGRITY := 3.0
 var system_integrity: float = MAX_SYSTEM_INTEGRITY
 const HACK_DRAIN_PER_SECOND := 0.02
 
@@ -37,7 +37,9 @@ func _process(delta: float) -> void:
 	var active_hacks := _count_active_player_hacks()
 	if active_hacks <= 0:
 		return
-	_adjust_integrity(-HACK_DRAIN_PER_SECOND * float(active_hacks) * delta)
+	var hack_factor := float(active_hacks)
+	var scaled_drain := HACK_DRAIN_PER_SECOND * hack_factor * hack_factor
+	_adjust_integrity(-scaled_drain * delta)
 
 # ─── Public API ───────────────────────────────────────────────────
 
@@ -138,6 +140,8 @@ func get_integrity_ratio() -> float:
 func apply_integrity_damage(amount: float) -> void:
 	if amount <= 0.0:
 		return
+	if _is_player_invincible():
+		return
 	_adjust_integrity(-amount)
 
 func apply_integrity_heal(amount: float) -> void:
@@ -216,6 +220,8 @@ var _death_triggered := false
 func _adjust_integrity(delta: float) -> void:
 	if _death_triggered:
 		return
+	if delta < 0.0 and _is_player_invincible():
+		return
 
 	var old = system_integrity
 	system_integrity = clampf(system_integrity + delta, 0.0, MAX_SYSTEM_INTEGRITY)
@@ -238,6 +244,9 @@ func _adjust_integrity(delta: float) -> void:
 	# ⭐ NEW DEATH THRESHOLD ⭐
 	# Player dies when integrity < 5% instead of EXACTLY 0.0
 	var death_threshold := MAX_SYSTEM_INTEGRITY * 0.05
+
+	if _is_player_invincible():
+		return
 
 	if system_integrity <= death_threshold and old > death_threshold:
 		_death_triggered = true
@@ -268,3 +277,17 @@ func _count_active_player_hacks() -> int:
 		if bool(enabled):
 			count += 1
 	return count
+
+func _is_player_invincible() -> bool:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return false
+	var player = players[0]
+	if player == null:
+		return false
+	if player.has_method("is_hack_invincible"):
+		return bool(player.call("is_hack_invincible"))
+	if player.has_method("get_hacked_client_modes"):
+		var modes: Dictionary = player.get_hacked_client_modes()
+		return bool(modes.get("invincible", false))
+	return false

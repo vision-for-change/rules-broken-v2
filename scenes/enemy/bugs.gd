@@ -44,6 +44,7 @@ func take_damage(amount: int) -> bool:
 	_play_hit_flash()
 	if _health > 0:
 		return false
+	AudioManager.play_sfx("feesound_community-glass-shatter")
 	shatter()
 	return true
 

@@ -120,10 +120,10 @@ func _style_label(lbl: Control, size: int, color: Color = Color.WHITE) -> void:
 		(lbl as Label).vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/levels/Level2.tscn")
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
 
 func _on_select_weapon_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/GunSelectScreen.tscn")
+	ScreenFX.transition_to_scene("res://scenes/ui/GunSelectScreen.tscn")
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

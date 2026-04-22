@@ -63,17 +63,16 @@ func _on_level_complete() -> void:
 	_set_non_player_pause_override(false)
 	var next = "res://scenes/levels/Level%d.tscn" % (level_number + 1)
 	if ResourceLoader.exists(next):
-		get_tree().change_scene_to_file(next)
+		ScreenFX.transition_to_scene(next)
 	else:
-		get_tree().change_scene_to_file("res://scenes/ui/WinScreen.tscn")
+		ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")
 
 func _on_player_caught(_catcher_id: String) -> void:
 	pass
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
 	if new_val <= 0.0:
-		EventBus.log("!! SYSTEM FAILURE — shutting down !!", "error")
-		get_tree().quit()
+		EventBus.log("!! SYSTEM FAILURE — PLAYER CAUGHT !!", "error")
 		return
 	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
 	var lockdown_threshold := max_integrity * 0.15
@@ -85,12 +84,17 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 			ScreenFX.screen_shake(8.0, 0.4)
 			AudioManager.play_sfx("lockdown")
 
-# ✅ REPLACED FUNCTION (clean, no pause system anymore)
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey:
 		return
+	if event.echo:
+		return
 	if event.is_action_pressed("ui_cancel"):
-		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+		_toggle_pause()
+		return
+	if _paused and event.is_action_pressed("pause_main_menu"):
+		_toggle_pause()
+		ScreenFX.transition_to_scene("res://scenes/ui/MainMenu.tscn")
 
 func _setup_pause_overlay() -> void:
 	_pause_layer = CanvasLayer.new()

@@ -19,15 +19,27 @@ const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.32)
 const DASH_GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.5)
 const SHATTER_ROWS := 4
 const SHATTER_COLS := 4
-const SHATTER_DURATION := 0.75
+const SHATTER_DURATION := 2.2
 const SHATTER_FORCE := 120.0
 const SHOOT_SHAKE_INTENSITY := 1.2
 const SHOOT_SHAKE_DURATION := 0.06
 const DASH_SHAKE_INTENSITY := 3.2
 const DASH_SHAKE_DURATION := 0.1
 const FOOTSTEP_INT = 0.38
+const DEATH_SHAKE_INTENSITY := 22.0
+const DEATH_SHAKE_DURATION := 0.45
+const DEATH_TRANSITION_DELAY := 7.0
+const DEATH_DIGIT_COUNT := 460
+const DEATH_EXPLOSION_COUNT := 220
+const DEATH_DIGIT_EFFECT_TIME := 1.35
+const DEATH_BURST_FLASH_TIME := 0.55
+const DEATH_SHAKE_PULSE_INTERVAL := 0.18
+const DEATH_ZOOM_IN_MULT := 1.75
+const DEATH_ZOOM_OUT_MULT := 0.75
+const DEATH_ZOOM_OUT_TIME := 1.35
 
 var is_alive := true
+var _death_anim_active := false
 var _interact_target: Node = null
 var _footstep_t := 0.0
 var _hack_super_speed := false
@@ -40,6 +52,7 @@ var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
 var _dash_direction := Vector2.ZERO
+var _death_zoom_tween: Tween
 var damage := 10
 var max_ammo := 12
 var fire_rate := 0.3
@@ -70,6 +83,11 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
+		if _death_anim_active:
+			_update_facing_to_mouse()
+			_shoot_cd = max(0.0, _shoot_cd - delta)
+			if Input.is_action_pressed("shoot"):
+				_shoot()
 		return
 	_update_facing_to_mouse()
 	_shoot_cd = max(0.0, _shoot_cd - delta)
@@ -140,6 +158,7 @@ func _shoot() -> void:
 	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
+	AudioManager.play_sfx("universfield-gunshot")
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
 	_shoot_cd = 0.0 if _hack_ultimate_bullets else SHOOT_COOLDOWN
 
@@ -173,25 +192,140 @@ func _on_action_denied(action: Dictionary, reason: String) -> void:
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 
 func _on_caught(_catcher_id: String) -> void:
+	if _hack_invincible:
+		return
 	if not is_alive:
 		return
 	is_alive = false
+	_death_anim_active = true
 	velocity = Vector2.ZERO
-	set_physics_process(false)
-	set_process(false)
-	ScreenFX.screen_shake(14.0, 0.6)
-	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
-	AudioManager.play_sfx("caught")
-	_play_shatter_effect()
-	get_tree().create_timer(1.5, false).timeout.connect(
-		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
-		CONNECT_ONE_SHOT
+	ScreenFX.screen_shake(DEATH_SHAKE_INTENSITY, DEATH_SHAKE_DURATION)
+	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.8), 0.9)
+	AudioManager.play_sfx("dragon-studio-cinematic-boom")
+	_start_death_zoom_in()
+	_shatter_visible_enemies()
+	_spawn_death_binary_cataclysm()
+	_pause_non_animation_elements()
+	ScreenFX.flash_screen(Color(0.2, 1.0, 0.45, 0.55), DEATH_BURST_FLASH_TIME)
+	var pulse_count := int(ceil(DEATH_TRANSITION_DELAY / DEATH_SHAKE_PULSE_INTERVAL))
+	for i in range(pulse_count):
+		var shake_delay := DEATH_SHAKE_PULSE_INTERVAL * float(i)
+		var progress := float(i) / maxf(1.0, float(pulse_count - 1))
+		var shake_strength := lerpf(DEATH_SHAKE_INTENSITY, DEATH_SHAKE_INTENSITY * 0.55, progress)
+		var shake_timer := get_tree().create_timer(shake_delay, false)
+		shake_timer.timeout.connect(func(): ScreenFX.screen_shake(shake_strength, DEATH_SHAKE_DURATION))
+	var shatter_delay := maxf(0.05, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
+	var shatter_timer := get_tree().create_timer(shatter_delay, false)
+	shatter_timer.timeout.connect(_play_shatter_effect)
+	var transition_timer := get_tree().create_timer(DEATH_TRANSITION_DELAY, false)
+	transition_timer.timeout.connect(func(): ScreenFX.transition_to_scene("res://scenes/ui/GameOver.tscn"))
+
+func _shatter_visible_enemies() -> void:
+	var enemies: Array = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if not (enemy is Node2D):
+			continue
+		var enemy_node: Node2D = enemy as Node2D
+		if not _is_world_point_visible(enemy_node.global_position):
+			continue
+		if enemy_node.has_method("shatter"):
+			enemy_node.call("shatter")
+		elif enemy_node.has_method("take_damage"):
+			enemy_node.call("take_damage", 9999)
+		else:
+			enemy_node.queue_free()
+
+func _pause_non_animation_elements() -> void:
+	var level_root: Node = get_tree().current_scene
+	if level_root == null:
+		return
+	if level_root.has_node("HUD"):
+		var hud_node := level_root.get_node("HUD")
+		if hud_node is Node:
+			(hud_node as Node).process_mode = Node.PROCESS_MODE_DISABLED
+
+	for group_name in ["enemy", "enemy_projectile"]:
+		var members: Array = get_tree().get_nodes_in_group(group_name)
+		for member in members:
+			if not (member is Node):
+				continue
+			var n: Node = member as Node
+			if n == self:
+				continue
+			n.process_mode = Node.PROCESS_MODE_DISABLED
+
+	if RuleManager is Node and is_instance_valid(RuleManager):
+		RuleManager.process_mode = Node.PROCESS_MODE_DISABLED
+
+func _is_world_point_visible(world_point: Vector2) -> bool:
+	var viewport: Viewport = get_viewport()
+	if viewport == null:
+		return false
+	var visible_rect: Rect2 = viewport.get_visible_rect()
+	var screen_point: Vector2 = viewport.get_canvas_transform() * world_point
+	return visible_rect.has_point(screen_point)
+
+func _spawn_death_binary_cataclysm() -> void:
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		return
+	var viewport: Viewport = get_viewport()
+	if viewport == null:
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 320
+	scene_root.add_child(layer)
+	var bounds: Vector2 = viewport.get_visible_rect().size
+
+	for i in range(DEATH_DIGIT_COUNT):
+		var digit := Label.new()
+		digit.text = "1" if randi() % 2 == 0 else "O"
+		digit.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y))
+		digit.rotation = randf_range(-0.4, 0.4)
+		digit.modulate.a = 0.0
+		digit.add_theme_font_size_override("font_size", randi_range(12, 30))
+		digit.add_theme_color_override("font_color", Color(0.2, 1.0, 0.45, 0.95))
+		digit.add_theme_color_override("outline_color", Color(0.0, 0.18, 0.07, 0.95))
+		digit.add_theme_constant_override("outline_size", 1)
+		layer.add_child(digit)
+		var digit_tween := digit.create_tween()
+		digit_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		var start_delay := randf_range(0.0, maxf(0.0, DEATH_TRANSITION_DELAY - (DEATH_DIGIT_EFFECT_TIME + 0.35)))
+		var drift := Vector2(randf_range(-180.0, 180.0), randf_range(-220.0, 220.0))
+		digit_tween.tween_interval(start_delay)
+		digit_tween.tween_property(digit, "modulate:a", 1.0, 0.05)
+		digit_tween.parallel().tween_property(digit, "position", digit.position + drift, DEATH_DIGIT_EFFECT_TIME)
+		digit_tween.parallel().tween_property(digit, "rotation", digit.rotation + randf_range(-2.2, 2.2), DEATH_DIGIT_EFFECT_TIME)
+		digit_tween.tween_property(digit, "modulate:a", 0.0, 0.35)
+		digit_tween.tween_callback(digit.queue_free)
+
+	for i in range(DEATH_EXPLOSION_COUNT):
+		var blast := ColorRect.new()
+		blast.color = Color(0.1, 1.0, 0.35, randf_range(0.25, 0.5))
+		blast.size = Vector2.ONE * randf_range(10.0, 24.0)
+		blast.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y)) - blast.size * 0.5
+		blast.pivot_offset = blast.size * 0.5
+		blast.modulate.a = 0.0
+		layer.add_child(blast)
+		var blast_tween := blast.create_tween()
+		blast_tween.tween_interval(randf_range(0.0, maxf(0.0, DEATH_TRANSITION_DELAY - 0.45)))
+		blast_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		blast_tween.tween_property(blast, "modulate:a", randf_range(0.35, 0.65), 0.08)
+		blast_tween.tween_property(blast, "scale", Vector2(randf_range(4.0, 10.0), randf_range(4.0, 10.0)), 0.35)
+		blast_tween.parallel().tween_property(blast, "modulate:a", 0.0, 0.35)
+		blast_tween.tween_callback(blast.queue_free)
+
+	var cleanup_timer := get_tree().create_timer(DEATH_TRANSITION_DELAY + 0.25, false)
+	cleanup_timer.timeout.connect(func():
+		if is_instance_valid(layer):
+			layer.queue_free()
 	)
 
 func _play_shatter_effect() -> void:
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		return
+	_start_death_zoom_out()
 	if is_instance_valid(player_sprite):
 		_spawn_shatter_from_sprite(player_sprite, SHATTER_ROWS, SHATTER_COLS, SHATTER_DURATION, SHATTER_FORCE)
 		player_sprite.visible = false
@@ -238,6 +372,31 @@ func _spawn_shatter_from_sprite(source_sprite: Sprite2D, rows: int, cols: int, d
 			tween.tween_property(shard, "modulate:a", 0.0, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 			tween.set_parallel(false)
 			tween.tween_callback(shard.queue_free)
+
+func _start_death_zoom_in() -> void:
+	if camera == null:
+		return
+	if is_instance_valid(_death_zoom_tween):
+		_death_zoom_tween.kill()
+	var target := camera.zoom * DEATH_ZOOM_IN_MULT
+	target.x = minf(4.0, target.x)
+	target.y = minf(4.0, target.y)
+	var zoom_in_time := maxf(0.2, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
+	_death_zoom_tween = create_tween()
+	_death_zoom_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_death_zoom_tween.tween_property(camera, "zoom", target, zoom_in_time)
+
+func _start_death_zoom_out() -> void:
+	if camera == null:
+		return
+	if is_instance_valid(_death_zoom_tween):
+		_death_zoom_tween.kill()
+	var target := DEFAULT_CAMERA_ZOOM * DEATH_ZOOM_OUT_MULT
+	target.x = maxf(0.35, target.x)
+	target.y = maxf(0.35, target.y)
+	_death_zoom_tween = create_tween()
+	_death_zoom_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_death_zoom_tween.tween_property(camera, "zoom", target, DEATH_ZOOM_OUT_TIME)
 
 func _load_selected_gun() -> void:
 	var gid = PlayerState.selected_gun_id
@@ -290,6 +449,9 @@ func get_hacked_client_modes() -> Dictionary:
 		"ultimate_bullets": _hack_ultimate_bullets,
 		"super_vision": _hack_super_vision
 	}
+
+func is_hack_invincible() -> bool:
+	return _hack_invincible
 
 func _apply_camera_modes() -> void:
 	if camera == null:

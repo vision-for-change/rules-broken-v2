@@ -1,20 +1,23 @@
 [gd_scene format=3 uid="uid://go001"]
 
 [ext_resource type="Script" uid="uid://beu51nc3iecrk" path="res://scenes/ui/GameOver.gd" id="1_57v1k"]
-[ext_resource type="Texture2D" uid="uid://ro5vsiiu2fyl" path="res://assets/sprites/death_screen.png" id="1_kp3qx"]
+[ext_resource type="Texture2D" uid="uid://cvpr8vpcvgaq7" path="res://assets/sprites/gettyimages-1328389388.jpg" id="2_57v1k"]
 
 [node name="GameOver" type="Control" unique_id=1484924869]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_57v1k")
 
-[node name="Background" type="TextureRect" parent="." unique_id=201889646]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=246562019]
 layout_mode = 0
-offset_right = 1156.0
-offset_bottom = 645.0
-texture = ExtResource("1_kp3qx")
+offset_right = 2309.0
+offset_bottom = 1299.0
+scale = Vector2(0.49569452, 0.5015967)
+texture = ExtResource("2_57v1k")
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=450677706]
 layout_mode = 1
@@ -23,23 +26,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -153.0
-offset_top = -23.0
-offset_right = 149.0
-offset_bottom = 62.0
+offset_left = -40.00006
+offset_top = 36.0
+offset_right = 261.99994
+offset_bottom = 168.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(1.4569025, 1.7432358)
 theme_override_constants/separation = 8
-
-[node name="TitleLabel" type="Label" parent="VBox" unique_id=481780457]
-layout_mode = 2
-text = "ACCESS REVOKED"
-horizontal_alignment = 1
-
-[node name="Sub" type="Label" parent="VBox" unique_id=883734569]
-layout_mode = 2
-text = "Bug enforcement successful."
-horizontal_alignment = 1
 
 [node name="RetryBtn" type="Button" parent="VBox" unique_id=1878569532]
 layout_mode = 2

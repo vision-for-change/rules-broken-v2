@@ -9,6 +9,17 @@ var _current_track := ""
 const POOL_SIZE   = 8
 const MUSIC_VOL   = -10.0
 const FADE_TIME   = 1.0
+const SFX_DIRS := [
+	"res://assets/audio/sfx",
+	"res://Sounds",
+]
+const SFX_EXTS := [".wav", ".ogg", ".mp3"]
+const SFX_ALIASES := {
+	"universfield-gunshot": "universfield-gunshot-352466",
+	"feesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
+	"freesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
+	"dragon-studio-cinematic-boom": "dragon-studio-cinematic-boom-454254",
+}
 
 # Track mapping: system state -> track name
 const STATE_TRACKS := {
@@ -67,12 +78,21 @@ func switch_music(state: String) -> void:
 	)
 
 func play_sfx(name: String) -> void:
-	for p in ["res://assets/audio/sfx/%s.wav" % name, "res://assets/audio/sfx/%s.ogg" % name]:
-		if ResourceLoader.exists(p):
-			var player = _free_sfx()
-			player.stream = load(p)
-			player.play()
-			return
+	var resolved_name: String = name
+	if SFX_ALIASES.has(name):
+		resolved_name = str(SFX_ALIASES[name])
+	var candidates: Array[String] = [resolved_name]
+	if resolved_name != name:
+		candidates.append(name)
+	for base_name in candidates:
+		for dir_path in SFX_DIRS:
+			for ext in SFX_EXTS:
+				var p = "%s/%s%s" % [dir_path, base_name, ext]
+				if ResourceLoader.exists(p):
+					var player = _free_sfx()
+					player.stream = load(p)
+					player.play()
+					return
 
 func _free_sfx() -> AudioStreamPlayer:
 	for p in _sfx_pool:

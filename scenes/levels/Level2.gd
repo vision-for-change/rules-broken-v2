@@ -448,4 +448,4 @@ func _on_floor_door_used() -> void:
 	_transitioning = true
 	_advance_requested = true
 	await _play_exit_transition()
-	get_tree().change_scene_to_file("res://scenes/levels/Level2.tscn")
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
