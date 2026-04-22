@@ -16,11 +16,11 @@ extends Node
 ##   source:      String         who created this rule (system, player, ai)
 ## }
 
-const SEVERITY_SOFT     = "soft"     # warns but allows
-const SEVERITY_HARD     = "hard"     # blocks action
-const SEVERITY_CRITICAL = "critical" # triggers immediate response
+const SEVERITY_SOFT     = "soft"
+const SEVERITY_HARD     = "hard"
+const SEVERITY_CRITICAL = "critical"
 
-var _rules: Dictionary = {}           # rule_id -> rule dict
+var _rules: Dictionary = {}
 var _conflict_log: Array[Dictionary] = []
 const MAX_SYSTEM_INTEGRITY := 2.0
 var system_integrity: float = MAX_SYSTEM_INTEGRITY
@@ -73,27 +73,21 @@ func get_active_rule_ids() -> Array:
 func is_rule_active(rule_id: String) -> bool:
 	return _rules.has(rule_id)
 
-## Core validation pipeline — ALL actions must pass through this.
-## Returns: { allowed: bool, reason: String, loophole: String }
 func validate_action(action_type: String, actor_tags: Array, context: Dictionary = {}) -> Dictionary:
 	var result = { "allowed": true, "reason": "", "loophole": "", "blocking_rule": "" }
 
 	var applicable = _get_applicable_rules(action_type, actor_tags, context)
 
 	if applicable.is_empty():
-		return result  # no rules = allowed
+		return result
 
-	# Sort by priority descending
 	applicable.sort_custom(func(a, b): return a["priority"] > b["priority"])
 
-	# Check explicit allows first (loophole opportunities)
 	var highest_allow = _find_highest_allow(applicable, action_type)
 	var highest_block = _find_highest_block(applicable, action_type)
 
 	if highest_allow != null and highest_block != null:
-		# CONFLICT: both block and allow exist — higher priority wins
 		if highest_allow["priority"] > highest_block["priority"]:
-			# Allow overrides block — this IS a loophole!
 			var loophole_desc = "Rule [%s] overrides [%s] for action %s" % [
 				highest_allow["id"], highest_block["id"], action_type
 			]
@@ -117,13 +111,11 @@ func validate_action(action_type: String, actor_tags: Array, context: Dictionary
 
 	return result
 
-## Try to find a rule conflict between two rules (different sources/priorities)
 func check_conflict(rule_id_a: String, rule_id_b: String) -> bool:
 	var a = _rules.get(rule_id_a, {})
 	var b = _rules.get(rule_id_b, {})
 	if a.is_empty() or b.is_empty():
 		return false
-	# Conflict = a blocks something b allows, or vice versa
 	for act in a.get("blocks", []):
 		if act in b.get("allows", []):
 			return true
@@ -164,7 +156,6 @@ func _validate_rule_schema(rule: Dictionary) -> bool:
 func _get_applicable_rules(action_type: String, actor_tags: Array, context: Dictionary) -> Array:
 	var result = []
 	for rule in _rules.values():
-		# Tag match: rule applies_to must overlap with actor_tags
 		var tag_match = false
 		for tag in rule.get("applies_to", []):
 			if tag == "*" or tag in actor_tags:
@@ -173,11 +164,9 @@ func _get_applicable_rules(action_type: String, actor_tags: Array, context: Dict
 		if not tag_match:
 			continue
 
-		# Condition check
 		if not _check_conditions(rule.get("conditions", {}), actor_tags, context):
 			continue
 
-		# Rule must affect this action type
 		var affects = (action_type in rule.get("blocks", [])) or (action_type in rule.get("allows", []))
 		if not affects:
 			continue
@@ -188,15 +177,12 @@ func _get_applicable_rules(action_type: String, actor_tags: Array, context: Dict
 func _check_conditions(conditions: Dictionary, actor_tags: Array, context: Dictionary) -> bool:
 	if conditions.is_empty():
 		return true
-	# tag_has: actor must have this tag
 	if conditions.has("tag_has"):
 		if not conditions["tag_has"] in actor_tags:
 			return false
-	# tag_lacks: actor must NOT have this tag
 	if conditions.has("tag_lacks"):
 		if conditions["tag_lacks"] in actor_tags:
 			return false
-	# context_key: context dict must have this key=value
 	if conditions.has("context_key"):
 		var ck = conditions["context_key"]
 		if not context.get(ck["key"]) == ck["value"]:
@@ -204,7 +190,7 @@ func _check_conditions(conditions: Dictionary, actor_tags: Array, context: Dicti
 	return true
 
 func _find_highest_allow(rules: Array, action_type: String) -> Dictionary:
-	for r in rules:  # already sorted by priority desc
+	for r in rules:
 		if action_type in r.get("allows", []):
 			return r
 	return {}
@@ -225,9 +211,14 @@ func _check_new_conflicts(new_id: String) -> void:
 			EventBus.log("CONFLICT DETECTED: [%s] vs [%s]" % [new_id, existing_id], "warn")
 			_adjust_integrity(-0.08)
 
+var _death_triggered := false
+
 func _adjust_integrity(delta: float) -> void:
+	if _death_triggered:
+		return
 	var old = system_integrity
 	system_integrity = clampf(system_integrity + delta, 0.0, MAX_SYSTEM_INTEGRITY)
+	print("INTEGRITY: ", system_integrity, " | delta: ", delta)
 	EventBus.integrity_changed.emit(system_integrity, delta)
 	var critical_threshold := MAX_SYSTEM_INTEGRITY * 0.25
 	var unstable_threshold := MAX_SYSTEM_INTEGRITY * 0.5
@@ -237,9 +228,12 @@ func _adjust_integrity(delta: float) -> void:
 	elif system_integrity < unstable_threshold and old >= unstable_threshold:
 		EventBus.system_unstable.emit()
 		EventBus.log("! SYSTEM UNSTABLE — integrity below 50%", "warn")
+	if system_integrity <= 0.0 and old > 0.0:
+		_death_triggered = true
+		EventBus.log("!! INTEGRITY ZERO — PLAYER CAUGHT !!", "error")
+		EventBus.player_caught.emit("integrity_failure")
 
 func _recalculate_integrity() -> void:
-	# Removing rules restores integrity slightly
 	_adjust_integrity(0.1)
 
 func clear_rules() -> void:

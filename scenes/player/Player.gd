@@ -186,13 +186,32 @@ func _on_caught(_catcher_id: String) -> void:
 	is_alive = false
 	velocity = Vector2.ZERO
 
+	set_physics_process(false)
+	set_process(false)
+
 	ScreenFX.screen_shake(14.0, 0.6)
 	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
 	AudioManager.play_sfx("caught")
 
 	get_tree().create_timer(1.5, false).timeout.connect(
-		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
+		func():
+			if get_tree() != null:
+				get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
 		CONNECT_ONE_SHOT
+	)
+
+	is_alive = false
+	velocity = Vector2.ZERO
+
+	ScreenFX.screen_shake(14.0, 0.6)
+	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
+	AudioManager.play_sfx("caught")
+
+	get_tree().create_timer(1.5, false).timeout.connect(
+	func():
+		if get_tree() != null:
+			get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
+	CONNECT_ONE_SHOT
 	)
 
 func set_hacked_client_modes(

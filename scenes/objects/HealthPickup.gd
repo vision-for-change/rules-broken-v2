@@ -18,6 +18,9 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body == null or not body.is_in_group("player"):
 		return
+	# Don't heal if player is already dead
+	if body.get("is_alive") == false:
+		return
 	_consumed = true
 	RuleManager.apply_integrity_heal(heal_amount)
 	EventBus.log("HEALTH POWER-UP +%d" % int(heal_amount * 100.0), "info")

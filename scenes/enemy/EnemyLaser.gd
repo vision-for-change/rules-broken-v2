@@ -2,7 +2,7 @@ extends Area2D
 
 @export var speed := 800.0
 @export var lifetime := 1.6
-@export var integrity_damage := 0.08
+@export var integrity_damage := 0.4
 const GHOST_INTERVAL := 0.02
 const GHOST_LIFETIME := 0.28
 const GHOST_COLOR := Color(1.0, 0.2, 0.2, 0.75)
@@ -39,9 +39,18 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body == _owner_body:
 		return
-	if body != null and body.is_in_group("player"):
-		RuleManager.apply_integrity_damage(integrity_damage)
+	if body == null:
+		return
+	if not body.is_in_group("player"):
+		queue_free()
+		return
+	# If player is already dead don't do anything
+	if body.get("is_alive") == false:
+		queue_free()
+		return
+	RuleManager.apply_integrity_damage(integrity_damage)
 	queue_free()
+	
 
 func _ghost_step(delta: float) -> void:
 	_ghost_timer -= delta
