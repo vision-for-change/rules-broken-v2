@@ -17,6 +17,10 @@ const GHOST_LIFETIME := 0.16
 const DASH_GHOST_LIFETIME := 0.22
 const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.32)
 const DASH_GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.5)
+const SHATTER_ROWS := 4
+const SHATTER_COLS := 4
+const SHATTER_DURATION := 0.75
+const SHATTER_FORCE := 120.0
 const SHOOT_SHAKE_INTENSITY := 1.2
 const SHOOT_SHAKE_DURATION := 0.06
 const DASH_SHAKE_INTENSITY := 3.2
@@ -46,6 +50,7 @@ var fire_rate := 0.3
 @onready var camera: Camera2D      = $Camera2D
 @onready var hint_label: Label     = $HintLabel
 @onready var gun_sprite: Sprite2D  = $Sprite2D   # GUN NODE
+@onready var player_sprite: Sprite2D = $PlayerSprite
 
 func _ready() -> void:
 	add_to_group("player")
@@ -177,10 +182,62 @@ func _on_caught(_catcher_id: String) -> void:
 	ScreenFX.screen_shake(14.0, 0.6)
 	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.7), 0.5)
 	AudioManager.play_sfx("caught")
+	_play_shatter_effect()
 	get_tree().create_timer(1.5, false).timeout.connect(
 		func(): get_tree().change_scene_to_file("res://scenes/ui/GameOver.tscn"),
 		CONNECT_ONE_SHOT
 	)
+
+func _play_shatter_effect() -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	if is_instance_valid(player_sprite):
+		_spawn_shatter_from_sprite(player_sprite, SHATTER_ROWS, SHATTER_COLS, SHATTER_DURATION, SHATTER_FORCE)
+		player_sprite.visible = false
+	if is_instance_valid(gun_sprite):
+		_spawn_shatter_from_sprite(gun_sprite, 3, 3, SHATTER_DURATION * 0.9, SHATTER_FORCE * 0.8)
+		gun_sprite.visible = false
+
+func _spawn_shatter_from_sprite(source_sprite: Sprite2D, rows: int, cols: int, duration: float, force: float) -> void:
+	if source_sprite == null:
+		return
+	if source_sprite.texture == null:
+		return
+	var texture_size := source_sprite.texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+		return
+	var piece_size := texture_size / Vector2(float(cols), float(rows))
+	for y in rows:
+		for x in cols:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = source_sprite.texture
+			atlas.region = Rect2(Vector2(x, y) * piece_size, piece_size)
+			var shard := Sprite2D.new()
+			shard.texture = atlas
+			shard.centered = true
+			shard.scale = source_sprite.global_scale
+			shard.global_rotation = source_sprite.global_rotation
+			shard.modulate = source_sprite.modulate
+			var cell_center := (Vector2(float(x), float(y)) + Vector2(0.5, 0.5)) * piece_size
+			var offset := cell_center - texture_size * 0.5
+			var rotated_offset := (offset * source_sprite.global_scale).rotated(source_sprite.global_rotation)
+			shard.global_position = source_sprite.global_position + rotated_offset
+			var outward_dir := offset.normalized()
+			if outward_dir.length_squared() < 0.001:
+				outward_dir = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
+			var random_spread := Vector2(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35))
+			var travel := (outward_dir + random_spread).normalized() * randf_range(force * 0.55, force)
+			var target_pos := shard.global_position + travel
+			var target_rot := shard.rotation + randf_range(-2.6, 2.6)
+			get_tree().current_scene.add_child(shard)
+			var tween := shard.create_tween()
+			tween.set_parallel(true)
+			tween.tween_property(shard, "global_position", target_pos, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.tween_property(shard, "rotation", target_rot, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.tween_property(shard, "modulate:a", 0.0, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+			tween.set_parallel(false)
+			tween.tween_callback(shard.queue_free)
 
 func _load_selected_gun() -> void:
 	var gid = PlayerState.selected_gun_id
