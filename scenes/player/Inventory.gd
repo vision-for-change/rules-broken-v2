@@ -12,7 +12,7 @@ var _reload_timer: float = 0.0
 var _fire_timer: float = 0.0
 var is_reloading: bool = false
 
-const BULLET_SCENE = preload("res://scenes/objects/Bullet.tscn")
+const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
 
 func _ready() -> void:
 	# Load gun from select screen
