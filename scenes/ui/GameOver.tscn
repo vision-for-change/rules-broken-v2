@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://go001"]
 
 [ext_resource type="Script" uid="uid://beu51nc3iecrk" path="res://scenes/ui/GameOver.gd" id="1_57v1k"]
-[ext_resource type="Texture2D" uid="uid://cvpr8vpcvgaq7" path="res://assets/sprites/gettyimages-1328389388.jpg" id="2_57v1k"]
+[ext_resource type="Texture2D" uid="uid://c51nasp5prfdc" path="res://assets/sprites/EndScreen.jpg" id="2_57v1k"]
 
 [node name="GameOver" type="Control" unique_id=1484924869]
 layout_mode = 3
@@ -14,8 +14,10 @@ script = ExtResource("1_57v1k")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=246562019]
 layout_mode = 0
-offset_right = 2309.0
-offset_bottom = 1299.0
+offset_left = 5.000002
+offset_top = -4.0
+offset_right = 2314.0
+offset_bottom = 1295.0
 scale = Vector2(0.49569452, 0.5015967)
 texture = ExtResource("2_57v1k")
 
