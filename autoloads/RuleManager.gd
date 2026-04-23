@@ -24,7 +24,7 @@ var _rules: Dictionary = {}
 var _conflict_log: Array[Dictionary] = []
 const MAX_SYSTEM_INTEGRITY := 9.0
 var system_integrity: float = MAX_SYSTEM_INTEGRITY
-const HACK_DRAIN_PER_SECOND := 0.04
+const HACK_DRAIN_PER_SECOND := 0.4
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

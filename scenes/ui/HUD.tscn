@@ -155,17 +155,9 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "SUPER SPEED"
 
-[node name="InvincibleToggle" type="CheckBox" parent="HackPanel/HackVBox" unique_id=137069288]
-layout_mode = 2
-text = "INVINCIBLE"
-
 [node name="FastBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox" unique_id=1219048878]
 layout_mode = 2
 text = "FASTER BULLETS"
-
-[node name="UltimateBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox" unique_id=2112016470]
-layout_mode = 2
-text = "ULTIMATE BULLETS"
 
 [node name="SuperVisionToggle" type="CheckBox" parent="HackPanel/HackVBox" unique_id=1752754069]
 layout_mode = 2
