@@ -158,7 +158,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	tex.custom_minimum_size = Vector2(100, 80)
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tex.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	var path = gun.get("sprite", "")
+	var path = gun.get("preview_sprite", gun.get("sprite", ""))
 	if ResourceLoader.exists(path):
 		tex.texture = load(path)
 	vbox.add_child(tex)
