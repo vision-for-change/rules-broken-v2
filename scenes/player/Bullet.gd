@@ -4,6 +4,7 @@ extends Area2D
 @export var lifetime := 1.2
 const HEALTH_PICKUP_SCENE := preload("res://scenes/objects/HealthPickup.tscn")
 const HEALTH_DROP_CHANCE_DENOM := 3
+const ENEMY_HEALTH_PICKUP_HEAL_AMOUNT := 0.5
 const GHOST_INTERVAL := 0.02
 const GHOST_LIFETIME := 0.28
 
@@ -52,6 +53,7 @@ func _try_spawn_health_pickup(enemy: Node) -> void:
 	var pickup = HEALTH_PICKUP_SCENE.instantiate()
 	if pickup == null:
 		return
+	pickup.heal_amount = ENEMY_HEALTH_PICKUP_HEAL_AMOUNT
 	scene_root.add_child(pickup)
 	pickup.global_position = enemy.global_position if enemy is Node2D else global_position
 

@@ -1,12 +1,4 @@
-res://scenes/ui/GunSelectScreen.gd
-res://scenes/ui/GameOver.tscn
-res://scenes/ui/GameOver.gd
-res://autoloads/ScreenFX.gd
-res://scenes/levels/BaseLevel.gd
-res://scenes/levels/Level2.gd
-res://scenes/player/Player.gd
-res://scenes/ui/MainMenu.gd
 res://autoloads/RuleManager.gd
-res://scenes/ui/HUD.gd
-res://scenes/enemy/bugs.gd
-res://autoloads/AudioManager.gd
+res://autoloads/ScreenFX.gd
+res://scenes/player/Bullet.gd
+res://autoloads/PlayerState.gd

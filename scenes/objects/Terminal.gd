@@ -113,5 +113,5 @@ func get_interact_hint() -> String:
 
 func _animate_idle() -> void:
 	var t = create_tween().set_loops()
-	t.tween_property(glow_rect, "modulate:a", 0.3, 0.8)
-	t.tween_property(glow_rect, "modulate:a", 0.9, 0.8)
+	t.tween_property(glow_rect, "modulate:a", 0.45, 0.65)
+	t.tween_property(glow_rect, "modulate:a", 1.0, 0.65)

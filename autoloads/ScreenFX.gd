@@ -8,6 +8,8 @@ var _shake_tween: Tween
 var _glitch_timer := 0.0
 var _integrity_ratio := 1.0
 var _vignette: ColorRect
+var _bloom_overlay: ColorRect
+var _bloom_mat: ShaderMaterial
 var _slowmo_end_ms := 0
 var _timescale_override_active := false
 var _timescale_override := 1.0
@@ -33,6 +35,7 @@ func _ready() -> void:
 	_overlay_layer = CanvasLayer.new()
 	_overlay_layer.layer = 99
 	add_child(_overlay_layer)
+	_setup_bloom_overlay()
 	_setup_vignette()
 	EventBus.integrity_changed.connect(_on_integrity_changed)
 	EventBus.rule_conflict_detected.connect(func(_a, _b): glitch_flash(0.2))
@@ -54,6 +57,7 @@ func _process(delta: float) -> void:
 				_scanline_flash()
 	_update_slowmo()
 	_update_transition_overlay(delta)
+	_update_bloom_overlay()
 
 func _exit_tree() -> void:
 	_timescale_override_active = false
@@ -132,13 +136,13 @@ func glitch_flash(duration: float = 0.12) -> void:
 	screen_shake(3.0, duration)
 
 func exploit_flash() -> void:
-	flash_screen(Color(0.0, 1.0, 0.5, 0.35), 0.3)
+	flash_screen(Color(0.0, 1.0, 0.5, 0.5), 0.32)
 	screen_shake(4.0, 0.2)
 	AudioManager.play_sfx("exploit")
 
 func _scanline_flash() -> void:
 	var r = ColorRect.new()
-	r.color = Color(0.0, 1.0, 0.4, 0.06)
+	r.color = Color(0.0, 1.0, 0.45, 0.1)
 	r.set_anchors_preset(Control.PRESET_FULL_RECT)
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay_layer.add_child(r)
@@ -255,6 +259,48 @@ func _finish_scene_transition() -> void:
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
 	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
 	_integrity_ratio = new_val / max_integrity if max_integrity > 0.0 else 0.0
+
+func _setup_bloom_overlay() -> void:
+	_bloom_overlay = ColorRect.new()
+	_bloom_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_bloom_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var shader := Shader.new()
+	shader.code = """
+shader_type canvas_item;
+render_mode unshaded, blend_add;
+
+uniform vec4 glow_color : source_color = vec4(0.05, 1.0, 0.55, 1.0);
+uniform float strength : hint_range(0.0, 0.6) = 0.12;
+uniform float pulse_strength : hint_range(0.0, 0.3) = 0.06;
+uniform float radius : hint_range(0.2, 2.0) = 1.25;
+uniform float scanline_density : hint_range(20.0, 300.0) = 140.0;
+
+void fragment() {
+	vec2 uv = SCREEN_UV * 2.0 - vec2(1.0);
+	float dist = length(uv);
+	float radial = clamp(1.0 - (dist / radius), 0.0, 1.0);
+	radial = pow(radial, 1.6);
+
+	float pulse = 0.5 + 0.5 * sin(TIME * 2.8);
+	float scanline = 0.7 + 0.3 * sin((SCREEN_UV.y + TIME * 0.14) * scanline_density);
+	float glow = (strength + pulse_strength * pulse) * radial * scanline;
+
+	COLOR = vec4(glow_color.rgb, glow);
+}
+"""
+
+	_bloom_mat = ShaderMaterial.new()
+	_bloom_mat.shader = shader
+	_bloom_overlay.material = _bloom_mat
+	_overlay_layer.add_child(_bloom_overlay)
+
+func _update_bloom_overlay() -> void:
+	if _bloom_mat == null:
+		return
+	var stress := clampf(1.0 - _integrity_ratio, 0.0, 1.0)
+	_bloom_mat.set_shader_parameter("strength", lerpf(0.10, 0.22, stress))
+	_bloom_mat.set_shader_parameter("pulse_strength", lerpf(0.05, 0.14, stress))
 
 func _setup_vignette() -> void:
 	_vignette = ColorRect.new()
