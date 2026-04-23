@@ -2,3 +2,6 @@ res://autoloads/RuleManager.gd
 res://autoloads/ScreenFX.gd
 res://scenes/player/Bullet.gd
 res://autoloads/PlayerState.gd
+res://scenes/enemy/bugs.gd
+res://scenes/enemy/bugs.tscn
+res://scenes/enemy/EnemyLaser.gd

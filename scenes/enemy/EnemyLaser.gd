@@ -1,11 +1,11 @@
 extends Area2D
 
-@export var speed := 800.0
+@export var speed := 520.0
 @export var lifetime := 1.6
 @export var integrity_damage := 0.4
-const GHOST_INTERVAL := 0.02
-const GHOST_LIFETIME := 0.28
-const GHOST_COLOR := Color(1.0, 0.2, 0.2, 0.75)
+const GHOST_INTERVAL := 0.015
+const GHOST_LIFETIME := 0.4
+const GHOST_COLOR := Color(1.0, 0.0, 0.0, 0.95)
 const DASH_DODGE_RADIUS := 28.0
 const DASH_DODGE_PASS_MARGIN := 8.0
 
@@ -48,6 +48,7 @@ func _on_body_entered(body: Node) -> void:
 	if body.get("is_alive") == false:
 		queue_free()
 		return
+	ScreenFX.flash_screen(Color(1.0, 0.1, 0.1, 0.28), 0.24)
 	RuleManager.apply_integrity_damage(integrity_damage)
 	queue_free()
 	
@@ -61,6 +62,25 @@ func _ghost_step(delta: float) -> void:
 
 func _spawn_ghost_from(source: CanvasItem) -> void:
 	if not is_instance_valid(source):
+		return
+	if source is Sprite2D:
+		var src_sprite := source as Sprite2D
+		if src_sprite.texture == null:
+			return
+		var scene_root := get_tree().current_scene
+		if scene_root == null:
+			return
+		var ghost_sprite := Sprite2D.new()
+		ghost_sprite.texture = src_sprite.texture
+		ghost_sprite.scale = src_sprite.scale * 1.35
+		ghost_sprite.global_position = src_sprite.global_position
+		ghost_sprite.global_rotation = src_sprite.global_rotation
+		ghost_sprite.z_index = z_index - 1
+		ghost_sprite.modulate = GHOST_COLOR
+		scene_root.add_child(ghost_sprite)
+		var sprite_tween := ghost_sprite.create_tween()
+		sprite_tween.tween_property(ghost_sprite, "modulate:a", 0.0, GHOST_LIFETIME)
+		sprite_tween.tween_callback(ghost_sprite.queue_free)
 		return
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
