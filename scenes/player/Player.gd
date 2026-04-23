@@ -43,16 +43,18 @@ var _death_anim_active := false
 var _interact_target: Node = null
 var _footstep_t := 0.0
 var _hack_super_speed := false
-var _hack_invincible := false
 var _hack_faster_bullets := false
-var _hack_ultimate_bullets := false
 var _hack_super_vision := false
+var _hack_slow_time := false
+var _hack_noclip := false
 var _shoot_cd := 0.0
 var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
 var _dash_direction := Vector2.ZERO
 var _death_zoom_tween: Tween
+var _default_collision_layer := 1
+var _default_collision_mask := 3
 var damage := 10
 var max_ammo := 12
 var fire_rate := 0.3
@@ -78,6 +80,9 @@ func _ready() -> void:
 	EventBus.action_denied.connect(_on_action_denied)
 	interact_area.body_entered.connect(_on_interact_enter)
 	interact_area.body_exited.connect(_on_interact_exit)
+	_default_collision_layer = collision_layer
+	_default_collision_mask = collision_mask
+	_apply_noclip_mode()
 	AudioManager.play_music("stable")
 	_apply_camera_modes()
 
@@ -160,7 +165,7 @@ func _shoot() -> void:
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
 	AudioManager.play_sfx("universfield-gunshot")
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
-	_shoot_cd = 0.0 if _hack_ultimate_bullets else SHOOT_COOLDOWN
+	_shoot_cd = SHOOT_COOLDOWN
 
 func _do_interact() -> void:
 	if _interact_target == null or not is_instance_valid(_interact_target):
@@ -192,10 +197,9 @@ func _on_action_denied(action: Dictionary, reason: String) -> void:
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 
 func _on_caught(_catcher_id: String) -> void:
-	if _hack_invincible:
-		return
 	if not is_alive:
 		return
+	ScreenFX.clear_time_scale_override()
 	is_alive = false
 	_death_anim_active = true
 	velocity = Vector2.ZERO
@@ -427,31 +431,35 @@ func _load_selected_gun() -> void:
 
 func set_hacked_client_modes(
 	super_speed_enabled: bool,
-	invincible_enabled: bool,
 	faster_bullets_enabled: bool = false,
-	ultimate_bullets_enabled: bool = false,
-	super_vision_enabled: bool = false
+	super_vision_enabled: bool = false,
+	slow_time_enabled: bool = false,
+	noclip_enabled: bool = false
 ) -> void:
 	_hack_super_speed = super_speed_enabled
-	_hack_invincible = invincible_enabled
 	_hack_faster_bullets = faster_bullets_enabled
-	_hack_ultimate_bullets = ultimate_bullets_enabled
-	if _hack_ultimate_bullets:
-		_shoot_cd = 0.0
 	_hack_super_vision = super_vision_enabled
+	_hack_slow_time = slow_time_enabled
+	_hack_noclip = noclip_enabled
+	_apply_noclip_mode()
 	_apply_camera_modes()
 
 func get_hacked_client_modes() -> Dictionary:
 	return {
 		"super_speed": _hack_super_speed,
-		"invincible": _hack_invincible,
 		"faster_bullets": _hack_faster_bullets,
-		"ultimate_bullets": _hack_ultimate_bullets,
-		"super_vision": _hack_super_vision
+		"super_vision": _hack_super_vision,
+		"slow_time": _hack_slow_time,
+		"noclip": _hack_noclip
 	}
 
-func is_hack_invincible() -> bool:
-	return _hack_invincible
+func _apply_noclip_mode() -> void:
+	if _hack_noclip:
+		collision_layer = 0
+		collision_mask = 0
+		return
+	collision_layer = _default_collision_layer
+	collision_mask = _default_collision_mask
 
 func _apply_camera_modes() -> void:
 	if camera == null:
