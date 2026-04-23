@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var move_speed := 200.0
+@export var move_speed := 140.0
 @export var shoot_range := 180.0
 @export var shoot_cooldown := 0.4
 @export var laser_spawn_distance := 12.0
@@ -23,6 +23,7 @@ var _health := 0
 var _hit_flash_tween: Tween = null
 
 @onready var body_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var visibility_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
 
 func _ready() -> void:
 	add_to_group("enemy")
@@ -62,6 +63,10 @@ func _exit_tree() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _defeated:
+		return
+	if is_instance_valid(visibility_notifier) and not visibility_notifier.is_on_screen():
+		velocity = Vector2.ZERO
+		move_and_slide()
 		return
 	_shoot_cd = maxf(0.0, _shoot_cd - delta)
 	if _player_ref == null or not is_instance_valid(_player_ref):
