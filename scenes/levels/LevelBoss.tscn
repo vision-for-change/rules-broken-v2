@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://6hknw5ad00nd"]
+
+[ext_resource type="Script" uid="uid://chnhtswgyo7lv" path="res://scenes/levels/LevelBoss.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="3"]
+
+[node name="LevelBoss" type="Node2D" unique_id=156095162]
+script = ExtResource("1")
+initial_rules = Array[String](["no_running", "no_access", "watchdog_enforce"])
+level_number = 6
+level_title_text = "FINAL SECTOR // CORE ACCESS"
+
+[node name="HUD" parent="." unique_id=727566940 instance=ExtResource("3")]
+
+[node name="TitleLabel" type="Label" parent="." unique_id=197445941]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 10.0
+offset_right = 80.0
+offset_bottom = 24.0
+text = "CORE ACCESS"
+horizontal_alignment = 1
+
+[node name="Background" type="ColorRect" parent="." unique_id=2079352867]
+z_index = -10
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.06, 0.06, 0.13, 1)
+
+[node name="Walls" type="Node2D" parent="." unique_id=637065615]
+
+[node name="Player" parent="." unique_id=589444354 instance=ExtResource("2")]
+position = Vector2(30, 90)

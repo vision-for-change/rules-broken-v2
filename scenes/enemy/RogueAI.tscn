@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://rogueai001"]
+
+[ext_resource type="Script" path="res://scenes/enemy/RogueAI.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/chatgpt.png" id="2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 32.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.1, 0.1, 0.1, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.2, 0.8, 1.0, 1.0)
+
+[node name="RogueAI" type="CharacterBody2D"]
+z_index = 10
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="UI" type="Node2D" parent="."]
+top_level = true
+z_index = 20
+
+[node name="PressureBar" type="ProgressBar" parent="UI"]
+offset_left = -60.0
+offset_top = -80.0
+offset_right = 60.0
+offset_bottom = -74.0
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+max_value = 1.0
+show_percentage = false
+
+[node name="Label" type="Label" parent="UI"]
+offset_left = -60.0
+offset_top = -100.0
+offset_right = 60.0
+offset_bottom = -80.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 12
+text = "ROGUE AI DETECTED"
+horizontal_alignment = 1

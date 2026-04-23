@@ -99,7 +99,11 @@ func _physics_process(delta: float) -> void:
 	_dash_cd = max(0.0, _dash_cd - delta)
 	_dash_timer = max(0.0, _dash_timer - delta)
 
-	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	# Try move_* first (physical), then fallback to ui_*
+	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if dir.length_squared() < 0.01:
+		dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	
 	if Input.is_action_just_pressed("dash") and _dash_cd <= 0.0 and dir.length() > 0.05:
 		_dash_direction = dir.normalized()
 		_dash_timer = DASH_DURATION

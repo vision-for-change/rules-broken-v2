@@ -481,6 +481,12 @@ func _on_floor_door_used() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
+	
+	if _floor_index >= 5:
+		await _play_exit_transition()
+		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
+		return
+
 	_advance_requested = true
 	await _play_exit_transition()
 	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")

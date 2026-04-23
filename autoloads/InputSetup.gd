@@ -5,6 +5,12 @@ func _ready() -> void:
 	_add("ui_right", [_key(KEY_RIGHT), _key(KEY_D)])
 	_add("ui_up", [_key(KEY_UP), _key(KEY_W)])
 	_add("ui_down", [_key(KEY_DOWN), _key(KEY_S)])
+	
+	_add("move_left", [_key(KEY_LEFT), _key(KEY_A)])
+	_add("move_right", [_key(KEY_RIGHT), _key(KEY_D)])
+	_add("move_up", [_key(KEY_UP), _key(KEY_W)])
+	_add("move_down", [_key(KEY_DOWN), _key(KEY_S)])
+
 	_add("ui_accept", [_key(KEY_ENTER), _key(KEY_KP_ENTER), _key(KEY_SPACE)])
 	_add("ui_cancel", [_key(KEY_ESCAPE)])
 
@@ -33,7 +39,7 @@ func _add(action_name: String, events: Array) -> void:
 
 func _key(code: Key) -> InputEventKey:
 	var event := InputEventKey.new()
-	event.keycode = code
+	event.physical_keycode = code
 	return event
 
 

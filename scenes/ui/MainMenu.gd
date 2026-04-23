@@ -40,6 +40,14 @@ func _ready() -> void:
 	_style_label($VBox/QuitBtn, 20)
 	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
 
+	if has_node("VBox/InstructionsBtn"):
+		_style_label($VBox/InstructionsBtn, 18, Color(0.8, 0.8, 0.3))
+
+	if has_node("InstructionsPanel"):
+		_style_label($InstructionsPanel/VBox/Title, 24, Color(0.2, 1.0, 0.8))
+		_style_label($InstructionsPanel/VBox/Content, 14, Color(0.9, 0.9, 0.9))
+		_style_label($InstructionsPanel/VBox/CloseInstructionsBtn, 16)
+
 	# ✅ YOUR CHANGE
 	if has_node("VBox/SelectWeaponBtn"):
 		$VBox/SelectWeaponBtn.add_theme_font_size_override("font_size", 9)
@@ -131,6 +139,16 @@ func _on_floor_5_pressed() -> void:
 
 func _on_select_weapon_pressed() -> void:
 	ScreenFX.transition_to_scene("res://scenes/ui/GunSelectScreen.tscn")
+
+func _on_instructions_pressed() -> void:
+	if has_node("InstructionsPanel"):
+		$InstructionsPanel.visible = true
+		$VBox.visible = false
+
+func _on_close_instructions_pressed() -> void:
+	if has_node("InstructionsPanel"):
+		$InstructionsPanel.visible = false
+		$VBox.visible = true
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

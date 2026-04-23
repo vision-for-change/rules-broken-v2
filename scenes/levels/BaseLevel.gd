@@ -20,6 +20,8 @@ const TRANSITION_OUT_TIME := 0.45
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Disable UI navigation so WASD reaches physics
+	get_viewport().gui_disable_input = true
 	RuleManager.clear_rules()
 	EntityRegistry.clear_all()
 
