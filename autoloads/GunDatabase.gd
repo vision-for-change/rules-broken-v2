@@ -29,7 +29,7 @@ const GUNS := {
 		"bullet_speed": 400.0,
 		"bullet_color": Color(1.0, 0.5, 0.1),
 		"color": Color(0.6, 0.3, 0.1),
-		"sprite": "res://assets/sprites/AK47.png",
+		"sprite": "res://assets/matrix_ak.webp",
 		"auto_fire": true,
 		"illegal": false,
 	},

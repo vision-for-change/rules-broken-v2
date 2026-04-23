@@ -61,6 +61,11 @@ custom_minimum_size = Vector2(170, 22)
 layout_mode = 2
 text = "[ ENTER ]  INITIATE BREACH"
 
+[node name="Floor5Btn" type="Button" parent="VBox" unique_id=1380302339]
+custom_minimum_size = Vector2(170, 22)
+layout_mode = 2
+text = "START FLOOR 5"
+
 [node name="QuitBtn" type="Button" parent="VBox" unique_id=73877338]
 custom_minimum_size = Vector2(170, 22)
 layout_mode = 2
@@ -76,5 +81,6 @@ layout_mode = 2
 text = "Select Weapon"
 
 [connection signal="pressed" from="VBox/PlayBtn" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="VBox/Floor5Btn" to="." method="_on_floor_5_pressed"]
 [connection signal="pressed" from="VBox/QuitBtn" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="VBox/SelectWeaponBtn" to="." method="_on_select_weapon_pressed"]

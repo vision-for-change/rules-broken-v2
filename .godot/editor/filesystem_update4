@@ -5,3 +5,6 @@ res://autoloads/PlayerState.gd
 res://scenes/enemy/bugs.gd
 res://scenes/enemy/bugs.tscn
 res://scenes/enemy/EnemyLaser.gd
+res://scenes/levels/Level2.gd
+res://scenes/ui/MainMenu.gd
+res://autoloads/GunDatabase.gd

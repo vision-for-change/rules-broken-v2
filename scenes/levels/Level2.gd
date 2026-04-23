@@ -22,12 +22,24 @@ var _bug_spawn_index := 0
 
 static var _floor_index := 1
 static var _advance_requested := false
+static var _queued_start_floor := 1
+
+static func queue_start_floor(floor_number: int) -> void:
+	_queued_start_floor = maxi(1, floor_number)
+	_advance_requested = false
+	_floor_index = _queued_start_floor
+
+static func reset_start_floor() -> void:
+	_queued_start_floor = 1
+	_advance_requested = false
+	_floor_index = 1
 
 func _ready() -> void:
 	if _advance_requested:
 		_floor_index += 1
 	else:
-		_floor_index = 1
+		_floor_index = _queued_start_floor
+	_queued_start_floor = 1
 	_advance_requested = false
 	level_title_text = "SECTOR 02 // FLOOR %d" % _floor_index
 	_transitioning = false
@@ -38,6 +50,10 @@ func _ready() -> void:
 	super._ready()
 
 func _generate_dungeon() -> void:
+	if _floor_index == 5:
+		_generate_floor_five_dungeon()
+		return
+
 	var grid := _make_filled_grid()
 	var rooms: Array[Rect2i] = []
 
@@ -71,6 +87,22 @@ func _generate_dungeon() -> void:
 	_build_walls(grid)
 	_resize_background()
 	_populate_floor(main_room, rooms)
+
+func _generate_floor_five_dungeon() -> void:
+	var grid := _make_filled_grid()
+	var spawn_room := Rect2i(40, int((GRID_H - 36) / 2), 42, 36)
+	var spawn_center := _room_center(spawn_room)
+	var big_room := Rect2i(spawn_room.end.x + 68, spawn_center.y - 52, 132, 104)
+
+	_carve_room(grid, spawn_room)
+	_carve_room(grid, big_room)
+	_carve_line_horizontal(grid, spawn_room.end.x - 1, big_room.position.x, spawn_center.y, HALLWAY_WIDTH)
+
+	var rooms: Array[Rect2i] = [spawn_room, big_room]
+	_build_minimap_texture(grid)
+	_build_walls(grid)
+	_resize_background()
+	_populate_floor(spawn_room, rooms)
 
 func _make_filled_grid() -> Array:
 	var grid: Array = []
@@ -254,14 +286,17 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	if player != null:
 		player.global_position = _cell_to_world(_room_center(main_room))
 
-	var door_room := _pick_farthest_room(main_room, rooms)
-	_spawn_floor_door(interactable_root, door_room)
+	var is_floor_five := _floor_index == 5
+	var door_room := Rect2i()
+	if not is_floor_five:
+		door_room = _pick_farthest_room(main_room, rooms)
+		_spawn_floor_door(interactable_root, door_room)
 
 	for room in rooms:
 		# Keep both the spawn room and floor door room clear.
-		if room != door_room and room != main_room:
+		if not is_floor_five and room != main_room and room != door_room:
 			_spawn_room_obstacles(obstacle_root, room)
-		if room != main_room:
+		if not is_floor_five and room != main_room:
 			_spawn_room_bugs(enemy_root, room)
 
 func _cell_to_world(cell: Vector2i) -> Vector2:

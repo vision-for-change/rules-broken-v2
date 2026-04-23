@@ -2,6 +2,7 @@ extends Control
 
 var _matrix_bg: Control
 var _matrix_columns: Array = []
+const LEVEL2_SCRIPT := preload("res://scenes/levels/Level2.gd")
 
 const MATRIX_COL_SPACING := 34.0
 const MATRIX_ROW_SPACING := 28.0
@@ -35,6 +36,7 @@ func _ready() -> void:
 	_style_label($VBox/TitleLabel, 40, Color(0.2, 1.0, 0.5, 1))
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
 	_style_label($VBox/PlayBtn, 20)
+	_style_label($VBox/Floor5Btn, 18)
 	_style_label($VBox/QuitBtn, 20)
 	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
 
@@ -120,6 +122,11 @@ func _style_label(lbl: Control, size: int, color: Color = Color.WHITE) -> void:
 		(lbl as Label).vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 func _on_play_pressed() -> void:
+	LEVEL2_SCRIPT.reset_start_floor()
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+
+func _on_floor_5_pressed() -> void:
+	LEVEL2_SCRIPT.queue_start_floor(5)
 	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
 
 func _on_select_weapon_pressed() -> void:
