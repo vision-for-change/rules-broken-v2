@@ -7,6 +7,7 @@ extends CanvasLayer
 
 @onready var integrity_bar:    ProgressBar        = $HealthBar
 @onready var integrity_label:  Label              = $Panel/VBox/IntegrityLabel
+@onready var health_percentage_label: Label       = %HealthPercentageLabel
 @onready var rules_container:  VBoxContainer      = $Panel/VBox/RulesScroll/RulesContainer
 @onready var tags_label:       Label              = $Panel/VBox/TagsLabel
 @onready var pause_btn:        Button             = $PauseBtn
@@ -238,6 +239,8 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 		col = Color(1.0, 0.2, 0.1)
 	integrity_label.text = "SYSTEM HEALTH: %d/%d" % [int(new_val * 100.0), int(_max_integrity * 100.0)]
 	integrity_label.add_theme_color_override("font_color", col)
+	if is_instance_valid(health_percentage_label):
+		health_percentage_label.text = "%d%%" % int(ratio * 100.0)
 
 func _on_tag_changed(entity_id: String, _tag: String, _added: bool) -> void:
 	if entity_id == "player":
