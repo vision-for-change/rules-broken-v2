@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://c7vtt6vjhaf55"]
+
+[ext_resource type="Script" uid="uid://di6faoc1am880" path="res://scenes/enemy/bugs.gd" id="1_gvpmo"]
+[ext_resource type="Texture2D" uid="uid://cf2lbhws1a23w" path="res://assets/sprites/bug.webp" id="2_7jcou"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iuc07"]
+size = Vector2(12, 12)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5eowu"]
+atlas = ExtResource("2_7jcou")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6m3hg"]
+atlas = ExtResource("2_7jcou")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3ngay"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5eowu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6m3hg")
+}],
+"loop": true,
+"name": &"default",
+"speed": 1.0
+}]
+
+[node name="bugs" type="CharacterBody2D" unique_id=1329929761]
+collision_layer = 2
+script = ExtResource("1_gvpmo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=68993521]
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_iuc07")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=713736914]
+position = Vector2(-0.99999994, 0)
+rotation = 1.5707964
+scale = Vector2(1.25, 1.25)
+sprite_frames = SubResource("SpriteFrames_3ngay")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-12, -12, 24, 24)

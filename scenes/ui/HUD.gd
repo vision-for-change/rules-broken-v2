@@ -18,14 +18,16 @@ extends CanvasLayer
 @onready var super_speed_toggle: CheckBox         = $HackPanel/HackVBox/SuperSpeedToggle
 @onready var fast_bullets_toggle: CheckBox        = $HackPanel/HackVBox/FastBulletsToggle
 @onready var super_vision_toggle: CheckBox        = $HackPanel/HackVBox/SuperVisionToggle
+@onready var slow_time_toggle: CheckBox           = $HackPanel/HackVBox/SlowTimeToggle
+@onready var noclip_toggle: CheckBox              = $HackPanel/HackVBox/NoclipToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
 
 var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
-var _hack_slowmo_active := false
 
 const HACK_PANEL_TIME_SCALE := 0.2
+const HACK_SLOW_TIME_SCALE := 0.45
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -43,6 +45,8 @@ func _ready() -> void:
 	super_speed_toggle.toggled.connect(_on_hack_toggled)
 	fast_bullets_toggle.toggled.connect(_on_hack_toggled)
 	super_vision_toggle.toggled.connect(_on_hack_toggled)
+	slow_time_toggle.toggled.connect(_on_hack_toggled)
+	noclip_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
@@ -54,7 +58,7 @@ func _process(_delta: float) -> void:
 	_update_minimap_player_dot()
 
 func _exit_tree() -> void:
-	_set_hack_panel_visible(false)
+	ScreenFX.clear_time_scale_override()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.is_action_pressed("inspect"):
@@ -71,12 +75,16 @@ func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
 	if visible:
 		get_viewport().gui_release_focus()
+	_apply_hack_time_scale()
+
+func _apply_hack_time_scale() -> void:
+	if hack_panel.visible:
 		ScreenFX.set_time_scale_override(HACK_PANEL_TIME_SCALE)
-		_hack_slowmo_active = true
 		return
-	if _hack_slowmo_active:
-		ScreenFX.clear_time_scale_override()
-		_hack_slowmo_active = false
+	if slow_time_toggle.button_pressed:
+		ScreenFX.set_time_scale_override(HACK_SLOW_TIME_SCALE)
+		return
+	ScreenFX.clear_time_scale_override()
 		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
@@ -105,7 +113,7 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle]:
+	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle]:
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
@@ -153,8 +161,11 @@ func _sync_hacks_from_player() -> void:
 	super_speed_toggle.button_pressed = modes.get("super_speed", false)
 	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false)
 	super_vision_toggle.button_pressed = modes.get("super_vision", false)
+	slow_time_toggle.button_pressed = modes.get("slow_time", false)
+	noclip_toggle.button_pressed = modes.get("noclip", false)
 	_syncing_hack_ui = false
 	_update_hack_status()
+	_apply_hack_time_scale()
 
 func _on_hack_toggled(_enabled: bool) -> void:
 	if _syncing_hack_ui:
@@ -164,9 +175,12 @@ func _on_hack_toggled(_enabled: bool) -> void:
 		player.set_hacked_client_modes(
 			super_speed_toggle.button_pressed,
 			fast_bullets_toggle.button_pressed,
-			super_vision_toggle.button_pressed
+			super_vision_toggle.button_pressed,
+			slow_time_toggle.button_pressed,
+			noclip_toggle.button_pressed
 		)
 	_update_hack_status()
+	_apply_hack_time_scale()
 
 func _update_hack_status() -> void:
 	var states: Array[String] = []
@@ -176,6 +190,10 @@ func _update_hack_status() -> void:
 		states.append("FASTER BULLETS")
 	if super_vision_toggle.button_pressed:
 		states.append("SUPER VISION")
+	if slow_time_toggle.button_pressed:
+		states.append("SLOW TIME")
+	if noclip_toggle.button_pressed:
+		states.append("NOCLIP")
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _get_player() -> Node:
