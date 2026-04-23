@@ -23,27 +23,29 @@ texture = ExtResource("2_57v1k")
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=450677706]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
+anchors_preset = 6
+anchor_left = 1.0
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -40.00006
-offset_top = 36.0
-offset_right = 261.99994
-offset_bottom = 168.0
-grow_horizontal = 2
+offset_left = -300.0
+offset_top = -60.0
+offset_right = -40.0
+offset_bottom = 60.0
+grow_horizontal = 0
 grow_vertical = 2
-scale = Vector2(1.4569025, 1.7432358)
-theme_override_constants/separation = 8
+theme_override_constants/separation = 15
+alignment = 1
 
 [node name="RetryBtn" type="Button" parent="VBox" unique_id=1878569532]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "Retry"
+text = "REBOOT SYSTEM (RETRY)"
 
 [node name="MenuBtn" type="Button" parent="VBox" unique_id=751865664]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "Main Menu"
+text = "RETURN TO TERMINAL"
 
 [connection signal="pressed" from="VBox/RetryBtn" to="." method="_on_retry_pressed"]
 [connection signal="pressed" from="VBox/MenuBtn" to="." method="_on_menu_pressed"]

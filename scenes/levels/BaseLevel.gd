@@ -20,8 +20,8 @@ const TRANSITION_OUT_TIME := 0.45
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	# Disable UI navigation so WASD reaches physics
-	get_viewport().gui_disable_input = true
+	# Allow GUI input so Tab and Esc work, we will handle button focus separately
+	get_viewport().gui_disable_input = false
 	RuleManager.clear_rules()
 	EntityRegistry.clear_all()
 

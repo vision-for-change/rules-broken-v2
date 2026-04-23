@@ -62,6 +62,10 @@ func _exit_tree() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.is_action_pressed("inspect"):
+		var scene = get_tree().current_scene
+		if scene and scene.name.contains("LevelBoss"):
+			EventBus.log("!! HACKS DISABLED IN CORE SECTOR !!", "error")
+			return
 		_set_hack_panel_visible(not hack_panel.visible)
 		return
 	if not hack_panel.visible:

@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var move_speed := 180.0 # Faster following
+@export var move_speed := 280.0 # Significantly faster following
 @export var duplication_rate := 4.0 
 @export var fire_rate := 0.8
 
