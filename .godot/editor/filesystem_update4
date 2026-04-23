@@ -31,3 +31,4 @@ res://scenes/enemy/RogueAI.tscn
 res://scenes/levels/LevelBoss.tscn
 res://scenes/enemy/RogueAI.gd
 res://scenes/levels/LevelBoss.gd
+res://scenes/enemy/Snake.tscn

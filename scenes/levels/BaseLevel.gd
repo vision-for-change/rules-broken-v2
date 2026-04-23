@@ -41,14 +41,33 @@ func _ready() -> void:
 	EventBus.log("Active rules: %d" % initial_rules.size(), "info")
 
 func _show_title() -> void:
-	title_label.text = level_title_text
-	title_label.add_theme_font_size_override("font_size", 12)
-	title_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
-	title_label.modulate.a = 0.0
+	# Create a large centered banner
+	var banner = CanvasLayer.new()
+	banner.layer = 100
+	add_child(banner)
+	
+	var label = Label.new()
+	label.text = level_title_text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_CENTER)
+	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	label.add_theme_font_size_override("font_size", 42)
+	label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+	label.add_theme_color_override("outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 6)
+	banner.add_child(label)
+	
+	label.modulate.a = 0.0
 	var t = create_tween()
-	t.tween_property(title_label, "modulate:a", 1.0, 0.4)
-	t.tween_interval(1.8)
-	t.tween_property(title_label, "modulate:a", 0.0, 0.4)
+	t.tween_property(label, "modulate:a", 1.0, 0.3)
+	t.tween_interval(2.0)
+	t.tween_property(label, "modulate:a", 0.0, 0.5)
+	t.tween_callback(banner.queue_free)
+	
+	# Also update the small top-left/top-center label if it exists
+	if is_instance_valid(title_label):
+		title_label.text = level_title_text
+		title_label.modulate.a = 0.0 # Keep it hidden or secondary
 
 func _on_level_complete() -> void:
 	if _complete:

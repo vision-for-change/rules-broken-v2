@@ -8,6 +8,7 @@ const ROOM_ATTEMPTS := 520
 const EXTRA_HALLWAYS := 28
 const HALLWAY_WIDTH := 12
 const BUG_SCENE := preload("res://scenes/enemy/bugs.tscn")
+const SNAKE_SCENE := preload("res://scenes/enemy/Snake.tscn")
 const FLOOR_DOOR_SCRIPT := preload("res://scenes/levels/FloorDoor.gd")
 const MIN_BUGS_PER_ROOM := 2
 const MAX_BUGS_PER_ROOM := 4
@@ -41,7 +42,7 @@ func _ready() -> void:
 		_floor_index = _queued_start_floor
 	_queued_start_floor = 1
 	_advance_requested = false
-	level_title_text = "SECTOR 02 // FLOOR %d" % _floor_index
+	level_title_text = "LEVEL %d" % _floor_index
 	_transitioning = false
 	_bug_spawn_index = 0
 	_rng.randomize()
@@ -297,7 +298,10 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		if not is_floor_five and room != main_room and room != door_room:
 			_spawn_room_obstacles(obstacle_root, room)
 		if not is_floor_five and room != main_room:
-			_spawn_room_bugs(enemy_root, room)
+			if _rng.randf() > 0.4:
+				_spawn_room_bugs(enemy_root, room)
+			else:
+				_spawn_room_snakes(enemy_root, room)
 
 func _cell_to_world(cell: Vector2i) -> Vector2:
 	return Vector2((cell.x + 0.5) * TILE_SIZE, (cell.y + 0.5) * TILE_SIZE)
@@ -463,6 +467,17 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i) -> void:
 		bug.set("entity_id", "bug_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		bug.position = _cell_to_world(_random_cell_in_room(room, 3))
 		parent.add_child(bug)
+
+func _spawn_room_snakes(parent: Node2D, room: Rect2i) -> void:
+	var count := _rng.randi_range(1, 2)
+	for i in range(count):
+		var snake := SNAKE_SCENE.instantiate()
+		if snake == null:
+			continue
+		_bug_spawn_index += 1
+		snake.set("entity_id", "snake_floor_%d_%d" % [_floor_index, _bug_spawn_index])
+		snake.position = _cell_to_world(_random_cell_in_room(room, 3))
+		parent.add_child(snake)
 
 func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 	var min_x := room.position.x + margin
