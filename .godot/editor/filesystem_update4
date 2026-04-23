@@ -8,3 +8,4 @@ res://scenes/enemy/EnemyLaser.gd
 res://scenes/levels/Level2.gd
 res://scenes/ui/MainMenu.gd
 res://autoloads/GunDatabase.gd
+res://scenes/ui/GunSelectScreen.gd

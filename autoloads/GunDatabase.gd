@@ -15,6 +15,7 @@ const GUNS := {
 		"bullet_color": Color(1.0, 0.9, 0.3),
 		"color": Color(0.9, 0.8, 0.2),
 		"sprite": "res://assets/sprites/Pistol.png",
+		"preview_sprite": "res://assets/matrix_gun.webp",
 		"auto_fire": false,
 		"illegal": false,
 	},
