@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://ws001"]
+[gd_scene format=3 uid="uid://ws001"]
 
 [sub_resource type="GDScript" id="s1"]
 script/source = "extends Control
@@ -16,17 +16,21 @@ func _input(event):
 		get_tree().change_scene_to_file(\"res://scenes/ui/MainMenu.tscn\")
 "
 
-[node name="WinScreen" type="Control"]
+[node name="WinScreen" type="Control" unique_id=1798148636]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = SubResource("s1")
 
-[node name="Background" type="ColorRect" parent="."]
-color = Color(0.04, 0.09, 0.06, 1)
+[node name="Background" type="ColorRect" parent="." unique_id=375916450]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+color = Color(0.04, 0.09, 0.06, 1)
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1571580311]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -37,15 +41,18 @@ offset_right = 100.0
 offset_bottom = 40.0
 theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="VBox"]
-horizontal_alignment = 1
+[node name="TitleLabel" type="Label" parent="VBox" unique_id=1432784507]
+layout_mode = 2
 text = "// SYSTEM BREACH COMPLETE //"
-
-[node name="Sub" type="Label" parent="VBox"]
 horizontal_alignment = 1
+
+[node name="Sub" type="Label" parent="VBox" unique_id=1745831705]
+layout_mode = 2
 text = "All sectors cleared.
 The ruleset has been dismantled."
-
-[node name="Hint" type="Label" parent="VBox"]
 horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="VBox" unique_id=2990332]
+layout_mode = 2
 text = "[ ENTER ] Return to System"
+horizontal_alignment = 1
