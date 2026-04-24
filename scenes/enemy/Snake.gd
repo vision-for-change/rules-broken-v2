@@ -52,15 +52,7 @@ func _setup_segments() -> void:
 			_pos_history.append(global_position)
 
 func take_damage(amount: int) -> bool:
-	if _defeated:
-		return false
-	_health = maxi(0, _health - amount)
-	_update_health_bar()
-	_play_hit_flash()
-	if _health > 0:
-		return false
-	shatter()
-	return true
+	return false
 
 func check_dash_collision(player_node: Node) -> bool:
 	print("DEBUG: Snake check_dash_collision called")
