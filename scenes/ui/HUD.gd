@@ -68,11 +68,8 @@ func _ready() -> void:
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
 	hack_panel.visible = true
-<<<<<<< Updated upstream
-=======
 	_apply_hack_time_scale()
 	_set_hack_labels()
->>>>>>> Stashed changes
 
 func _process(_delta: float) -> void:
 	_sync_minimap()
@@ -90,9 +87,7 @@ func _input(event: InputEvent) -> void:
 			_activate_timed_hack(_hack_key_map[key_text])
 			get_tree().root.set_input_as_handled()
 			return
-<<<<<<< Updated upstream
 		return
-=======
 	
 	if event is InputEventKey and event.is_action_pressed("inspect"):
 		return
@@ -102,7 +97,6 @@ func _input(event: InputEvent) -> void:
 		var mouse_pos := get_viewport().get_mouse_position()
 		if not hack_panel.get_global_rect().has_point(mouse_pos):
 			return
->>>>>>> Stashed changes
 
 func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
