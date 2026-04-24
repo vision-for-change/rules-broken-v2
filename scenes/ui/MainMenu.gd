@@ -49,7 +49,7 @@ func _ready() -> void:
 
 	# ✅ YOUR CHANGE
 	if has_node("VBox/SelectWeaponBtn"):
-		_style_button($VBox/SelectWeaponBtn, 9)
+		_style_button($VBox/SelectWeaponBtn, 20)
 
 	_connect_button_hover_sounds()
 	move_child($VBox, get_child_count() - 1)

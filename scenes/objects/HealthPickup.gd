@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var heal_amount := 0.3
+@export var heal_amount := 1.0
 @export var lifetime := 8.0
 
 var _consumed := false

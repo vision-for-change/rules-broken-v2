@@ -57,7 +57,11 @@ func _on_contact_body_entered(body: Node2D) -> void:
 		if is_dashing and has_super_speed:
 			return
 			
+		# Deal damage to both systems
 		body.take_damage(10)
+		if RuleManager.has_method("apply_integrity_damage"):
+			RuleManager.apply_integrity_damage(0.5)
+			
 		shatter()
 
 func take_damage(amount: int) -> bool:

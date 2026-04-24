@@ -11,6 +11,7 @@ const GHOST_LIFETIME := 0.28
 var _direction := Vector2.RIGHT
 var _owner_body: PhysicsBody2D = null
 var _ghost_timer := 0.0
+var _is_lightsaber_bullet := false
 var damage := 10
 
 @onready var bullet_sprite: Sprite2D = $Sprite2D
@@ -24,6 +25,13 @@ func setup(owner_body: PhysicsBody2D, direction: Vector2, speed_mult: float = 1.
 	speed *= maxf(speed_mult, 0.1)
 	rotation = _direction.angle()
 
+func setup_as_lightsaber(owner_body: PhysicsBody2D, direction: Vector2) -> void:
+	setup(owner_body, direction, 1.2) # Faster
+	_is_lightsaber_bullet = true
+	if is_instance_valid(bullet_sprite):
+		bullet_sprite.modulate = Color(0.2, 1.0, 0.8) # Cyan energy color
+	lifetime = 0.5 # Shorter range
+
 func _physics_process(delta: float) -> void:
 	global_position += _direction * speed * delta
 	_ghost_step(delta)
@@ -34,15 +42,41 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body == null or body == _owner_body:
 		return
+	
 	if body.is_in_group("enemy"):
-		if body.has_method("take_damage"):
-			var defeated := bool(body.call("take_damage", damage))
-			if defeated:
-				_try_spawn_health_pickup(body)
+		if _is_lightsaber_bullet:
+			_handle_lightsaber_hit(body)
 		else:
-			body.queue_free()
-			_try_spawn_health_pickup(body)
-	queue_free()
+			if body.has_method("take_damage"):
+				var defeated := bool(body.call("take_damage", damage))
+				if defeated:
+					_try_spawn_health_pickup(body)
+			else:
+				body.queue_free()
+				_try_spawn_health_pickup(body)
+		queue_free()
+	elif not body is PhysicsBody2D:
+		# Static collision or wall
+		queue_free()
+
+func _handle_lightsaber_hit(enemy: Node) -> void:
+	# Check if it's a snake - snakes are immune to lightsaber bullets
+	var is_snake = false
+	var entity_id = enemy.get("entity_id")
+	if entity_id:
+		var entity = EntityRegistry.get_entity(entity_id)
+		is_snake = entity.get("type", "") == "snake"
+	
+	if not is_snake:
+		# It's a bug or other non-snake enemy - health MUST go down
+		if enemy.has_method("take_damage"):
+			var defeated := bool(enemy.call("take_damage", damage))
+			if defeated:
+				_try_spawn_health_pickup(enemy)
+		else:
+			# Fallback: instant kill if it has no take_damage method
+			enemy.queue_free()
+			_try_spawn_health_pickup(enemy)
 
 func _try_spawn_health_pickup(enemy: Node) -> void:
 	if randi() % HEALTH_DROP_CHANCE_DENOM != 0:

@@ -211,6 +211,8 @@ func _shoot() -> void:
 		bullet_speed_mult *= HACK_BULLET_SPEED_MULT
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
+	if bullet.has_method("set_damage"):
+		bullet.set_damage(damage)
 	AudioManager.play_sfx("universfield-gunshot")
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
 
@@ -503,7 +505,7 @@ func _lightsaber_attack() -> void:
 	if _lightsaber_swing_tween != null and _lightsaber_swing_tween.is_running():
 		return
 	
-	# Swing Animation
+	# Swing Animation (Visual only now)
 	_lightsaber_swing_tween = create_tween()
 	_lightsaber_swing_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	var original_rot = gun_sprite.rotation
@@ -516,36 +518,26 @@ func _lightsaber_attack() -> void:
 	AudioManager.play_sfx("whoosh")
 	ScreenFX.screen_shake(2.0, 0.1)
 	
-	# Damage Logic
-	var attack_range := 60.0
-	var aim_dir = (get_global_mouse_position() - global_position).normalized()
-	var attack_pos = global_position + aim_dir * 30.0
+	# --- NEW: Shoot Lightsaber Bullet ---
+	var muzzle_pos: Vector2 = gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
+	var shot_dir: Vector2 = (get_global_mouse_position() - muzzle_pos).normalized()
+	if shot_dir.length_squared() == 0.0:
+		shot_dir = Vector2.RIGHT
 	
-	var enemies = get_tree().get_nodes_in_group("enemy")
-	for enemy in enemies:
-		if not is_instance_valid(enemy) or not (enemy is Node2D):
-			continue
-		
-		var dist = attack_pos.distance_to(enemy.global_position)
-		if dist < attack_range:
-			# Check if it's a bug or a snake
-			var entity_id = enemy.get("entity_id")
-			var is_bug = false
-			if entity_id:
-				var entity = EntityRegistry.get_entity(entity_id)
-				is_bug = entity.get("type") == "bug"
-			
-			if is_bug:
-				if enemy.has_method("take_damage"):
-					enemy.call("take_damage", damage)
-				elif enemy.has_method("shatter"):
-					enemy.call("shatter")
-			else:
-				# It's a snake or something else - don't kill it with lightsaber
-				# Maybe play a "clink" sound?
-				pass
-
-
+	var bullet: Node = BULLET_SCENE.instantiate()
+	if bullet == null:
+		return
+	get_tree().current_scene.add_child(bullet)
+	bullet.global_position = muzzle_pos
+	
+	if bullet.has_method("setup_as_lightsaber"):
+		bullet.call("setup_as_lightsaber", self, shot_dir)
+	else:
+		# Fallback just in case
+		bullet.call("setup", self, shot_dir, 1.2)
+	
+	if bullet.has_method("set_damage"):
+		bullet.set_damage(damage)
 
 func set_hacked_client_modes(
 	super_speed_enabled: bool,

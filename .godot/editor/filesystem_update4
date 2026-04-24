@@ -13,3 +13,7 @@ res://scenes/ui/GunSelectScreen.gd
 res://scenes/enemy/worm.gd
 res://scenes/enemy/Snake.tscn
 res://autoloads/GunDatabase.gd
+res://scenes/enemy/bugs.gd
+res://scenes/player/Bullet.gd
+res://scenes/objects/HealthPickup.gd
+res://scenes/enemy/EnemyLaser.gd

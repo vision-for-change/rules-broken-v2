@@ -41,16 +41,32 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body == null:
 		return
-	if not body.is_in_group("player"):
+	
+	if body.is_in_group("player"):
+		# If player is already dead don't do anything
+		if body.get("is_alive") == false:
+			queue_free()
+			return
+		
+		# Feedback for hitting player
+		ScreenFX.flash_screen(Color(1.0, 0.1, 0.1, 0.4), 0.25)
+		ScreenFX.screen_shake(3.0, 0.15)
+		
+		# Deal damage to both systems
+		if RuleManager.has_method("apply_integrity_damage"):
+			RuleManager.apply_integrity_damage(1.0) # ~11% of integrity
+		
+		if body.has_method("take_damage"):
+			body.take_damage(15) # 15% of health
+			
+		EventBus.log("SYSTEM INTEGRITY COMPROMISED", "error")
 		queue_free()
+	elif body.is_in_group("enemy"):
+		# Let it pass through other enemies so it doesn't get blocked accidentally
 		return
-	# If player is already dead don't do anything
-	if body.get("is_alive") == false:
+	else:
+		# Hit a wall or static object
 		queue_free()
-		return
-	ScreenFX.flash_screen(Color(1.0, 0.1, 0.1, 0.28), 0.24)
-	RuleManager.apply_integrity_damage(integrity_damage)
-	queue_free()
 	
 
 func _ghost_step(delta: float) -> void:

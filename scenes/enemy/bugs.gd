@@ -48,9 +48,15 @@ func take_damage(amount: int) -> bool:
 	_play_hit_flash()
 	if _health > 0:
 		return false
-	AudioManager.play_sfx("feesound_community-glass-shatter")
+	AudioManager.play_sfx("freesound_community-glass-shatter")
 	shatter()
 	return true
+
+func get_health() -> int:
+	return _health
+
+func get_max_health() -> int:
+	return max_health
 
 func _update_health_bar() -> void:
 	if is_instance_valid(health_bar):
