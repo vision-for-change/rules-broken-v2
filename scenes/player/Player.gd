@@ -549,11 +549,10 @@ func _check_dash_collision() -> void:
 		if not (enemy is Node2D):
 			continue
 		print("DEBUG: Enemy found: %s" % enemy.name)
-		if enemy.name != "worm":
+		if not enemy.has_method("check_dash_collision"):
 			continue
 		var distance = global_position.distance_to((enemy as Node2D).global_position)
-		print("DEBUG: Worm distance: %.2f" % distance)
+		print("DEBUG: Enemy distance: %.2f" % distance)
 		if distance < 300.0:
-			print("DEBUG: Worm in range! Calling check_dash_collision")
-			if enemy.has_method("check_dash_collision"):
-				enemy.call("check_dash_collision", self)
+			print("DEBUG: Enemy in range! Calling check_dash_collision")
+			enemy.call("check_dash_collision", self)
