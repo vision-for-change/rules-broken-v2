@@ -21,10 +21,15 @@ extends CanvasLayer
 @onready var slow_time_toggle: CheckBox           = $HackPanel/HackVBox/SlowTimeToggle
 @onready var noclip_toggle: CheckBox              = $HackPanel/HackVBox/NoclipToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
+@onready var boss_bar_root:    Control            = $BossBar
+@onready var boss_name_label:  Label              = $BossBar/BossName
+@onready var boss_health_bar:  ProgressBar         = $BossBar/BossHealthBar
+@onready var boss_health_label: Label              = $BossBar/BossHealthBar/BossHealthLabel
 
 var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
+var _boss_ref: Node2D = null
 
 const HACK_PANEL_TIME_SCALE := 0.2
 const HACK_SLOW_TIME_SCALE := 0.45
@@ -56,6 +61,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
+	_update_boss_bar()
 
 func _exit_tree() -> void:
 	ScreenFX.clear_time_scale_override()
@@ -214,6 +220,17 @@ func _on_pause_pressed() -> void:
 func _on_rule_changed(_rule: Dictionary, _added: bool) -> void:
 	_refresh_rules()
 
+func bind_boss(boss: Node2D, boss_name: String = "CHATGPT") -> void:
+	_boss_ref = boss
+	if is_instance_valid(boss_name_label):
+		boss_name_label.text = boss_name
+	_update_boss_bar()
+
+func unbind_boss() -> void:
+	_boss_ref = null
+	if is_instance_valid(boss_bar_root):
+		boss_bar_root.visible = false
+
 func _refresh_rules() -> void:
 	for c in rules_container.get_children():
 		c.queue_free()
@@ -266,6 +283,31 @@ func _make_label(text: String, color: Color, size: int = 7) -> Label:
 	lbl.add_theme_constant_override("outline_size", 1)
 	lbl.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 	return lbl
+
+func _update_boss_bar() -> void:
+	if not is_instance_valid(_boss_ref):
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+	if not _boss_ref.has_method("get_health") or not _boss_ref.has_method("get_max_health"):
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+
+	var current_health: int = _boss_ref.call("get_health")
+	var max_health: int = _boss_ref.call("get_max_health")
+	if max_health <= 0:
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+
+	if is_instance_valid(boss_bar_root):
+		boss_bar_root.visible = true
+	if is_instance_valid(boss_health_bar):
+		boss_health_bar.max_value = max_health
+		boss_health_bar.value = current_health
+	if is_instance_valid(boss_health_label):
+		boss_health_label.text = "%d / %d" % [current_health, max_health]
 
 
 func _apply_fonts() -> void:

@@ -37,6 +37,7 @@ const DEATH_SHAKE_PULSE_INTERVAL := 0.18
 const DEATH_ZOOM_IN_MULT := 1.75
 const DEATH_ZOOM_OUT_MULT := 0.75
 const DEATH_ZOOM_OUT_TIME := 1.35
+const OUTER_WALL_COLLISION_LAYER := 8
 
 var is_alive := true
 var _death_anim_active := false
@@ -90,9 +91,6 @@ func _physics_process(delta: float) -> void:
 	if not is_alive:
 		if _death_anim_active:
 			_update_facing_to_mouse()
-			_shoot_cd = max(0.0, _shoot_cd - delta)
-			if Input.is_action_pressed("shoot"):
-				_shoot()
 		return
 	_update_facing_to_mouse()
 	_shoot_cd = max(0.0, _shoot_cd - delta)
@@ -151,6 +149,8 @@ func _update_facing_to_mouse() -> void:
 	hint_label.rotation = -rotation
 
 func _shoot() -> void:
+	if not is_alive or _death_anim_active:
+		return
 	if _shoot_cd > 0.0:
 		return
 	var muzzle_pos := gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
@@ -164,6 +164,8 @@ func _shoot() -> void:
 		return
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = muzzle_pos
+	if bullet.has_method("set_damage"):
+		bullet.set_damage(damage)
 	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
@@ -460,7 +462,7 @@ func get_hacked_client_modes() -> Dictionary:
 func _apply_noclip_mode() -> void:
 	if _hack_noclip:
 		collision_layer = 0
-		collision_mask = 0
+		collision_mask = OUTER_WALL_COLLISION_LAYER
 		return
 	collision_layer = _default_collision_layer
 	collision_mask = _default_collision_mask
