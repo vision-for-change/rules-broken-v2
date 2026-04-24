@@ -553,6 +553,6 @@ func _check_dash_collision() -> void:
 			continue
 		var distance = global_position.distance_to((enemy as Node2D).global_position)
 		print("DEBUG: Enemy distance: %.2f" % distance)
-		if distance < 300.0:
+		if distance < 100.0:
 			print("DEBUG: Enemy in range! Calling check_dash_collision")
 			enemy.call("check_dash_collision", self)
