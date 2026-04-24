@@ -57,6 +57,7 @@ func _ready() -> void:
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
+	hack_panel.visible = true
 
 func _process(_delta: float) -> void:
 	_sync_minimap()
@@ -72,25 +73,12 @@ func _input(event: InputEvent) -> void:
 		if scene and scene.name.contains("LevelBoss"):
 			EventBus.log("!! HACKS DISABLED IN CORE SECTOR !!", "error")
 			return
-		_set_hack_panel_visible(not hack_panel.visible)
 		return
-	if not hack_panel.visible:
-		return
-	if event is InputEventMouseButton and event.pressed:
-		var mouse_pos := get_viewport().get_mouse_position()
-		if not hack_panel.get_global_rect().has_point(mouse_pos):
-			_set_hack_panel_visible(false)
 
 func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
-	if visible:
-		get_viewport().gui_release_focus()
-	_apply_hack_time_scale()
 
 func _apply_hack_time_scale() -> void:
-	if hack_panel.visible:
-		ScreenFX.set_time_scale_override(HACK_PANEL_TIME_SCALE)
-		return
 	if slow_time_toggle.button_pressed:
 		ScreenFX.set_time_scale_override(HACK_SLOW_TIME_SCALE)
 		return
