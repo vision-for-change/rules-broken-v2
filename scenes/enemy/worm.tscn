@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://c7vtt6vjhaf55"]
 
 [ext_resource type="Texture2D" uid="uid://b5fmjihl4uqeg" path="res://assets/sprites/snake_segment.webp" id="1_si6vf"]
+[ext_resource type="Script" path="res://scenes/enemy/worm.gd" id="2_worm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iuc07"]
 size = Vector2(12, 12)
 
 [node name="worm" type="CharacterBody2D" unique_id=1329929761]
 collision_layer = 2
+script = ExtResource("2_worm")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=68993521]
 position = Vector2(0, 1)

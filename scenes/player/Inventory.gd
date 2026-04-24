@@ -130,9 +130,19 @@ func request_shot() -> Dictionary:
 		return {}
 
 	var gun: Dictionary = slots[current_slot]
-	gun["ammo"] -= 1
+	
+	var player = get_tree().get_nodes_in_group("player")
+	var unlimited_bullets_enabled := false
+	if not player.is_empty():
+		var p = player[0]
+		if p.has_method("get_hacked_client_modes"):
+			unlimited_bullets_enabled = p.get_hacked_client_modes().get("unlimited_bullets", false)
+	
+	if not unlimited_bullets_enabled:
+		gun["ammo"] -= 1
+	
 	_fire_timer = float(gun["fire_rate"])
 	ammo_changed.emit(gun["id"], gun["ammo"], gun["max_ammo"])
-	if gun["ammo"] <= 0:
+	if gun["ammo"] <= 0 and not unlimited_bullets_enabled:
 		reload_state_changed.emit(false, gun["ammo"], gun["max_ammo"], 0.0)
 	return gun.duplicate(true)

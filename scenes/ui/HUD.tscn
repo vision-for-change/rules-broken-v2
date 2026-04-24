@@ -271,6 +271,10 @@ text = "SLOW TIME"
 layout_mode = 2
 text = "NOCLIP"
 
+[node name="UnlimitedBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+layout_mode = 2
+text = "UNLIMITED AMMO"
+
 [node name="HackStatus" type="Label" parent="HackPanel/HackVBox" unique_id=1411182737]
 layout_mode = 2
 text = "// ACTIVE: NONE"

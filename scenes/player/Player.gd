@@ -46,6 +46,7 @@ var _hack_faster_bullets := false
 var _hack_super_vision := false
 var _hack_slow_time := false
 var _hack_noclip := false
+var _hack_unlimited_bullets := false
 var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
@@ -132,6 +133,9 @@ func _physics_process(delta: float) -> void:
 
 	velocity = target_velocity
 	move_and_slide()
+	
+	if _hack_noclip:
+		_clamp_position_to_bounds()
 
 	if velocity.length_squared() > 16.0:
 		_ghost_step(delta)
@@ -447,13 +451,15 @@ func set_hacked_client_modes(
 	faster_bullets_enabled: bool = false,
 	super_vision_enabled: bool = false,
 	slow_time_enabled: bool = false,
-	noclip_enabled: bool = false
+	noclip_enabled: bool = false,
+	unlimited_bullets_enabled: bool = false
 ) -> void:
 	_hack_super_speed = super_speed_enabled
 	_hack_faster_bullets = faster_bullets_enabled
 	_hack_super_vision = super_vision_enabled
 	_hack_slow_time = slow_time_enabled
 	_hack_noclip = noclip_enabled
+	_hack_unlimited_bullets = unlimited_bullets_enabled
 	_apply_noclip_mode()
 	_apply_camera_modes()
 
@@ -463,7 +469,8 @@ func get_hacked_client_modes() -> Dictionary:
 		"faster_bullets": _hack_faster_bullets,
 		"super_vision": _hack_super_vision,
 		"slow_time": _hack_slow_time,
-		"noclip": _hack_noclip
+		"noclip": _hack_noclip,
+		"unlimited_bullets": _hack_unlimited_bullets
 	}
 
 func _apply_noclip_mode() -> void:
@@ -473,6 +480,21 @@ func _apply_noclip_mode() -> void:
 		return
 	collision_layer = _default_collision_layer
 	collision_mask = _default_collision_mask
+
+func _clamp_position_to_bounds() -> void:
+	var level = get_tree().current_scene
+	if level == null:
+		return
+	
+	var bounds: Rect2 = Rect2()
+	if level.has_method("get_world_size"):
+		bounds = Rect2(Vector2.ZERO, level.get_world_size())
+	else:
+		return
+	
+	var player_size := 16.0
+	global_position.x = clampf(global_position.x, bounds.position.x + player_size, bounds.position.x + bounds.size.x - player_size)
+	global_position.y = clampf(global_position.y, bounds.position.y + player_size, bounds.position.y + bounds.size.y - player_size)
 
 func _apply_camera_modes() -> void:
 	if camera == null:

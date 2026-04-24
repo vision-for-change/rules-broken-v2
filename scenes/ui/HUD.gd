@@ -20,6 +20,7 @@ extends CanvasLayer
 @onready var super_vision_toggle: CheckBox        = $HackPanel/HackVBox/SuperVisionToggle
 @onready var slow_time_toggle: CheckBox           = $HackPanel/HackVBox/SlowTimeToggle
 @onready var noclip_toggle: CheckBox              = $HackPanel/HackVBox/NoclipToggle
+@onready var unlimited_bullets_toggle: CheckBox   = $HackPanel/HackVBox/UnlimitedBulletsToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
 @onready var boss_bar_root:    Control            = $BossBar
 @onready var boss_name_label:  Label              = $BossBar/BossName
@@ -36,7 +37,8 @@ var _hack_key_map := {
 	"2": "faster_bullets",
 	"3": "super_vision",
 	"4": "slow_time",
-	"5": "noclip"
+	"5": "noclip",
+	"6": "unlimited_bullets"
 }
 
 const HACK_PANEL_TIME_SCALE := 0.2
@@ -61,6 +63,8 @@ func _ready() -> void:
 	super_vision_toggle.toggled.connect(_on_hack_toggled)
 	slow_time_toggle.toggled.connect(_on_hack_toggled)
 	noclip_toggle.toggled.connect(_on_hack_toggled)
+	if unlimited_bullets_toggle != null:
+		unlimited_bullets_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
@@ -84,7 +88,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		var key_text = OS.get_keycode_string(event.keycode)
 		if key_text in _hack_key_map:
-			_activate_timed_hack(_hack_key_map[key_text])
+			var hack_name = _hack_key_map[key_text]
+			if hack_name == "unlimited_bullets":
+				if unlimited_bullets_toggle != null:
+					unlimited_bullets_toggle.button_pressed = not unlimited_bullets_toggle.button_pressed
+			else:
+				_activate_timed_hack(hack_name)
 			get_tree().root.set_input_as_handled()
 			return
 		return
@@ -178,7 +187,9 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle]:
+	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle]:
+		if toggle == null:
+			continue
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
@@ -190,6 +201,8 @@ func _set_hack_labels() -> void:
 	super_vision_toggle.text = "[3] SUPER VISION"
 	slow_time_toggle.text = "[4] SLOW TIME"
 	noclip_toggle.text = "[5] NOCLIP"
+	if unlimited_bullets_toggle != null:
+		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -235,6 +248,7 @@ func _sync_hacks_from_player() -> void:
 	super_vision_toggle.button_pressed = modes.get("super_vision", false)
 	slow_time_toggle.button_pressed = modes.get("slow_time", false)
 	noclip_toggle.button_pressed = modes.get("noclip", false)
+	unlimited_bullets_toggle.button_pressed = modes.get("unlimited_bullets", false)
 	_syncing_hack_ui = false
 	_update_hack_status()
 	_apply_hack_time_scale()
@@ -244,7 +258,8 @@ func _sync_hacks_from_player() -> void:
 			fast_bullets_toggle.button_pressed,
 			super_vision_toggle.button_pressed,
 			slow_time_toggle.button_pressed,
-			noclip_toggle.button_pressed
+			noclip_toggle.button_pressed,
+			unlimited_bullets_toggle.button_pressed
 		)
 
 func _on_hack_toggled(_enabled: bool) -> void:
@@ -257,7 +272,8 @@ func _on_hack_toggled(_enabled: bool) -> void:
 			fast_bullets_toggle.button_pressed,
 			super_vision_toggle.button_pressed,
 			slow_time_toggle.button_pressed,
-			noclip_toggle.button_pressed
+			noclip_toggle.button_pressed,
+			unlimited_bullets_toggle.button_pressed
 		)
 	_update_hack_status()
 	_apply_hack_time_scale()
@@ -265,15 +281,17 @@ func _on_hack_toggled(_enabled: bool) -> void:
 func _update_hack_status() -> void:
 	var states: Array[String] = []
 	if super_speed_toggle.button_pressed:
-		states.append(_format_hack_status("SUPER SPEED", "super_speed"))
+		states.append("SUPER SPEED")
 	if fast_bullets_toggle.button_pressed:
-		states.append(_format_hack_status("FASTER BULLETS", "faster_bullets"))
+		states.append("FASTER BULLETS")
 	if super_vision_toggle.button_pressed:
-		states.append(_format_hack_status("SUPER VISION", "super_vision"))
+		states.append("SUPER VISION")
 	if slow_time_toggle.button_pressed:
-		states.append(_format_hack_status("SLOW TIME", "slow_time"))
+		states.append("SLOW TIME")
 	if noclip_toggle.button_pressed:
-		states.append(_format_hack_status("NOCLIP", "noclip"))
+		states.append("NOCLIP")
+	if unlimited_bullets_toggle.button_pressed:
+		states.append("UNLIMITED BULLETS")
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _format_hack_status(hack_label: String, hack_name: String) -> String:
