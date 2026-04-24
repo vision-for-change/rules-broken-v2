@@ -46,17 +46,23 @@ func take_damage(amount: int) -> bool:
 	return false
 
 func check_dash_collision(player_node: Node) -> bool:
+	print("DEBUG: Worm check_dash_collision called")
 	if _defeated or player_node == null:
+		print("DEBUG: Worm defeated or player null")
 		return false
 	
 	if not player_node.has_method("is_dashing") or not player_node.has_method("get_hacked_client_modes"):
+		print("DEBUG: Player missing methods")
 		return false
 	
 	var is_dashing = player_node.is_dashing()
 	var modes = player_node.get_hacked_client_modes()
 	var has_super_speed = modes.get("super_speed", false)
 	
+	print("DEBUG: is_dashing=%s, has_super_speed=%s" % [is_dashing, has_super_speed])
+	
 	if is_dashing and has_super_speed:
+		print("DEBUG: Worm shattering!")
 		_health = 0
 		shatter()
 		return true

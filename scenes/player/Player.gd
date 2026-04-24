@@ -138,6 +138,7 @@ func _physics_process(delta: float) -> void:
 		_clamp_position_to_bounds()
 	
 	if _dash_timer > 0.0 and _hack_super_speed:
+		print("DEBUG: _physics_process calling _check_dash_collision: dash_timer=%.2f, super_speed=%s" % [_dash_timer, _hack_super_speed])
 		_check_dash_collision()
 
 	if velocity.length_squared() > 16.0:
@@ -541,14 +542,18 @@ func is_dashing() -> bool:
 
 func _check_dash_collision() -> void:
 	var enemies = get_tree().get_nodes_in_group("enemy")
+	print("DEBUG: _check_dash_collision called, found %d enemies" % enemies.size())
 	for enemy in enemies:
 		if enemy == null or not is_instance_valid(enemy):
 			continue
 		if not (enemy is Node2D):
 			continue
+		print("DEBUG: Enemy found: %s" % enemy.name)
 		if enemy.name != "worm":
 			continue
 		var distance = global_position.distance_to((enemy as Node2D).global_position)
-		if distance < 100.0:
-			if enemy.has_method("take_damage"):
-				enemy.call("take_damage", 9999)
+		print("DEBUG: Worm distance: %.2f" % distance)
+		if distance < 300.0:
+			print("DEBUG: Worm in range! Calling check_dash_collision")
+			if enemy.has_method("check_dash_collision"):
+				enemy.call("check_dash_collision", self)
