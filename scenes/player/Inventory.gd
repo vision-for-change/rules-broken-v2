@@ -121,11 +121,12 @@ func start_reload() -> void:
 func can_shoot() -> bool:
 	if slots.is_empty() or is_reloading or _fire_timer > 0.0:
 		return false
-	return slots[current_slot]["ammo"] > 0
+	var gun = slots[current_slot]
+	return gun["max_ammo"] == 0 or gun["ammo"] > 0
 
 func request_shot() -> Dictionary:
 	if not can_shoot():
-		if not slots.is_empty() and slots[current_slot]["ammo"] <= 0:
+		if not slots.is_empty() and slots[current_slot]["max_ammo"] > 0 and slots[current_slot]["ammo"] <= 0:
 			start_reload()
 		return {}
 
@@ -138,11 +139,12 @@ func request_shot() -> Dictionary:
 		if p.has_method("get_hacked_client_modes"):
 			unlimited_bullets_enabled = p.get_hacked_client_modes().get("unlimited_bullets", false)
 	
-	if not unlimited_bullets_enabled:
+	if not unlimited_bullets_enabled and gun["max_ammo"] > 0:
 		gun["ammo"] -= 1
 	
 	_fire_timer = float(gun["fire_rate"])
-	ammo_changed.emit(gun["id"], gun["ammo"], gun["max_ammo"])
-	if gun["ammo"] <= 0 and not unlimited_bullets_enabled:
-		reload_state_changed.emit(false, gun["ammo"], gun["max_ammo"], 0.0)
+	if gun["max_ammo"] > 0:
+		ammo_changed.emit(gun["id"], gun["ammo"], gun["max_ammo"])
+		if gun["ammo"] <= 0 and not unlimited_bullets_enabled:
+			reload_state_changed.emit(false, gun["ammo"], gun["max_ammo"], 0.0)
 	return gun.duplicate(true)

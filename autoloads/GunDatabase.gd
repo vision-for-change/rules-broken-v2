@@ -79,6 +79,23 @@ const GUNS := {
 		"auto_fire": false,
 		"illegal": false,
 	},
+	"lightsaber": {
+		"id": "lightsaber",
+		"display_name": "Lightsaber",
+		"description": "Dynamic energy blade. Cuts through bugs like butter.",
+		"damage": 100,
+		"fire_rate": 0.2,
+		"max_ammo": 0, # Infinite
+		"reload_time": 0.0,
+		"bullet_speed": 0.0,
+		"bullet_color": Color(1.0, 1.0, 1.0),
+		"color": Color(0.0, 1.0, 1.0),
+		"sprite": "res://assets/lightsaber.webp",
+		"preview_sprite": "res://assets/lightsaber.webp",
+		"auto_fire": false,
+		"illegal": true,
+		"is_lightsaber": true
+	},
 }
 
 func _ready() -> void:

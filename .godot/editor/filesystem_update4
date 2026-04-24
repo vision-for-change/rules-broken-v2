@@ -12,3 +12,4 @@ res://scenes/ui/GameOver.gd
 res://scenes/ui/GunSelectScreen.gd
 res://scenes/enemy/worm.gd
 res://scenes/enemy/Snake.tscn
+res://autoloads/GunDatabase.gd

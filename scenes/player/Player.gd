@@ -54,6 +54,9 @@ var _dash_direction := Vector2.ZERO
 var _death_zoom_tween: Tween
 var _default_collision_layer := 1
 var _default_collision_mask := 3
+var _is_lightsaber := false
+var _lightsaber_time := 0.0
+var _lightsaber_swing_tween: Tween
 var damage := 10
 var max_ammo := 12
 var fire_rate := 0.3
@@ -71,6 +74,9 @@ var health := 100
 func _ready() -> void:
 	add_to_group("player")
 	_load_selected_gun()   # ⭐ NEW — load gun sprite + stats
+	
+	if inventory != null:
+		inventory.gun_changed.connect(_on_inventory_gun_changed)
 
 	ScreenFX.register_camera(camera)
 	EntityRegistry.register(ENTITY_ID, "player", self,
@@ -95,6 +101,12 @@ func _physics_process(delta: float) -> void:
 				_shoot()
 		return
 	_update_facing_to_mouse()
+	
+	if _is_lightsaber and is_instance_valid(gun_sprite):
+		_lightsaber_time += delta * 1.5
+		var hue = fmod(_lightsaber_time, 1.0)
+		gun_sprite.modulate = Color.from_hsv(hue, 0.7, 1.2) # Glowing shifting colors
+
 	_dash_cd = max(0.0, _dash_cd - delta)
 	_dash_timer = max(0.0, _dash_timer - delta)
 
@@ -177,6 +189,10 @@ func _shoot() -> void:
 
 	var gun: Dictionary = inventory.request_shot()
 	if gun.is_empty():
+		return
+
+	if _is_lightsaber:
+		_lightsaber_attack()
 		return
 
 	var muzzle_pos: Vector2 = gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
@@ -455,6 +471,8 @@ func _load_selected_gun() -> void:
 	if gun.is_empty():
 		return
 
+	_is_lightsaber = gun.get("is_lightsaber", false)
+
 	# Set gun sprite
 	if gun.has("sprite") and ResourceLoader.exists(gun["sprite"]):
 		gun_sprite.texture = load(gun["sprite"])
@@ -462,9 +480,12 @@ func _load_selected_gun() -> void:
 		# ⭐ AUTO-SCALE GUN TO A GOOD SIZE
 		if gun_sprite.texture:
 			var tex_size: Vector2 = gun_sprite.texture.get_size()
-			var target_height: float = 20.0
+			var target_height: float = 20.0 if not _is_lightsaber else 40.0 # Lightsaber is bigger
 			var scale_factor: float = target_height / tex_size.y
 			gun_sprite.scale = Vector2(scale_factor, scale_factor)
+	
+	if not _is_lightsaber:
+		gun_sprite.modulate = Color.WHITE
 
 	# Apply stats if they exist
 	if gun.has("damage"):
@@ -473,6 +494,56 @@ func _load_selected_gun() -> void:
 		max_ammo = int(gun["max_ammo"])
 	if gun.has("fire_rate"):
 		fire_rate = float(gun["fire_rate"])
+
+func _on_inventory_gun_changed(gun_data: Dictionary) -> void:
+	PlayerState.selected_gun_id = gun_data["id"]
+	_load_selected_gun()
+
+func _lightsaber_attack() -> void:
+	if _lightsaber_swing_tween != null and _lightsaber_swing_tween.is_running():
+		return
+	
+	# Swing Animation
+	_lightsaber_swing_tween = create_tween()
+	_lightsaber_swing_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var original_rot = gun_sprite.rotation
+	gun_sprite.rotation -= 1.0
+	_lightsaber_swing_tween.tween_property(gun_sprite, "rotation", original_rot + 1.5, 0.1)
+	_lightsaber_swing_tween.parallel().tween_property(gun_sprite, "scale", gun_sprite.scale * 1.2, 0.05)
+	_lightsaber_swing_tween.tween_property(gun_sprite, "rotation", original_rot, 0.1)
+	_lightsaber_swing_tween.parallel().tween_property(gun_sprite, "scale", gun_sprite.scale, 0.1)
+	
+	AudioManager.play_sfx("whoosh")
+	ScreenFX.screen_shake(2.0, 0.1)
+	
+	# Damage Logic
+	var attack_range := 60.0
+	var aim_dir = (get_global_mouse_position() - global_position).normalized()
+	var attack_pos = global_position + aim_dir * 30.0
+	
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if not is_instance_valid(enemy) or not (enemy is Node2D):
+			continue
+		
+		var dist = attack_pos.distance_to(enemy.global_position)
+		if dist < attack_range:
+			# Check if it's a bug or a snake
+			var entity_id = enemy.get("entity_id")
+			var is_bug = false
+			if entity_id:
+				var entity = EntityRegistry.get_entity(entity_id)
+				is_bug = entity.get("type") == "bug"
+			
+			if is_bug:
+				if enemy.has_method("take_damage"):
+					enemy.call("take_damage", damage)
+				elif enemy.has_method("shatter"):
+					enemy.call("shatter")
+			else:
+				# It's a snake or something else - don't kill it with lightsaber
+				# Maybe play a "clink" sound?
+				pass
 
 
 
