@@ -23,8 +23,8 @@ const TRANSITION_COL_SPACING := 34.0
 const TRANSITION_ROW_SPACING := 28.0
 const TRANSITION_FONT_SIZE := 18
 const TRANSITION_BASE_COLOR := Color(0.2, 1.0, 0.45, 0.65)
-const TRANSITION_FADE_IN := 0.24
-const TRANSITION_FADE_OUT := 0.22
+const TRANSITION_FADE_IN := 0.6
+const TRANSITION_FADE_OUT := 0.6
 const TRANSITION_TAIL_SPEED_START := 0.45
 const TRANSITION_TAIL_FADE_START := 0.68
 const TRANSITION_TAIL_MAX_SPEED_MULT := 4.8
@@ -150,9 +150,11 @@ func _scanline_flash() -> void:
 	t.tween_property(r, "modulate:a", 0.0, 0.15)
 	t.tween_callback(r.queue_free)
 
-func transition_to_scene(scene_path: String) -> void:
+func transition_to_scene(scene_path: String, fade_in_time: float = -1.0, fade_out_time: float = -1.0) -> void:
 	if _scene_transitioning:
 		return
+	var in_time = fade_in_time if fade_in_time >= 0 else TRANSITION_FADE_IN
+	var out_time = fade_out_time if fade_out_time >= 0 else TRANSITION_FADE_OUT
 	_scene_transitioning = true
 	_transition_is_exiting = false
 	_transition_exit_elapsed = 0.0
@@ -162,7 +164,7 @@ func transition_to_scene(scene_path: String) -> void:
 
 	var fade_in = create_tween()
 	fade_in.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	fade_in.tween_property(_transition_overlay, "modulate:a", 1.0, TRANSITION_FADE_IN)
+	fade_in.tween_property(_transition_overlay, "modulate:a", 1.0, in_time)
 	fade_in.finished.connect(func():
 		var err := get_tree().change_scene_to_file(scene_path)
 		if err != OK:
@@ -174,8 +176,56 @@ func transition_to_scene(scene_path: String) -> void:
 		var fade_out = create_tween()
 		fade_out.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 		fade_out.tween_interval(0.04)
-		fade_out.tween_property(_transition_overlay, "modulate:a", 0.0, TRANSITION_FADE_OUT)
+		fade_out.tween_property(_transition_overlay, "modulate:a", 0.0, out_time)
 		fade_out.finished.connect(_finish_scene_transition, CONNECT_ONE_SHOT)
+	, CONNECT_ONE_SHOT)
+
+func transition_to_scene_with_black_fade(scene_path: String, black_in_time: float = 0.5, matrix_display_time: float = 0.8, black_out_time: float = 0.5) -> void:
+	if _scene_transitioning:
+		return
+	_scene_transitioning = true
+	
+	# Create black fade overlay
+	var black_rect = ColorRect.new()
+	black_rect.color = Color.BLACK
+	black_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	black_rect.modulate.a = 0.0
+	_overlay_layer.add_child(black_rect)
+	
+	# Fade to black
+	var fade_to_black = create_tween()
+	fade_to_black.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_to_black.tween_property(black_rect, "modulate:a", 1.0, black_in_time)
+	fade_to_black.finished.connect(func():
+		# Create and show matrix overlay
+		_transition_overlay = _create_matrix_transition_overlay()
+		_transition_overlay.modulate.a = 0.0
+		_overlay_layer.add_child(_transition_overlay)
+		
+		# Fade in matrix
+		var fade_in_matrix = create_tween()
+		fade_in_matrix.tween_property(_transition_overlay, "modulate:a", 1.0, 0.2)
+		fade_in_matrix.tween_interval(matrix_display_time)
+		fade_in_matrix.tween_callback(func():
+			var err := get_tree().change_scene_to_file(scene_path)
+			if err != OK:
+				push_error("Scene transition failed: %s" % scene_path)
+				_finish_scene_transition()
+				black_rect.queue_free()
+				return
+			
+			# Fade out matrix and black
+			_transition_is_exiting = true
+			_transition_exit_elapsed = 0.0
+			var fade_out = create_tween()
+			fade_out.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+			fade_out.tween_property(_transition_overlay, "modulate:a", 0.0, black_out_time * 0.5)
+			fade_out.parallel().tween_property(black_rect, "modulate:a", 0.0, black_out_time)
+			fade_out.finished.connect(func():
+				_finish_scene_transition()
+				black_rect.queue_free()
+			, CONNECT_ONE_SHOT)
+		)
 	, CONNECT_ONE_SHOT)
 
 func _create_matrix_transition_overlay() -> Control:

@@ -139,7 +139,7 @@ func shatter() -> void:
 	for child in get_children():
 		if child is CollisionShape2D:
 			(child as CollisionShape2D).disabled = true
-	AudioManager.play_sfx("freesound_community-glass-shatter")
+	AudioManager.play_sfx("explosive-glass-shatter")
 	_spawn_shards()
 	visible = false
 	await get_tree().create_timer(SHATTER_DURATION).timeout

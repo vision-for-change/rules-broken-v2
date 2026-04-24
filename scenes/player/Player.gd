@@ -107,6 +107,7 @@ func _physics_process(delta: float) -> void:
 		_dash_timer = DASH_DURATION
 		_dash_cd = DASH_COOLDOWN
 		ScreenFX.screen_shake(DASH_SHAKE_INTENSITY, DASH_SHAKE_DURATION)
+		AudioManager.play_sfx("whoosh")
 	elif _dash_timer <= 0.0:
 		_dash_direction = Vector2.ZERO
 
