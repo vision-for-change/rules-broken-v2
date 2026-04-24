@@ -10,7 +10,6 @@ const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
 const ENTITY_ID = "player"
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
-const SHOOT_COOLDOWN := 0.2
 const GHOST_INTERVAL := 0.045
 const DASH_GHOST_INTERVAL := 0.015
 const GHOST_LIFETIME := 0.16
@@ -47,7 +46,6 @@ var _hack_faster_bullets := false
 var _hack_super_vision := false
 var _hack_slow_time := false
 var _hack_noclip := false
-var _shoot_cd := 0.0
 var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
@@ -64,6 +62,7 @@ var fire_rate := 0.3
 @onready var interact_area: Area2D = $InteractArea
 @onready var camera: Camera2D      = $Camera2D
 @onready var hint_label: Label     = $HintLabel
+@onready var inventory: Node = $Inventory
 @onready var gun_sprite: Sprite2D  = $Sprite2D   # GUN NODE
 @onready var player_sprite: Sprite2D = $PlayerSprite
 
@@ -90,17 +89,15 @@ func _physics_process(delta: float) -> void:
 	if not is_alive:
 		if _death_anim_active:
 			_update_facing_to_mouse()
-			_shoot_cd = max(0.0, _shoot_cd - delta)
 			if Input.is_action_pressed("shoot"):
 				_shoot()
 		return
 	_update_facing_to_mouse()
-	_shoot_cd = max(0.0, _shoot_cd - delta)
 	_dash_cd = max(0.0, _dash_cd - delta)
 	_dash_timer = max(0.0, _dash_timer - delta)
 
 	# Try move_* first (physical), then fallback to ui_*
-	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var dir: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if dir.length_squared() < 0.01:
 		dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	
@@ -112,14 +109,14 @@ func _physics_process(delta: float) -> void:
 	elif _dash_timer <= 0.0:
 		_dash_direction = Vector2.ZERO
 
-	var move_dir := dir
+	var move_dir: Vector2 = dir
 	if _dash_timer > 0.0 and _dash_direction.length() > 0.05:
 		move_dir = _dash_direction
 
-	var target_velocity := Vector2.ZERO
+	var target_velocity: Vector2 = Vector2.ZERO
 	if move_dir.length() > 0.05:
 		var ctx = {"actor_id": ENTITY_ID, "direction": move_dir}
-		var result = ActionBus.submit(ActionBus.MOVE, EntityRegistry.get_tags(ENTITY_ID), ctx)
+		var result: Dictionary = ActionBus.submit(ActionBus.MOVE, EntityRegistry.get_tags(ENTITY_ID), ctx)
 		if result["allowed"]:
 			target_velocity = move_dir * SPEED_MOVE
 		else:
@@ -140,47 +137,59 @@ func _physics_process(delta: float) -> void:
 		_ghost_step(delta)
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
 		_do_interact()
-	if Input.is_action_pressed("shoot"):
+	var current_gun: Dictionary = {}
+	if inventory != null and inventory.has_method("get_current_gun"):
+		current_gun = inventory.get_current_gun()
+	var wants_to_shoot: bool = false
+	if not current_gun.is_empty():
+		wants_to_shoot = Input.is_action_pressed("shoot") if current_gun.get("auto_fire", false) else Input.is_action_just_pressed("shoot")
+	if wants_to_shoot:
 		_shoot()
 
 func _update_facing_to_mouse() -> void:
-	var aim_dir := get_global_mouse_position() - global_position
+	var aim_dir: Vector2 = get_global_mouse_position() - global_position
 	if aim_dir.length_squared() < 0.001:
 		return
 	rotation = aim_dir.angle()
 	hint_label.rotation = -rotation
 
 func _shoot() -> void:
-	if _shoot_cd > 0.0:
+	if inventory == null or not inventory.has_method("request_shot"):
 		return
-	var muzzle_pos := gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
-	var shot_dir := get_global_mouse_position() - muzzle_pos
+
+	var gun: Dictionary = inventory.request_shot()
+	if gun.is_empty():
+		return
+
+	var muzzle_pos: Vector2 = gun_sprite.global_position if is_instance_valid(gun_sprite) else global_position
+	var shot_dir: Vector2 = get_global_mouse_position() - muzzle_pos
 	if shot_dir.length_squared() == 0.0:
 		shot_dir = Vector2.RIGHT
-	var bullet = BULLET_SCENE.instantiate()
+	var bullet: Node = BULLET_SCENE.instantiate()
 	if bullet == null:
 		return
 	if get_tree().current_scene == null:
 		return
 	get_tree().current_scene.add_child(bullet)
 	bullet.global_position = muzzle_pos
-	var bullet_speed_mult := HACK_BULLET_SPEED_MULT if _hack_faster_bullets else 1.0
+	var bullet_speed_mult: float = float(gun.get("bullet_speed", 520.0)) / 520.0
+	if _hack_faster_bullets:
+		bullet_speed_mult *= HACK_BULLET_SPEED_MULT
 	if bullet.has_method("setup"):
 		bullet.setup(self, shot_dir.normalized(), bullet_speed_mult)
 	AudioManager.play_sfx("universfield-gunshot")
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
-	_shoot_cd = SHOOT_COOLDOWN
 
 func _do_interact() -> void:
 	if _interact_target == null or not is_instance_valid(_interact_target):
 		return
-	var target_id = _interact_target.get("entity_id") if _interact_target.get("entity_id") != null else "unknown"
+	var target_id: String = str(_interact_target.get("entity_id")) if _interact_target.get("entity_id") != null else "unknown"
 	var ctx = {
 		"actor_id": ENTITY_ID,
 		"target_id": target_id,
 		"target_node": _interact_target
 	}
-	var result = ActionBus.submit(ActionBus.INTERACT, EntityRegistry.get_tags(ENTITY_ID), ctx)
+	var result: Dictionary = ActionBus.submit(ActionBus.INTERACT, EntityRegistry.get_tags(ENTITY_ID), ctx)
 	if result["allowed"] or result["loophole"] != "":
 		_interact_target.on_player_interact(result)
 
@@ -215,17 +224,17 @@ func _on_caught(_catcher_id: String) -> void:
 	_spawn_death_binary_cataclysm()
 	_pause_non_animation_elements()
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.45, 0.55), DEATH_BURST_FLASH_TIME)
-	var pulse_count := int(ceil(DEATH_TRANSITION_DELAY / DEATH_SHAKE_PULSE_INTERVAL))
+	var pulse_count: int = int(ceil(DEATH_TRANSITION_DELAY / DEATH_SHAKE_PULSE_INTERVAL))
 	for i in range(pulse_count):
-		var shake_delay := DEATH_SHAKE_PULSE_INTERVAL * float(i)
-		var progress := float(i) / maxf(1.0, float(pulse_count - 1))
-		var shake_strength := lerpf(DEATH_SHAKE_INTENSITY, DEATH_SHAKE_INTENSITY * 0.55, progress)
-		var shake_timer := get_tree().create_timer(shake_delay, false)
+		var shake_delay: float = DEATH_SHAKE_PULSE_INTERVAL * float(i)
+		var progress: float = float(i) / maxf(1.0, float(pulse_count - 1))
+		var shake_strength: float = lerpf(DEATH_SHAKE_INTENSITY, DEATH_SHAKE_INTENSITY * 0.55, progress)
+		var shake_timer: SceneTreeTimer = get_tree().create_timer(shake_delay, false)
 		shake_timer.timeout.connect(func(): ScreenFX.screen_shake(shake_strength, DEATH_SHAKE_DURATION))
-	var shatter_delay := maxf(0.05, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
-	var shatter_timer := get_tree().create_timer(shatter_delay, false)
+	var shatter_delay: float = maxf(0.05, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
+	var shatter_timer: SceneTreeTimer = get_tree().create_timer(shatter_delay, false)
 	shatter_timer.timeout.connect(_play_shatter_effect)
-	var transition_timer := get_tree().create_timer(DEATH_TRANSITION_DELAY, false)
+	var transition_timer: SceneTreeTimer = get_tree().create_timer(DEATH_TRANSITION_DELAY, false)
 	transition_timer.timeout.connect(func(): ScreenFX.transition_to_scene("res://scenes/ui/GameOver.tscn"))
 
 func _shatter_visible_enemies() -> void:
@@ -248,7 +257,7 @@ func _pause_non_animation_elements() -> void:
 	if level_root == null:
 		return
 	if level_root.has_node("HUD"):
-		var hud_node := level_root.get_node("HUD")
+		var hud_node: Node = level_root.get_node("HUD")
 		if hud_node is Node:
 			(hud_node as Node).process_mode = Node.PROCESS_MODE_DISABLED
 
@@ -280,13 +289,13 @@ func _spawn_death_binary_cataclysm() -> void:
 	var viewport: Viewport = get_viewport()
 	if viewport == null:
 		return
-	var layer := CanvasLayer.new()
+	var layer: CanvasLayer = CanvasLayer.new()
 	layer.layer = 320
 	scene_root.add_child(layer)
 	var bounds: Vector2 = viewport.get_visible_rect().size
 
 	for i in range(DEATH_DIGIT_COUNT):
-		var digit := Label.new()
+		var digit: Label = Label.new()
 		digit.text = "1" if randi() % 2 == 0 else "O"
 		digit.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y))
 		digit.rotation = randf_range(-0.4, 0.4)
@@ -296,10 +305,10 @@ func _spawn_death_binary_cataclysm() -> void:
 		digit.add_theme_color_override("outline_color", Color(0.0, 0.18, 0.07, 0.95))
 		digit.add_theme_constant_override("outline_size", 1)
 		layer.add_child(digit)
-		var digit_tween := digit.create_tween()
+		var digit_tween: Tween = digit.create_tween()
 		digit_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		var start_delay := randf_range(0.0, maxf(0.0, DEATH_TRANSITION_DELAY - (DEATH_DIGIT_EFFECT_TIME + 0.35)))
-		var drift := Vector2(randf_range(-180.0, 180.0), randf_range(-220.0, 220.0))
+		var start_delay: float = randf_range(0.0, maxf(0.0, DEATH_TRANSITION_DELAY - (DEATH_DIGIT_EFFECT_TIME + 0.35)))
+		var drift: Vector2 = Vector2(randf_range(-180.0, 180.0), randf_range(-220.0, 220.0))
 		digit_tween.tween_interval(start_delay)
 		digit_tween.tween_property(digit, "modulate:a", 1.0, 0.05)
 		digit_tween.parallel().tween_property(digit, "position", digit.position + drift, DEATH_DIGIT_EFFECT_TIME)
@@ -308,14 +317,14 @@ func _spawn_death_binary_cataclysm() -> void:
 		digit_tween.tween_callback(digit.queue_free)
 
 	for i in range(DEATH_EXPLOSION_COUNT):
-		var blast := ColorRect.new()
+		var blast: ColorRect = ColorRect.new()
 		blast.color = Color(0.1, 1.0, 0.35, randf_range(0.25, 0.5))
 		blast.size = Vector2.ONE * randf_range(10.0, 24.0)
 		blast.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y)) - blast.size * 0.5
 		blast.pivot_offset = blast.size * 0.5
 		blast.modulate.a = 0.0
 		layer.add_child(blast)
-		var blast_tween := blast.create_tween()
+		var blast_tween: Tween = blast.create_tween()
 		blast_tween.tween_interval(randf_range(0.0, maxf(0.0, DEATH_TRANSITION_DELAY - 0.45)))
 		blast_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		blast_tween.tween_property(blast, "modulate:a", randf_range(0.35, 0.65), 0.08)
@@ -323,14 +332,14 @@ func _spawn_death_binary_cataclysm() -> void:
 		blast_tween.parallel().tween_property(blast, "modulate:a", 0.0, 0.35)
 		blast_tween.tween_callback(blast.queue_free)
 
-	var cleanup_timer := get_tree().create_timer(DEATH_TRANSITION_DELAY + 0.25, false)
+	var cleanup_timer: SceneTreeTimer = get_tree().create_timer(DEATH_TRANSITION_DELAY + 0.25, false)
 	cleanup_timer.timeout.connect(func():
 		if is_instance_valid(layer):
 			layer.queue_free()
 	)
 
 func _play_shatter_effect() -> void:
-	var scene_root := get_tree().current_scene
+	var scene_root: Node = get_tree().current_scene
 	if scene_root == null:
 		return
 	_start_death_zoom_out()
@@ -346,34 +355,34 @@ func _spawn_shatter_from_sprite(source_sprite: Sprite2D, rows: int, cols: int, d
 		return
 	if source_sprite.texture == null:
 		return
-	var texture_size := source_sprite.texture.get_size()
+	var texture_size: Vector2 = source_sprite.texture.get_size()
 	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return
-	var piece_size := texture_size / Vector2(float(cols), float(rows))
+	var piece_size: Vector2 = texture_size / Vector2(float(cols), float(rows))
 	for y in rows:
 		for x in cols:
-			var atlas := AtlasTexture.new()
+			var atlas: AtlasTexture = AtlasTexture.new()
 			atlas.atlas = source_sprite.texture
 			atlas.region = Rect2(Vector2(x, y) * piece_size, piece_size)
-			var shard := Sprite2D.new()
+			var shard: Sprite2D = Sprite2D.new()
 			shard.texture = atlas
 			shard.centered = true
 			shard.scale = source_sprite.global_scale
 			shard.global_rotation = source_sprite.global_rotation
 			shard.modulate = source_sprite.modulate
-			var cell_center := (Vector2(float(x), float(y)) + Vector2(0.5, 0.5)) * piece_size
-			var offset := cell_center - texture_size * 0.5
-			var rotated_offset := (offset * source_sprite.global_scale).rotated(source_sprite.global_rotation)
+			var cell_center: Vector2 = (Vector2(float(x), float(y)) + Vector2(0.5, 0.5)) * piece_size
+			var offset: Vector2 = cell_center - texture_size * 0.5
+			var rotated_offset: Vector2 = (offset * source_sprite.global_scale).rotated(source_sprite.global_rotation)
 			shard.global_position = source_sprite.global_position + rotated_offset
-			var outward_dir := offset.normalized()
+			var outward_dir: Vector2 = offset.normalized()
 			if outward_dir.length_squared() < 0.001:
 				outward_dir = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
-			var random_spread := Vector2(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35))
-			var travel := (outward_dir + random_spread).normalized() * randf_range(force * 0.55, force)
-			var target_pos := shard.global_position + travel
-			var target_rot := shard.rotation + randf_range(-2.6, 2.6)
+			var random_spread: Vector2 = Vector2(randf_range(-0.35, 0.35), randf_range(-0.35, 0.35))
+			var travel: Vector2 = (outward_dir + random_spread).normalized() * randf_range(force * 0.55, force)
+			var target_pos: Vector2 = shard.global_position + travel
+			var target_rot: float = shard.rotation + randf_range(-2.6, 2.6)
 			get_tree().current_scene.add_child(shard)
-			var tween := shard.create_tween()
+			var tween: Tween = shard.create_tween()
 			tween.set_parallel(true)
 			tween.tween_property(shard, "global_position", target_pos, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 			tween.tween_property(shard, "rotation", target_rot, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -386,10 +395,10 @@ func _start_death_zoom_in() -> void:
 		return
 	if is_instance_valid(_death_zoom_tween):
 		_death_zoom_tween.kill()
-	var target := camera.zoom * DEATH_ZOOM_IN_MULT
+	var target: Vector2 = camera.zoom * DEATH_ZOOM_IN_MULT
 	target.x = minf(4.0, target.x)
 	target.y = minf(4.0, target.y)
-	var zoom_in_time := maxf(0.2, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
+	var zoom_in_time: float = maxf(0.2, DEATH_TRANSITION_DELAY - SHATTER_DURATION - 0.1)
 	_death_zoom_tween = create_tween()
 	_death_zoom_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_death_zoom_tween.tween_property(camera, "zoom", target, zoom_in_time)
@@ -399,7 +408,7 @@ func _start_death_zoom_out() -> void:
 		return
 	if is_instance_valid(_death_zoom_tween):
 		_death_zoom_tween.kill()
-	var target := DEFAULT_CAMERA_ZOOM * DEATH_ZOOM_OUT_MULT
+	var target: Vector2 = DEFAULT_CAMERA_ZOOM * DEATH_ZOOM_OUT_MULT
 	target.x = maxf(0.35, target.x)
 	target.y = maxf(0.35, target.y)
 	_death_zoom_tween = create_tween()
@@ -407,9 +416,9 @@ func _start_death_zoom_out() -> void:
 	_death_zoom_tween.tween_property(camera, "zoom", target, DEATH_ZOOM_OUT_TIME)
 
 func _load_selected_gun() -> void:
-	var gid = PlayerState.selected_gun_id
-	var gun = GunDatabase.GUNS.get(gid, null)
-	if gun == null:
+	var gid: String = PlayerState.selected_gun_id
+	var gun: Dictionary = GunDatabase.GUNS.get(gid, {})
+	if gun.is_empty():
 		return
 
 	# Set gun sprite
@@ -418,18 +427,18 @@ func _load_selected_gun() -> void:
 
 		# ⭐ AUTO-SCALE GUN TO A GOOD SIZE
 		if gun_sprite.texture:
-			var tex_size = gun_sprite.texture.get_size()
-			var target_height := 20.0  # adjust this number if needed
+			var tex_size: Vector2 = gun_sprite.texture.get_size()
+			var target_height: float = 20.0
 			var scale_factor: float = target_height / tex_size.y
 			gun_sprite.scale = Vector2(scale_factor, scale_factor)
 
 	# Apply stats if they exist
 	if gun.has("damage"):
-		damage = gun["damage"]
+		damage = int(gun["damage"])
 	if gun.has("max_ammo"):
-		max_ammo = gun["max_ammo"]
+		max_ammo = int(gun["max_ammo"])
 	if gun.has("fire_rate"):
-		fire_rate = gun["fire_rate"]
+		fire_rate = float(gun["fire_rate"])
 
 
 
@@ -471,8 +480,8 @@ func _apply_camera_modes() -> void:
 	camera.zoom = SUPER_VISION_CAMERA_ZOOM if _hack_super_vision else DEFAULT_CAMERA_ZOOM
 
 func _ghost_step(delta: float) -> void:
-	var dash_blur := is_dashing()
-	var ghost_interval := DASH_GHOST_INTERVAL if dash_blur else GHOST_INTERVAL
+	var dash_blur: bool = is_dashing()
+	var ghost_interval: float = DASH_GHOST_INTERVAL if dash_blur else GHOST_INTERVAL
 	_ghost_timer -= delta
 	if _ghost_timer > 0.0:
 		return
@@ -480,10 +489,10 @@ func _ghost_step(delta: float) -> void:
 	_spawn_player_ghost(dash_blur)
 
 func _spawn_player_ghost(dash_blur: bool = false) -> void:
-	var scene_root := get_tree().current_scene
+	var scene_root: Node = get_tree().current_scene
 	if scene_root == null:
 		return
-	var ghost_root := Node2D.new()
+	var ghost_root: Node2D = Node2D.new()
 	ghost_root.global_position = global_position
 	ghost_root.global_rotation = global_rotation
 	ghost_root.scale = scale
@@ -491,14 +500,14 @@ func _spawn_player_ghost(dash_blur: bool = false) -> void:
 	ghost_root.modulate = DASH_GHOST_COLOR if dash_blur else GHOST_COLOR
 	scene_root.add_child(ghost_root)
 	if is_instance_valid(body_rect):
-		var body_ghost := body_rect.duplicate()
+		var body_ghost: Node = body_rect.duplicate()
 		if body_ghost is Control:
 			(body_ghost as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ghost_root.add_child(body_ghost)
 	if is_instance_valid(gun_sprite):
 		ghost_root.add_child(gun_sprite.duplicate())
-	var tween := ghost_root.create_tween()
-	var ghost_lifetime := DASH_GHOST_LIFETIME if dash_blur else GHOST_LIFETIME
+	var tween: Tween = ghost_root.create_tween()
+	var ghost_lifetime: float = DASH_GHOST_LIFETIME if dash_blur else GHOST_LIFETIME
 	tween.tween_property(ghost_root, "modulate:a", 0.0, ghost_lifetime)
 	tween.tween_callback(ghost_root.queue_free)
 

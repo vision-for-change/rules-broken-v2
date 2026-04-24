@@ -26,6 +26,32 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_panel"]
+bg_color = Color(0.04, 0.08, 0.11, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.5, 0.62, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_icon"]
+bg_color = Color(0.08, 0.14, 0.18, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.4, 0.5, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="HUD" type="CanvasLayer" unique_id=1580468143]
 layer = 10
 script = ExtResource("1")
@@ -206,23 +232,80 @@ text = "// ACTIVE: NONE"
 
 [node name="WeaponDisplay" type="Control" parent="." unique_id=1094516479]
 layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
+anchors_preset = 2
 anchor_top = 1.0
-anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -40.0
-grow_horizontal = 0
+offset_left = 16.0
+offset_top = -144.0
+offset_right = 332.0
+offset_bottom = -48.0
+grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("2_atyv1")
 
-[node name="GunImage" type="TextureRect" parent="WeaponDisplay" unique_id=289764564]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Panel" type="PanelContainer" parent="WeaponDisplay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
 
-[node name="AmmoLabel" type="Label" parent="WeaponDisplay" unique_id=1627650995]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+[node name="Accent" type="ColorRect" parent="WeaponDisplay/Panel"]
+layout_mode = 1
+anchors_preset = 6
+anchor_right = 1.0
+offset_right = -210.0
+offset_bottom = 4.0
+color = Color(0.18, 0.88, 0.72, 1)
+
+[node name="Margin" type="MarginContainer" parent="WeaponDisplay/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="WeaponDisplay/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="GunFrame" type="PanelContainer" parent="WeaponDisplay/Panel/Margin/HBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_icon")
+
+[node name="GunImage" type="TextureRect" parent="WeaponDisplay/Panel/Margin/HBox/GunFrame" unique_id=289764564]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Info" type="VBoxContainer" parent="WeaponDisplay/Panel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="WeaponNameLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.54, 0.93, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "WEAPON"
+
+[node name="AmmoLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info" unique_id=1627650995]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 22
+text = "Ammo: 12 / 12"
+
+[node name="StatusLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.84, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 12
+text = "Ready"

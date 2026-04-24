@@ -2,6 +2,7 @@ extends Node
 
 signal gun_changed(gun_data: Dictionary)
 signal ammo_changed(gun_id: String, current: int, max_ammo: int)
+signal reload_state_changed(is_reloading: bool, current: int, max_ammo: int, reload_time: float)
 signal inventory_full()
 
 const MAX_SLOTS := 3
@@ -12,54 +13,54 @@ var _reload_timer: float = 0.0
 var _fire_timer: float = 0.0
 var is_reloading: bool = false
 
-const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
-
 func _ready() -> void:
-	var gun_id = "pistol"
+	var gun_id: String = "pistol"
 	if get_node_or_null("/root/GunDatabase") != null:
 		gun_id = GunDatabase.selected_gun_id
 	if get_node_or_null("/root/PlayerState") != null:
 		gun_id = PlayerState.selected_gun_id
-	var starting = GunDatabase.get_gun(gun_id)
+	var starting: Dictionary = GunDatabase.get_gun(gun_id)
 	if not starting.is_empty():
 		add_gun(starting)
 
 func _process(delta: float) -> void:
 	if _fire_timer > 0.0:
-		_fire_timer -= delta
+		_fire_timer = maxf(0.0, _fire_timer - delta)
 
-	if is_reloading:
-		_reload_timer -= delta
-		if _reload_timer <= 0.0:
-			is_reloading = false
-			if not slots.is_empty():
-				slots[current_slot]["ammo"] = slots[current_slot]["max_ammo"]
-				ammo_changed.emit(
-					slots[current_slot]["id"],
-					slots[current_slot]["ammo"],
-					slots[current_slot]["max_ammo"]
-				)
-
-	# Auto fire — hold left mouse for automatic guns
-	if not slots.is_empty():
-		var gun = slots[current_slot]
-		if gun.get("auto_fire", false) and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			_try_shoot()
-
-func _input(event: InputEvent) -> void:
-	# ── Mouse shooting ──────────────────────────────
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			_try_shoot()
-		return  # stop here, don't run keyboard checks on mouse events
-
-	# ── Keyboard only below ──────────────────────────
-	if not event is InputEventKey or not event.pressed:
+	if not is_reloading:
 		return
 
-	if event.keycode == KEY_1: switch_to(0)
-	elif event.keycode == KEY_2: switch_to(1)
-	elif event.keycode == KEY_3: switch_to(2)
+	_reload_timer -= delta
+	if _reload_timer > 0.0:
+		return
+
+	is_reloading = false
+	if slots.is_empty():
+		return
+
+	slots[current_slot]["ammo"] = slots[current_slot]["max_ammo"]
+	ammo_changed.emit(
+		slots[current_slot]["id"],
+		slots[current_slot]["ammo"],
+		slots[current_slot]["max_ammo"]
+	)
+	reload_state_changed.emit(
+		false,
+		slots[current_slot]["ammo"],
+		slots[current_slot]["max_ammo"],
+		0.0
+	)
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed:
+		return
+
+	if event.keycode == KEY_1:
+		switch_to(0)
+	elif event.keycode == KEY_2:
+		switch_to(1)
+	elif event.keycode == KEY_3:
+		switch_to(2)
 	elif event.keycode == KEY_Q:
 		if not slots.is_empty():
 			switch_to((current_slot + 1) % slots.size())
@@ -95,6 +96,12 @@ func switch_to(index: int) -> void:
 	is_reloading = false
 	_reload_timer = 0.0
 	gun_changed.emit(slots[current_slot])
+	reload_state_changed.emit(
+		false,
+		slots[current_slot]["ammo"],
+		slots[current_slot]["max_ammo"],
+		0.0
+	)
 
 func get_current_gun() -> Dictionary:
 	if slots.is_empty():
@@ -104,35 +111,28 @@ func get_current_gun() -> Dictionary:
 func start_reload() -> void:
 	if slots.is_empty() or is_reloading:
 		return
-	var gun = slots[current_slot]
+	var gun: Dictionary = slots[current_slot]
 	if gun["ammo"] >= gun["max_ammo"]:
 		return
 	is_reloading = true
-	_reload_timer = gun.get("reload_time", 1.5)
+	_reload_timer = float(gun.get("reload_time", 1.5))
+	reload_state_changed.emit(true, gun["ammo"], gun["max_ammo"], _reload_timer)
 
 func can_shoot() -> bool:
 	if slots.is_empty() or is_reloading or _fire_timer > 0.0:
 		return false
 	return slots[current_slot]["ammo"] > 0
 
-func _try_shoot() -> void:
+func request_shot() -> Dictionary:
 	if not can_shoot():
 		if not slots.is_empty() and slots[current_slot]["ammo"] <= 0:
 			start_reload()
-		return
+		return {}
 
-	var gun = slots[current_slot]
+	var gun: Dictionary = slots[current_slot]
 	gun["ammo"] -= 1
-	_fire_timer = gun["fire_rate"]
+	_fire_timer = float(gun["fire_rate"])
 	ammo_changed.emit(gun["id"], gun["ammo"], gun["max_ammo"])
-
-	var player = get_parent()
-	var dir = (player.get_global_mouse_position() - player.global_position).normalized()
-
-	# Spawn your existing Bullet.tscn
-	var bullet = BULLET_SCENE.instantiate()
-	get_tree().current_scene.add_child(bullet)
-	bullet.global_position = player.global_position
-	bullet.setup(player, dir, gun.get("bullet_speed", 520.0) / 520.0)
-
-	ScreenFX.screen_shake(1.5, 0.05)
+	if gun["ammo"] <= 0:
+		reload_state_changed.emit(false, gun["ammo"], gun["max_ammo"], 0.0)
+	return gun.duplicate(true)
