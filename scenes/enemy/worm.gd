@@ -11,6 +11,7 @@ const SHATTER_DURATION := 0.22
 var _player_ref: CharacterBody2D = null
 var _defeated := false
 var _health := 0
+var _contact_area: Area2D = null
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -19,6 +20,8 @@ func _ready() -> void:
 	_health = maxi(1, max_health)
 	_player_ref = get_tree().get_first_node_in_group("player") as CharacterBody2D
 	
+	_setup_contact_area()
+	
 	EntityRegistry.register(
 		entity_id,
 		"worm",
@@ -26,6 +29,36 @@ func _ready() -> void:
 		["worm", "mobile"],
 		{"integrity_contribution": -0.02}
 	)
+
+func _setup_contact_area() -> void:
+	_contact_area = Area2D.new()
+	_contact_area.body_entered.connect(_on_contact_body_entered)
+	add_child(_contact_area)
+	
+	var shape = CircleShape2D.new()
+	shape.radius = 12.0
+	var collision_shape = CollisionShape2D.new()
+	collision_shape.shape = shape
+	_contact_area.add_child(collision_shape)
+	
+	_contact_area.collision_layer = 0
+	_contact_area.collision_mask = 1
+
+func _on_contact_body_entered(body: Node2D) -> void:
+	if _defeated:
+		return
+	
+	if body.is_in_group("player") and body.has_method("take_damage"):
+		var is_dashing = body.is_dashing() if body.has_method("is_dashing") else false
+		var modes = body.get_hacked_client_modes() if body.has_method("get_hacked_client_modes") else {}
+		var has_super_speed = modes.get("super_speed", false)
+		
+		# Don't damage if player is dashing with super speed (they should be killing us)
+		if is_dashing and has_super_speed:
+			return
+			
+		body.take_damage(10)
+		shatter()
 
 func take_damage(amount: int) -> bool:
 	if _defeated:

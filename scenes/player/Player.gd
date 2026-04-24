@@ -139,8 +139,7 @@ func _physics_process(delta: float) -> void:
 	if _hack_noclip:
 		_clamp_position_to_bounds()
 	
-	if _dash_timer > 0.0 and _hack_super_speed:
-		print("DEBUG: _physics_process calling _check_dash_collision: dash_timer=%.2f, super_speed=%s" % [_dash_timer, _hack_super_speed])
+	if _dash_timer > 0.0:
 		_check_dash_collision()
 
 	_update_player_animation()
