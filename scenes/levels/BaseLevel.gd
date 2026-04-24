@@ -3,7 +3,6 @@
 ## Each level script extends this and declares its own rules/entities.
 extends Node2D
 
-## Override in subclasses to define which rules start active
 @export var initial_rules: Array[String] = []
 @export var level_number: int = 1
 @export var level_title_text: String = "SECTOR 01"
@@ -21,6 +20,8 @@ const TRANSITION_OUT_TIME := 0.45
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Allow GUI input so Tab and Esc work, we will handle button focus separately
+	get_viewport().gui_disable_input = false
 	RuleManager.clear_rules()
 	EntityRegistry.clear_all()
 
@@ -40,14 +41,33 @@ func _ready() -> void:
 	EventBus.log("Active rules: %d" % initial_rules.size(), "info")
 
 func _show_title() -> void:
-	title_label.text = level_title_text
-	title_label.add_theme_font_size_override("font_size", 12)
-	title_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
-	title_label.modulate.a = 0.0
+	# Create a large centered banner
+	var banner = CanvasLayer.new()
+	banner.layer = 100
+	add_child(banner)
+	
+	var label = Label.new()
+	label.text = level_title_text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.set_anchors_preset(Control.PRESET_CENTER)
+	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	label.add_theme_font_size_override("font_size", 42)
+	label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+	label.add_theme_color_override("outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 6)
+	banner.add_child(label)
+	
+	label.modulate.a = 0.0
 	var t = create_tween()
-	t.tween_property(title_label, "modulate:a", 1.0, 0.4)
-	t.tween_interval(1.8)
-	t.tween_property(title_label, "modulate:a", 0.0, 0.4)
+	t.tween_property(label, "modulate:a", 1.0, 0.3)
+	t.tween_interval(2.0)
+	t.tween_property(label, "modulate:a", 0.0, 0.5)
+	t.tween_callback(banner.queue_free)
+	
+	# Also update the small top-left/top-center label if it exists
+	if is_instance_valid(title_label):
+		title_label.text = level_title_text
+		title_label.modulate.a = 0.0 # Keep it hidden or secondary
 
 func _on_level_complete() -> void:
 	if _complete:
@@ -64,18 +84,16 @@ func _on_level_complete() -> void:
 	_set_non_player_pause_override(false)
 	var next = "res://scenes/levels/Level%d.tscn" % (level_number + 1)
 	if ResourceLoader.exists(next):
-		get_tree().change_scene_to_file(next)
+		ScreenFX.transition_to_scene(next)
 	else:
-		get_tree().change_scene_to_file("res://scenes/ui/WinScreen.tscn")
+		ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")
 
 func _on_player_caught(_catcher_id: String) -> void:
-	# Player.gd handles its own caught animation + scene change
 	pass
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
 	if new_val <= 0.0:
-		EventBus.log("!! SYSTEM FAILURE — shutting down !!", "error")
-		get_tree().quit()
+		EventBus.log("!! SYSTEM FAILURE — PLAYER CAUGHT !!", "error")
 		return
 	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
 	var lockdown_threshold := max_integrity * 0.15
@@ -88,18 +106,16 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 			AudioManager.play_sfx("lockdown")
 
 func _input(event: InputEvent) -> void:
+	if not event is InputEventKey:
+		return
+	if event.echo:
+		return
 	if event.is_action_pressed("ui_cancel"):
 		_toggle_pause()
 		return
 	if _paused and event.is_action_pressed("pause_main_menu"):
-		get_tree().paused = false
-		_paused = false
-		_set_player_pause_override(false)
-		_set_enemy_pause_override(false)
-		_set_non_player_pause_override(false)
-		if is_instance_valid(_pause_layer):
-			_pause_layer.visible = false
-		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+		_toggle_pause()
+		ScreenFX.transition_to_scene("res://scenes/ui/MainMenu.tscn")
 
 func _setup_pause_overlay() -> void:
 	_pause_layer = CanvasLayer.new()

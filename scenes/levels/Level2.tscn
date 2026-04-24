@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cjtv38dqmbcqs"]
 
-[ext_resource type="Script" path="res://scenes/levels/Level2.gd" id="1"]
+[ext_resource type="Script" uid="uid://dgnitueod5hgx" path="res://scenes/levels/Level2.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="6"]
 

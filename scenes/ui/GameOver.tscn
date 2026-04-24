@@ -1,50 +1,51 @@
-[gd_scene load_steps=2 format=3 uid="uid://go001"]
+[gd_scene format=3 uid="uid://go001"]
 
-[sub_resource type="GDScript" id="s1"]
-script/source = "extends Control
-func _ready() -> void:
-	ScreenFX.flash_screen(Color(1,0,0.1,0.6), 0.5)
-	AudioManager.switch_music(\"stable\")
-	$VBox/TitleLabel.add_theme_font_size_override(\"font_size\", 16)
-	$VBox/TitleLabel.add_theme_color_override(\"font_color\", Color(1,0.2,0.2,1))
-	$VBox/Sub.add_theme_font_size_override(\"font_size\", 8)
-	$VBox/Sub.add_theme_color_override(\"font_color\", Color(0.7,0.5,0.5,1))
-	$VBox/Hint.add_theme_font_size_override(\"font_size\", 7)
-	$VBox/Hint.add_theme_color_override(\"font_color\", Color(0.4,0.4,0.5,1))
-func _input(event):
-	if event.is_action_pressed(\"ui_accept\"): get_tree().change_scene_to_file(\"res://scenes/levels/Level2.tscn\")
-	if event.is_action_pressed(\"ui_cancel\"): get_tree().change_scene_to_file(\"res://scenes/ui/MainMenu.tscn\")
-"
+[ext_resource type="Script" uid="uid://beu51nc3iecrk" path="res://scenes/ui/GameOver.gd" id="1_57v1k"]
+[ext_resource type="Texture2D" uid="uid://c51nasp5prfdc" path="res://assets/sprites/EndScreen.jpg" id="2_57v1k"]
 
-[node name="GameOver" type="Control"]
+[node name="GameOver" type="Control" unique_id=1484924869]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource("s1")
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_57v1k")
 
-[node name="Background" type="ColorRect" parent="."]
-color = Color(0.08, 0.03, 0.04, 1)
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="TextureRect" type="TextureRect" parent="." unique_id=246562019]
+layout_mode = 0
+offset_left = 5.000002
+offset_top = -4.0
+offset_right = 2314.0
+offset_bottom = 1295.0
+scale = Vector2(0.49569452, 0.5015967)
+texture = ExtResource("2_57v1k")
 
-[node name="VBox" type="VBoxContainer" parent="."]
-anchor_left = 0.5
+[node name="VBox" type="VBoxContainer" parent="." unique_id=450677706]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -90.0
-offset_top = -35.0
-offset_right = 90.0
-offset_bottom = 35.0
-theme_override_constants/separation = 8
+offset_left = -300.0
+offset_top = -60.0
+offset_right = -40.0
+offset_bottom = 60.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 15
+alignment = 1
 
-[node name="TitleLabel" type="Label" parent="VBox"]
-horizontal_alignment = 1
-text = "ACCESS REVOKED"
+[node name="RetryBtn" type="Button" parent="VBox" unique_id=1878569532]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "REBOOT SYSTEM (RETRY)"
 
-[node name="Sub" type="Label" parent="VBox"]
-horizontal_alignment = 1
-text = "Bug enforcement successful."
+[node name="MenuBtn" type="Button" parent="VBox" unique_id=751865664]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "RETURN TO TERMINAL"
 
-[node name="Hint" type="Label" parent="VBox"]
-horizontal_alignment = 1
-text = "[ ENTER ] Retry Sector 02    [ ESC ] Menu"
+[connection signal="pressed" from="VBox/RetryBtn" to="." method="_on_retry_pressed"]
+[connection signal="pressed" from="VBox/MenuBtn" to="." method="_on_menu_pressed"]

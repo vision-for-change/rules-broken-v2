@@ -12,9 +12,14 @@ grow_vertical = 2
 script = ExtResource("1")
 
 [node name="Background" type="ColorRect" parent="." unique_id=1114803465]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.05, 0.06, 0.1, 1)
 
 [node name="ScanlineOverlay" type="ColorRect" parent="." unique_id=1510156687]
@@ -24,9 +29,18 @@ anchor_bottom = 1.0
 color = Color(0, 1, 0.4, 0.03)
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=1673385274]
-layout_mode = 0
-offset_right = 445.0
-offset_bottom = 159.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -222.5
+offset_top = -97.0
+offset_right = 222.5
+offset_bottom = 97.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TitleLabel" type="Label" parent="VBox" unique_id=2025929778]
 layout_mode = 2
@@ -47,15 +61,71 @@ custom_minimum_size = Vector2(170, 22)
 layout_mode = 2
 text = "[ ENTER ]  INITIATE BREACH"
 
+[node name="Floor5Btn" type="Button" parent="VBox" unique_id=1380302339]
+custom_minimum_size = Vector2(170, 22)
+layout_mode = 2
+text = "START FLOOR 5"
+
 [node name="QuitBtn" type="Button" parent="VBox" unique_id=73877338]
 custom_minimum_size = Vector2(170, 22)
 layout_mode = 2
 text = "TERMINATE"
 
+[node name="InstructionsBtn" type="Button" parent="VBox" unique_id=1454518489]
+layout_mode = 2
+text = "Instructions"
+
 [node name="InfoLabel" type="Label" parent="VBox" unique_id=922867853]
 layout_mode = 2
-text = "Arrows:Move  Shift:Run  E:Interact  `:Toggle Log  Esc:Menu"
+text = "Arrows:Move  Shift:Run  E:Interact  Esc:Menu"
 horizontal_alignment = 1
 
+[node name="SelectWeaponBtn" type="Button" parent="VBox" unique_id=1854518489]
+layout_mode = 2
+text = "Select Weapon"
+
+[node name="InstructionsPanel" type="PanelContainer" parent="." unique_id=1954518489]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -150.0
+offset_right = 250.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="InstructionsPanel" unique_id=2042001511]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="InstructionsPanel/VBox" unique_id=217769805]
+layout_mode = 2
+text = "OPERATIONAL INTEL"
+horizontal_alignment = 1
+
+[node name="Content" type="Label" parent="InstructionsPanel/VBox" unique_id=1446083051]
+layout_mode = 2
+text = "MOVEMENT: WASD
+SHOOTING: MOUSE CLICK
+HACKS: TAB
+
+MISSION GOAL: 
+Beat the Boss at the end by increasing levels.
+System integrity is critical. Stay alive."
+horizontal_alignment = 1
+
+[node name="CloseInstructionsBtn" type="Button" parent="InstructionsPanel/VBox" unique_id=1171733339]
+layout_mode = 2
+text = "CLOSE"
+
 [connection signal="pressed" from="VBox/PlayBtn" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="VBox/Floor5Btn" to="." method="_on_floor_5_pressed"]
 [connection signal="pressed" from="VBox/QuitBtn" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="VBox/InstructionsBtn" to="." method="_on_instructions_pressed"]
+[connection signal="pressed" from="VBox/SelectWeaponBtn" to="." method="_on_select_weapon_pressed"]
+[connection signal="pressed" from="InstructionsPanel/VBox/CloseInstructionsBtn" to="." method="_on_close_instructions_pressed"]

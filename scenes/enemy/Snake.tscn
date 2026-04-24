@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://snake001"]
+
+[ext_resource type="Script" path="res://scenes/enemy/Snake.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/snake_segment.webp" id="2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_bg"]
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+bg_color = Color(1, 0.2, 0.2, 1)
+
+[node name="Snake" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Head" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -15.0
+offset_top = -25.0
+offset_right = 15.0
+offset_bottom = -21.0
+theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+max_value = 1.0
+value = 1.0
+show_percentage = false

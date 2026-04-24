@@ -8,28 +8,48 @@ const ROOM_ATTEMPTS := 520
 const EXTRA_HALLWAYS := 28
 const HALLWAY_WIDTH := 12
 const BUG_SCENE := preload("res://scenes/enemy/bugs.tscn")
+const SNAKE_SCENE := preload("res://scenes/enemy/Snake.tscn")
+const CHATGPT_BOSS_SCENE := preload("res://scenes/enemy/chatgpt.tscn")
 const FLOOR_DOOR_SCRIPT := preload("res://scenes/levels/FloorDoor.gd")
 const MIN_BUGS_PER_ROOM := 2
 const MAX_BUGS_PER_ROOM := 4
 const MIN_OBSTACLES_PER_ROOM := 2
 const MAX_OBSTACLES_PER_ROOM := 5
+const OUTER_WALL_THICKNESS_TILES := 100
+const OUTER_WALL_COLLISION_LAYER := 8
 
 var _rng := RandomNumberGenerator.new()
 var _wall_material: ShaderMaterial
 var _minimap_texture: Texture2D
 var _transitioning := false
 var _bug_spawn_index := 0
+var _floor_five_cutscene_played := false
+var _floor_five_boss: Node2D
+var _camera_at_player: Camera2D
+var _player_for_death_cam: Node2D
 
 static var _floor_index := 1
 static var _advance_requested := false
+static var _queued_start_floor := 1
+
+static func queue_start_floor(floor_number: int) -> void:
+	_queued_start_floor = maxi(1, floor_number)
+	_advance_requested = false
+	_floor_index = _queued_start_floor
+
+static func reset_start_floor() -> void:
+	_queued_start_floor = 1
+	_advance_requested = false
+	_floor_index = 1
 
 func _ready() -> void:
 	if _advance_requested:
 		_floor_index += 1
 	else:
-		_floor_index = 1
+		_floor_index = _queued_start_floor
+	_queued_start_floor = 1
 	_advance_requested = false
-	level_title_text = "SECTOR 02 // FLOOR %d" % _floor_index
+	level_title_text = "LEVEL %d" % _floor_index
 	_transitioning = false
 	_bug_spawn_index = 0
 	_rng.randomize()
@@ -38,6 +58,10 @@ func _ready() -> void:
 	super._ready()
 
 func _generate_dungeon() -> void:
+	if _floor_index == 5:
+		_generate_floor_five_dungeon()
+		return
+
 	var grid := _make_filled_grid()
 	var rooms: Array[Rect2i] = []
 
@@ -71,6 +95,24 @@ func _generate_dungeon() -> void:
 	_build_walls(grid)
 	_resize_background()
 	_populate_floor(main_room, rooms)
+
+func _generate_floor_five_dungeon() -> void:
+	_floor_five_cutscene_played = false
+	_floor_five_boss = null
+	var grid := _make_filled_grid()
+	var spawn_room := Rect2i(40, int((GRID_H - 36) / 2), 42, 36)
+	var spawn_center := _room_center(spawn_room)
+	var big_room := Rect2i(spawn_room.end.x + 68, spawn_center.y - 52, 132, 104)
+
+	_carve_room(grid, spawn_room)
+	_carve_room(grid, big_room)
+	_carve_line_horizontal(grid, spawn_room.end.x - 1, big_room.position.x, spawn_center.y, HALLWAY_WIDTH)
+
+	var rooms: Array[Rect2i] = [spawn_room, big_room]
+	_build_minimap_texture(grid)
+	_build_walls(grid)
+	_resize_background()
+	_populate_floor(spawn_room, rooms)
 
 func _make_filled_grid() -> Array:
 	var grid: Array = []
@@ -229,11 +271,40 @@ func _spawn_vertical_wall_span(parent: Node, cell_x: int, start_y: int, end_y: i
 	body.add_child(block)
 
 func _spawn_outer_boundary_walls(parent: Node) -> void:
-	# Add a secondary wall ring beyond the edge walls so off-map space keeps the binary wall look.
-	_spawn_wall_span(parent, -1, GRID_W, -1)
-	_spawn_wall_span(parent, -1, GRID_W, GRID_H)
-	_spawn_vertical_wall_span(parent, -1, -1, GRID_H)
-	_spawn_vertical_wall_span(parent, GRID_W, -1, GRID_H)
+	# Add thick outer walls so camera space outside the dungeon still shows map walls.
+	var t := OUTER_WALL_THICKNESS_TILES
+	_spawn_outer_wall_band(parent, Rect2i(-t, -t, GRID_W + t * 2, t)) # top
+	_spawn_outer_wall_band(parent, Rect2i(-t, GRID_H, GRID_W + t * 2, t)) # bottom
+	_spawn_outer_wall_band(parent, Rect2i(-t, 0, t, GRID_H)) # left
+	_spawn_outer_wall_band(parent, Rect2i(GRID_W, 0, t, GRID_H)) # right
+
+func _spawn_outer_wall_band(parent: Node, cells: Rect2i) -> void:
+	var body := StaticBody2D.new()
+	var w := float(cells.size.x) * TILE_SIZE
+	var h := float(cells.size.y) * TILE_SIZE
+	body.position = Vector2(
+		(float(cells.position.x) + float(cells.size.x) * 0.5) * TILE_SIZE,
+		(float(cells.position.y) + float(cells.size.y) * 0.5) * TILE_SIZE
+	)
+	body.collision_layer = 1 | OUTER_WALL_COLLISION_LAYER
+	body.collision_mask = 0
+	parent.add_child(body)
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(w, h)
+	shape.shape = rect
+	body.add_child(shape)
+
+	var block := ColorRect.new()
+	block.offset_left = -w * 0.5
+	block.offset_top = -h * 0.5
+	block.offset_right = w * 0.5
+	block.offset_bottom = h * 0.5
+	block.color = Color(1, 1, 1, 1)
+	block.material = _wall_material
+	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_child(block)
 
 func _resize_background() -> void:
 	var bg := get_node_or_null("Background") as ColorRect
@@ -254,15 +325,26 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	if player != null:
 		player.global_position = _cell_to_world(_room_center(main_room))
 
-	var door_room := _pick_farthest_room(main_room, rooms)
-	_spawn_floor_door(interactable_root, door_room)
+	var is_floor_five := _floor_index == 5
+	var door_room := Rect2i()
+	if not is_floor_five:
+		door_room = _pick_farthest_room(main_room, rooms)
+		_spawn_floor_door(interactable_root, door_room)
 
 	for room in rooms:
-		# Keep the floor door room clear so the teleporter is never obstructed.
-		if room != door_room:
+		# Keep both the spawn room and floor door room clear.
+		if not is_floor_five and room != main_room and room != door_room:
 			_spawn_room_obstacles(obstacle_root, room)
-		if room != main_room:
-			_spawn_room_bugs(enemy_root, room)
+		if not is_floor_five and room != main_room:
+			if _rng.randf() > 0.4:
+				_spawn_room_bugs(enemy_root, room)
+			else:
+				_spawn_room_snakes(enemy_root, room)
+
+	if is_floor_five:
+		var big_room := rooms[1] if rooms.size() > 1 else main_room
+		_spawn_floor_five_boss(enemy_root, big_room)
+		_spawn_floor_five_cutscene_trigger(interactable_root, big_room)
 
 func _cell_to_world(cell: Vector2i) -> Vector2:
 	return Vector2((cell.x + 0.5) * TILE_SIZE, (cell.y + 0.5) * TILE_SIZE)
@@ -429,6 +511,17 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i) -> void:
 		bug.position = _cell_to_world(_random_cell_in_room(room, 3))
 		parent.add_child(bug)
 
+func _spawn_room_snakes(parent: Node2D, room: Rect2i) -> void:
+	var count := _rng.randi_range(1, 2)
+	for i in range(count):
+		var snake := SNAKE_SCENE.instantiate()
+		if snake == null:
+			continue
+		_bug_spawn_index += 1
+		snake.set("entity_id", "snake_floor_%d_%d" % [_floor_index, _bug_spawn_index])
+		snake.position = _cell_to_world(_random_cell_in_room(room, 3))
+		parent.add_child(snake)
+
 func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 	var min_x := room.position.x + margin
 	var max_x := room.end.x - margin - 1
@@ -442,10 +535,129 @@ func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 		max_y = room.end.y - 1
 	return Vector2i(_rng.randi_range(min_x, max_x), _rng.randi_range(min_y, max_y))
 
+func _spawn_floor_five_boss(parent: Node2D, big_room: Rect2i) -> void:
+	var boss := CHATGPT_BOSS_SCENE.instantiate() as Node2D
+	if boss == null:
+		return
+	parent.add_child(boss)
+	boss.global_position = _cell_to_world(_room_center(big_room))
+	boss.add_to_group("enemy")
+	_floor_five_boss = boss
+	var hud_node := get_node_or_null("HUD")
+	if is_instance_valid(hud_node) and hud_node.has_method("bind_boss"):
+		hud_node.call("bind_boss", boss, "CHATGPT")
+	if boss.has_signal("death_animation_finished"):
+		boss.death_animation_finished.connect(_on_chatgpt_death, CONNECT_ONE_SHOT)
+	if boss.has_signal("shatter_started"):
+		boss.shatter_started.connect(_on_chatgpt_shatter)
+
+func _spawn_floor_five_cutscene_trigger(parent: Node2D, big_room: Rect2i) -> void:
+	var trigger := Area2D.new()
+	trigger.name = "FloorFiveBossCutsceneTrigger"
+	trigger.collision_layer = 0
+	trigger.collision_mask = 1
+	trigger.monitoring = true
+	parent.add_child(trigger)
+	trigger.global_position = _cell_to_world(_room_center(big_room))
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(float(big_room.size.x) * TILE_SIZE, float(big_room.size.y) * TILE_SIZE)
+	shape.shape = rect
+	trigger.add_child(shape)
+
+	trigger.body_entered.connect(func(body: Node) -> void:
+		if _floor_five_cutscene_played:
+			return
+		if not body.is_in_group("player"):
+			return
+		_floor_five_cutscene_played = true
+		trigger.monitoring = false
+		_play_floor_five_boss_cutscene(body as Node2D)
+	)
+
+func _play_floor_five_boss_cutscene(player: Node2D) -> void:
+	if player == null:
+		return
+	var camera := player.get_node_or_null("Camera2D") as Camera2D
+	if camera == null:
+		return
+
+	var original_smoothing := camera.position_smoothing_enabled
+	var default_zoom := camera.zoom
+	var boss_focus := _floor_five_boss.global_position if is_instance_valid(_floor_five_boss) else player.global_position
+	var can_restore_player_physics := player.has_method("set_physics_process")
+
+	if player is CharacterBody2D:
+		(player as CharacterBody2D).velocity = Vector2.ZERO
+	if can_restore_player_physics:
+		player.set_physics_process(false)
+
+	camera.position_smoothing_enabled = false
+	camera.reparent(self, true)
+
+	var reveal_tween := create_tween()
+	reveal_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	reveal_tween.tween_property(camera, "global_position", boss_focus, 3.0)
+	reveal_tween.parallel().tween_property(camera, "zoom", Vector2(0.85, 0.85), 3.0)
+	await reveal_tween.finished
+	await get_tree().create_timer(0.75).timeout
+
+	var return_tween := create_tween()
+	return_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return_tween.tween_property(camera, "global_position", player.global_position, 1.2)
+	return_tween.parallel().tween_property(camera, "zoom", default_zoom, 1.2)
+	await return_tween.finished
+
+	camera.reparent(player, true)
+	camera.position = Vector2.ZERO
+	camera.position_smoothing_enabled = original_smoothing
+	if can_restore_player_physics:
+		player.set_physics_process(true)
+	
+	_camera_at_player = camera
+	_player_for_death_cam = player
+
 func _on_floor_door_used() -> void:
+	if _transitioning:
+		return
+	_transitioning = true
+	
+	if _floor_index >= 5:
+		await _play_exit_transition()
+		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
+		return
+
+	_advance_requested = true
+	await _play_exit_transition()
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+
+func _on_chatgpt_death() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
 	_advance_requested = true
 	await _play_exit_transition()
-	get_tree().change_scene_to_file("res://scenes/levels/Level2.tscn")
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+
+func _on_chatgpt_shatter() -> void:
+	if _player_for_death_cam == null or _camera_at_player == null:
+		return
+	
+	var camera := _camera_at_player
+	var boss_focus := _floor_five_boss.global_position if is_instance_valid(_floor_five_boss) else _player_for_death_cam.global_position
+	
+	camera.position_smoothing_enabled = false
+	camera.reparent(self, true)
+	
+	var zoom_in_tween := create_tween()
+	zoom_in_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	zoom_in_tween.tween_property(camera, "global_position", boss_focus, 0.5)
+	zoom_in_tween.parallel().tween_property(camera, "zoom", Vector2(0.6, 0.6), 0.5)
+	await zoom_in_tween.finished
+	
+	await get_tree().create_timer(0.3).timeout
+	
+	var zoom_out_tween := create_tween()
+	zoom_out_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	zoom_out_tween.tween_property(camera, "zoom", Vector2(0.3, 0.3), 1.2)

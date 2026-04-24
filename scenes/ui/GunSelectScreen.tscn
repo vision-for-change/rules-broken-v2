@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://c05mnlmq1rgua"]
+
+[ext_resource type="Script" uid="uid://6vbc2gdlwsjf" path="res://scenes/ui/GunSelectScreen.gd" id="1_lfxor"]
+
+[node name="GunSelectScreen" type="Control" unique_id=766139747]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lfxor")
+
+[node name="Background" type="ColorRect" parent="." unique_id=443408714]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="." unique_id=76477952]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -88.5
+offset_top = -23.0
+offset_right = 88.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "SELECT YOUR WEAPON"
+
+[node name="SubLabel" type="Label" parent="." unique_id=56532882]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 423.0
+offset_top = 386.0
+offset_right = 637.0
+offset_bottom = 409.0
+grow_horizontal = 2
+grow_vertical = 2
+text = ""
+
+[node name="GunGrid" type="HBoxContainer" parent="." unique_id=1300802493]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DeployBtn" type="Button" parent="." unique_id=1045495827]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -31.0
+offset_top = -15.5
+offset_right = 31.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Deploy"
+
+[node name="BackBtn" type="Button" parent="." unique_id=1429218840]
+layout_mode = 0
+offset_left = -26.0
+offset_top = -60.0
+offset_right = 19.0
+offset_bottom = -29.0
+text = "Back"

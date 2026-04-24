@@ -1,19 +1,19 @@
 [gd_scene format=3 uid="uid://bullet001"]
 
-[ext_resource type="Script" path="res://scenes/player/Bullet.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/bullet.webp" id="2"]
+[ext_resource type="Script" uid="uid://ellxshattwdl" path="res://scenes/player/Bullet.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dt8hwt6i3p842" path="res://assets/bullet.webp" id="2"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 2.5
 
-[node name="Bullet" type="Area2D"]
+[node name="Bullet" type="Area2D" unique_id=838723870]
+z_index = 5
 collision_layer = 0
 collision_mask = 3
-z_index = 5
 script = ExtResource("1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1904590622]
 shape = SubResource("1")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=509898728]
 texture = ExtResource("2")

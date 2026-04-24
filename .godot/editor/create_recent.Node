@@ -1,5 +1,11 @@
-AnimatedSprite2D
 Sprite2D
+TextureRect
+Node2D
+Button
+Label
+Control
+Node
+HBoxContainer
 ColorRect
 CollisionShape2D
 CharacterBody2D

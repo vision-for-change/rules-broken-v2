@@ -4,14 +4,14 @@ extends Area2D
 @export var lifetime := 1.2
 const HEALTH_PICKUP_SCENE := preload("res://scenes/objects/HealthPickup.tscn")
 const HEALTH_DROP_CHANCE_DENOM := 3
+const ENEMY_HEALTH_PICKUP_HEAL_AMOUNT := 0.5
 const GHOST_INTERVAL := 0.02
 const GHOST_LIFETIME := 0.28
-const ENEMY_DEFEAT_SHAKE_INTENSITY := 3.0
-const ENEMY_DEFEAT_SHAKE_DURATION := 0.1
 
 var _direction := Vector2.RIGHT
 var _owner_body: PhysicsBody2D = null
 var _ghost_timer := 0.0
+var damage := 10
 
 @onready var bullet_sprite: Sprite2D = $Sprite2D
 
@@ -32,15 +32,16 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 
 func _on_body_entered(body: Node) -> void:
-	if body == _owner_body:
+	if body == null or body == _owner_body:
 		return
-	if body != null and body.is_in_group("enemy"):
-		_try_spawn_health_pickup(body)
-		if body.has_method("shatter"):
-			body.shatter()
+	if body.is_in_group("enemy"):
+		if body.has_method("take_damage"):
+			var defeated := bool(body.call("take_damage", damage))
+			if defeated:
+				_try_spawn_health_pickup(body)
 		else:
 			body.queue_free()
-		ScreenFX.screen_shake(ENEMY_DEFEAT_SHAKE_INTENSITY, ENEMY_DEFEAT_SHAKE_DURATION)
+			_try_spawn_health_pickup(body)
 	queue_free()
 
 func _try_spawn_health_pickup(enemy: Node) -> void:
@@ -52,6 +53,7 @@ func _try_spawn_health_pickup(enemy: Node) -> void:
 	var pickup = HEALTH_PICKUP_SCENE.instantiate()
 	if pickup == null:
 		return
+	pickup.heal_amount = ENEMY_HEALTH_PICKUP_HEAL_AMOUNT
 	scene_root.add_child(pickup)
 	pickup.global_position = enemy.global_position if enemy is Node2D else global_position
 
@@ -79,3 +81,6 @@ func _spawn_ghost() -> void:
 	var tween := ghost.create_tween()
 	tween.tween_property(ghost, "modulate:a", 0.0, GHOST_LIFETIME)
 	tween.tween_callback(ghost.queue_free)
+
+func set_damage(amount: int) -> void:
+	damage = amount

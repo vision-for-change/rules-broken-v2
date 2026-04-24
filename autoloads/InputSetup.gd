@@ -1,38 +1,49 @@
 extends Node
+
 func _ready() -> void:
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	_add("interact", [KEY_E, KEY_F])
-	_add_mouse("shoot", [MOUSE_BUTTON_LEFT])
-	_add("dash", [KEY_SPACE])
-	_add("inspect",  [KEY_TAB])
-	_add("pause_main_menu", [KEY_M])
-	_add_to_existing("ui_left", [KEY_A])
-	_add_to_existing("ui_right", [KEY_D])
-	_add_to_existing("ui_up", [KEY_W])
-	_add_to_existing("ui_down", [KEY_S])
+	_add("ui_left", [_key(KEY_LEFT), _key(KEY_A)])
+	_add("ui_right", [_key(KEY_RIGHT), _key(KEY_D)])
+	_add("ui_up", [_key(KEY_UP), _key(KEY_W)])
+	_add("ui_down", [_key(KEY_DOWN), _key(KEY_S)])
+	
+	_add("move_left", [_key(KEY_LEFT), _key(KEY_A)])
+	_add("move_right", [_key(KEY_RIGHT), _key(KEY_D)])
+	_add("move_up", [_key(KEY_UP), _key(KEY_W)])
+	_add("move_down", [_key(KEY_DOWN), _key(KEY_S)])
 
-func _add(action: String, keys: Array) -> void:
-	if InputMap.has_action(action):
-		return
-	InputMap.add_action(action)
-	for k in keys:
-		var ev = InputEventKey.new()
-		ev.keycode = k
-		InputMap.action_add_event(action, ev)
+	_add("ui_accept", [_key(KEY_ENTER), _key(KEY_KP_ENTER), _key(KEY_SPACE)])
+	_add("ui_cancel", [_key(KEY_ESCAPE)])
 
-func _add_to_existing(action: String, keys: Array) -> void:
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-	for k in keys:
-		var ev = InputEventKey.new()
-		ev.keycode = k
-		InputMap.action_add_event(action, ev)
+	_add("dash", [_key(KEY_SPACE)])
+	_add("interact", [_key(KEY_E), _key(KEY_F)])
+	_add("shoot", [_mouse(MOUSE_BUTTON_LEFT)])
+	_add("inspect", [_key(KEY_TAB)])
+	_add("pause_main_menu", [_key(KEY_M)])
 
-func _add_mouse(action: String, buttons: Array) -> void:
-	if InputMap.has_action(action):
-		return
-	InputMap.add_action(action)
-	for b in buttons:
-		var ev = InputEventMouseButton.new()
-		ev.button_index = b
-		InputMap.action_add_event(action, ev)
+	# ✅ STEP 6 (added properly)
+	_add("slot_1", [_key(KEY_1)])
+	_add("slot_2", [_key(KEY_2)])
+	_add("slot_3", [_key(KEY_3)])
+	_add("next_weapon", [_key(KEY_Q)])
+	_add("reload", [_key(KEY_R)])
+
+
+func _add(action_name: String, events: Array) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+
+	for event in events:
+		if not InputMap.action_has_event(action_name, event):
+			InputMap.action_add_event(action_name, event)
+
+
+func _key(code: Key) -> InputEventKey:
+	var event := InputEventKey.new()
+	event.physical_keycode = code
+	return event
+
+
+func _mouse(button: MouseButton) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.button_index = button
+	return event

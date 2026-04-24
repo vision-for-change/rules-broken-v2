@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://v184r76b8465"]
+
+[ext_resource type="Texture2D" uid="uid://b5jxbipohggeb" path="res://assets/chatgpt.png" id="1_lanm7"]
+[ext_resource type="Script" uid="uid://cjyxytr73hxe5" path="res://scenes/enemy/chatgpt.gd" id="2_30mb2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ma6x7"]
+radius = 118.0
+
+[node name="chatgpt" type="CharacterBody2D" unique_id=1329929761]
+collision_layer = 2
+script = ExtResource("2_30mb2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=68993521]
+shape = SubResource("CircleShape2D_ma6x7")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=849372685]
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("1_lanm7")

@@ -1,10 +1,13 @@
 extends CharacterBody2D
 
-@export var move_speed := 200.0
+@export var move_speed := 140.0
 @export var shoot_range := 180.0
 @export var shoot_cooldown := 0.4
 @export var laser_spawn_distance := 12.0
 @export var entity_id := "bug_01"
+@export var max_health := 40
+@export var hit_flash_duration := 0.1
+@export var hit_flash_color := Color(1.0, 0.3, 0.3, 1.0)
 const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
 const GHOST_INTERVAL := 0.045
 const GHOST_LIFETIME := 0.16
@@ -16,11 +19,17 @@ var _player_ref: CharacterBody2D = null
 var _shoot_cd := 0.0
 var _ghost_timer := 0.0
 var _defeated := false
+var _health := 0
+var _hit_flash_tween: Tween = null
 
 @onready var body_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var visibility_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
+@onready var health_bar: ProgressBar = $HealthBar
 
 func _ready() -> void:
 	add_to_group("enemy")
+	_health = maxi(1, max_health)
+	_update_health_bar()
 	_player_ref = get_tree().get_first_node_in_group("player") as CharacterBody2D
 	EntityRegistry.register(
 		entity_id,
@@ -30,11 +39,62 @@ func _ready() -> void:
 		{"integrity_contribution": -0.03}
 	)
 
+func take_damage(amount: int) -> bool:
+	if _defeated:
+		return false
+	var final_damage: int = maxi(1, amount)
+	_health = maxi(0, _health - final_damage)
+	_update_health_bar()
+	_play_hit_flash()
+	if _health > 0:
+		return false
+	AudioManager.play_sfx("feesound_community-glass-shatter")
+	shatter()
+	return true
+
+func _update_health_bar() -> void:
+	if is_instance_valid(health_bar):
+		health_bar.max_value = max_health
+		health_bar.value = _health
+		health_bar.visible = _health > 0 # Show always if alive
+
+func _play_hit_flash() -> void:
+	if not is_instance_valid(body_sprite):
+		return
+	if is_instance_valid(_hit_flash_tween):
+		_hit_flash_tween.kill()
+	body_sprite.modulate = hit_flash_color
+	_hit_flash_tween = create_tween()
+	_hit_flash_tween.tween_property(body_sprite, "modulate", Color.WHITE, hit_flash_duration)
+
 func _exit_tree() -> void:
 	EntityRegistry.unregister(entity_id)
 
 func _physics_process(delta: float) -> void:
 	if _defeated:
+		if is_instance_valid(health_bar):
+			health_bar.visible = false
+		return
+	
+	# Update health bar position/rotation (keep it upright and centered above the bug)
+	if is_instance_valid(health_bar):
+		# We want the bar to be at (0, -28) in GLOBAL space relative to our position
+		# but it's a child, so we must counteract our own rotation
+		health_bar.rotation = -rotation
+		# Counter-rotate the offset so it stays "above" the bug in world space
+		var offset := Vector2(0, -28).rotated(-rotation)
+		health_bar.position = offset - (health_bar.size / 2.0).rotated(-rotation)
+		# Actually simpler to just use top_level if it's easier, but this keeps it a child
+		# Adjusting for local offset center:
+		health_bar.position = Vector2(-15, -28).rotated(-rotation)
+		# Wait, simplest way is to put the bar in a non-rotating Node2D marker. 
+		# Let's just fix the position/rotation manually here.
+		health_bar.rotation = -rotation
+		health_bar.position = Vector2(0, -28).rotated(-rotation) + Vector2(-15, 0).rotated(-rotation)
+
+	if is_instance_valid(visibility_notifier) and not visibility_notifier.is_on_screen():
+		velocity = Vector2.ZERO
+		move_and_slide()
 		return
 	_shoot_cd = maxf(0.0, _shoot_cd - delta)
 	if _player_ref == null or not is_instance_valid(_player_ref):

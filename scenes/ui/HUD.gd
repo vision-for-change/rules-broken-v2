@@ -7,6 +7,7 @@ extends CanvasLayer
 
 @onready var integrity_bar:    ProgressBar        = $HealthBar
 @onready var integrity_label:  Label              = $Panel/VBox/IntegrityLabel
+@onready var health_percentage_label: Label       = %HealthPercentageLabel
 @onready var rules_container:  VBoxContainer      = $Panel/VBox/RulesScroll/RulesContainer
 @onready var tags_label:       Label              = $Panel/VBox/TagsLabel
 @onready var pause_btn:        Button             = $PauseBtn
@@ -15,15 +16,23 @@ extends CanvasLayer
 @onready var minimap_texture:  TextureRect        = $MinimapPanel/MinimapTexture
 @onready var minimap_dot:      ColorRect          = $MinimapPanel/MinimapTexture/PlayerDot
 @onready var super_speed_toggle: CheckBox         = $HackPanel/HackVBox/SuperSpeedToggle
-@onready var invincible_toggle: CheckBox          = $HackPanel/HackVBox/InvincibleToggle
 @onready var fast_bullets_toggle: CheckBox        = $HackPanel/HackVBox/FastBulletsToggle
-@onready var ultimate_bullets_toggle: CheckBox    = $HackPanel/HackVBox/UltimateBulletsToggle
 @onready var super_vision_toggle: CheckBox        = $HackPanel/HackVBox/SuperVisionToggle
+@onready var slow_time_toggle: CheckBox           = $HackPanel/HackVBox/SlowTimeToggle
+@onready var noclip_toggle: CheckBox              = $HackPanel/HackVBox/NoclipToggle
 @onready var hack_status:      Label              = $HackPanel/HackVBox/HackStatus
+@onready var boss_bar_root:    Control            = $BossBar
+@onready var boss_name_label:  Label              = $BossBar/BossName
+@onready var boss_health_bar:  ProgressBar         = $BossBar/BossHealthBar
+@onready var boss_health_label: Label              = $BossBar/BossHealthBar/BossHealthLabel
 
 var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
+var _boss_ref: Node2D = null
+
+const HACK_PANEL_TIME_SCALE := 0.2
+const HACK_SLOW_TIME_SCALE := 0.45
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -39,10 +48,10 @@ func _ready() -> void:
 	_style_hack_panel()
 	pause_btn.pressed.connect(_on_pause_pressed)
 	super_speed_toggle.toggled.connect(_on_hack_toggled)
-	invincible_toggle.toggled.connect(_on_hack_toggled)
 	fast_bullets_toggle.toggled.connect(_on_hack_toggled)
-	ultimate_bullets_toggle.toggled.connect(_on_hack_toggled)
 	super_vision_toggle.toggled.connect(_on_hack_toggled)
+	slow_time_toggle.toggled.connect(_on_hack_toggled)
+	noclip_toggle.toggled.connect(_on_hack_toggled)
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
@@ -52,11 +61,41 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
+	_update_boss_bar()
+
+func _exit_tree() -> void:
+	ScreenFX.clear_time_scale_override()
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("inspect"):
-		hack_panel.visible = not hack_panel.visible
+	if event is InputEventKey and event.is_action_pressed("inspect"):
+		var scene = get_tree().current_scene
+		if scene and scene.name.contains("LevelBoss"):
+			EventBus.log("!! HACKS DISABLED IN CORE SECTOR !!", "error")
+			return
+		_set_hack_panel_visible(not hack_panel.visible)
+		return
+	if not hack_panel.visible:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		var mouse_pos := get_viewport().get_mouse_position()
+		if not hack_panel.get_global_rect().has_point(mouse_pos):
+			_set_hack_panel_visible(false)
 
+func _set_hack_panel_visible(visible: bool) -> void:
+	hack_panel.visible = visible
+	if visible:
+		get_viewport().gui_release_focus()
+	_apply_hack_time_scale()
+
+func _apply_hack_time_scale() -> void:
+	if hack_panel.visible:
+		ScreenFX.set_time_scale_override(HACK_PANEL_TIME_SCALE)
+		return
+	if slow_time_toggle.button_pressed:
+		ScreenFX.set_time_scale_override(HACK_SLOW_TIME_SCALE)
+		return
+	ScreenFX.clear_time_scale_override()
+		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
 				$Panel/VBox/TagsLabel, $Panel/VBox/HintLabel]:
@@ -84,10 +123,11 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, invincible_toggle, fast_bullets_toggle, ultimate_bullets_toggle, super_vision_toggle]:
+	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle]:
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
+		toggle.focus_mode = Control.FOCUS_NONE
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -129,12 +169,13 @@ func _sync_hacks_from_player() -> void:
 	var modes: Dictionary = player.get_hacked_client_modes()
 	_syncing_hack_ui = true
 	super_speed_toggle.button_pressed = modes.get("super_speed", false)
-	invincible_toggle.button_pressed = modes.get("invincible", false)
 	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false)
-	ultimate_bullets_toggle.button_pressed = modes.get("ultimate_bullets", false)
 	super_vision_toggle.button_pressed = modes.get("super_vision", false)
+	slow_time_toggle.button_pressed = modes.get("slow_time", false)
+	noclip_toggle.button_pressed = modes.get("noclip", false)
 	_syncing_hack_ui = false
 	_update_hack_status()
+	_apply_hack_time_scale()
 
 func _on_hack_toggled(_enabled: bool) -> void:
 	if _syncing_hack_ui:
@@ -143,25 +184,26 @@ func _on_hack_toggled(_enabled: bool) -> void:
 	if player != null and player.has_method("set_hacked_client_modes"):
 		player.set_hacked_client_modes(
 			super_speed_toggle.button_pressed,
-			invincible_toggle.button_pressed,
 			fast_bullets_toggle.button_pressed,
-			ultimate_bullets_toggle.button_pressed,
-			super_vision_toggle.button_pressed
+			super_vision_toggle.button_pressed,
+			slow_time_toggle.button_pressed,
+			noclip_toggle.button_pressed
 		)
 	_update_hack_status()
+	_apply_hack_time_scale()
 
 func _update_hack_status() -> void:
 	var states: Array[String] = []
 	if super_speed_toggle.button_pressed:
 		states.append("SUPER SPEED")
-	if invincible_toggle.button_pressed:
-		states.append("INVINCIBLE")
 	if fast_bullets_toggle.button_pressed:
 		states.append("FASTER BULLETS")
-	if ultimate_bullets_toggle.button_pressed:
-		states.append("ULTIMATE BULLETS")
 	if super_vision_toggle.button_pressed:
 		states.append("SUPER VISION")
+	if slow_time_toggle.button_pressed:
+		states.append("SLOW TIME")
+	if noclip_toggle.button_pressed:
+		states.append("NOCLIP")
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _get_player() -> Node:
@@ -177,6 +219,17 @@ func _on_pause_pressed() -> void:
 
 func _on_rule_changed(_rule: Dictionary, _added: bool) -> void:
 	_refresh_rules()
+
+func bind_boss(boss: Node2D, boss_name: String = "CHATGPT") -> void:
+	_boss_ref = boss
+	if is_instance_valid(boss_name_label):
+		boss_name_label.text = boss_name
+	_update_boss_bar()
+
+func unbind_boss() -> void:
+	_boss_ref = null
+	if is_instance_valid(boss_bar_root):
+		boss_bar_root.visible = false
 
 func _refresh_rules() -> void:
 	for c in rules_container.get_children():
@@ -213,6 +266,8 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 		col = Color(1.0, 0.2, 0.1)
 	integrity_label.text = "SYSTEM HEALTH: %d/%d" % [int(new_val * 100.0), int(_max_integrity * 100.0)]
 	integrity_label.add_theme_color_override("font_color", col)
+	if is_instance_valid(health_percentage_label):
+		health_percentage_label.text = "%d%%" % int(ratio * 100.0)
 
 func _on_tag_changed(entity_id: String, _tag: String, _added: bool) -> void:
 	if entity_id == "player":
@@ -228,6 +283,31 @@ func _make_label(text: String, color: Color, size: int = 7) -> Label:
 	lbl.add_theme_constant_override("outline_size", 1)
 	lbl.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 	return lbl
+
+func _update_boss_bar() -> void:
+	if not is_instance_valid(_boss_ref):
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+	if not _boss_ref.has_method("get_health") or not _boss_ref.has_method("get_max_health"):
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+
+	var current_health: int = _boss_ref.call("get_health")
+	var max_health: int = _boss_ref.call("get_max_health")
+	if max_health <= 0:
+		if is_instance_valid(boss_bar_root):
+			boss_bar_root.visible = false
+		return
+
+	if is_instance_valid(boss_bar_root):
+		boss_bar_root.visible = true
+	if is_instance_valid(boss_health_bar):
+		boss_health_bar.max_value = max_health
+		boss_health_bar.value = current_health
+	if is_instance_valid(boss_health_label):
+		boss_health_label.text = "%d / %d" % [current_health, max_health]
 
 
 func _apply_fonts() -> void:

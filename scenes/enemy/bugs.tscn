@@ -28,6 +28,17 @@ animations = [{
 "speed": 1.0
 }]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_bg"]
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+bg_color = Color(1, 0.2, 0.2, 1)
+
 [node name="bugs" type="CharacterBody2D" unique_id=1329929761]
 collision_layer = 2
 script = ExtResource("1")
@@ -41,3 +52,17 @@ position = Vector2(-0.99999994, 0)
 rotation = 1.5707964
 scale = Vector2(1.25, 1.25)
 sprite_frames = SubResource("SpriteFrames_3ngay")
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -15.0
+offset_top = -28.0
+offset_right = 15.0
+offset_bottom = -24.0
+theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-12, -12, 24, 24)
