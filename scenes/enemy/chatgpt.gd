@@ -228,8 +228,19 @@ func _spawn_expanding_circle() -> void:
 	if player != null:
 		await grow_tween.finished
 		
-		var has_noclip = player.get("_hack_noclip") as bool
-		if not has_noclip and player.is_alive:
-			EventBus.player_caught.emit("chatgpt_boss")
+		# Check distance to player
+		var dist := global_position.distance_to(player.global_position)
+		if dist <= CIRCLE_MAX_RADIUS:
+			var has_noclip = player.get("_hack_noclip") as bool
+			if not has_noclip and player.is_alive:
+				# Instead of instant death, deal percentage damage to system integrity
+				var damage_amount := RuleManager.get_max_integrity() * PLAYER_DAMAGE_PERCENT
+				RuleManager.apply_integrity_damage(damage_amount)
+				
+				# Feedback for getting hit
+				EventBus.log("!! CORE PULSE DETECTED — SYSTEM INTEGRITY DAMAGED !!", "error")
+				ScreenFX.flash_screen(Color(1.0, 0.1, 0.1, 0.5), 0.25)
+				ScreenFX.screen_shake(10.0, 0.4)
+				AudioManager.play_sfx("dragon-studio-cinematic-boom")
 	
 	circle.queue_free()

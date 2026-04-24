@@ -30,9 +30,18 @@ var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
 var _boss_ref: Node2D = null
+var _timed_hacks: Dictionary = {}  # hack_name -> remaining_time
+var _hack_key_map := {
+	"1": "super_speed",
+	"2": "faster_bullets",
+	"3": "super_vision",
+	"4": "slow_time",
+	"5": "noclip"
+}
 
 const HACK_PANEL_TIME_SCALE := 0.2
 const HACK_SLOW_TIME_SCALE := 0.45
+const TIMED_HACK_DURATION := 10.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -55,25 +64,45 @@ func _ready() -> void:
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
+	_timed_hacks.clear()
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
 	hack_panel.visible = true
+<<<<<<< Updated upstream
+=======
+	_apply_hack_time_scale()
+	_set_hack_labels()
+>>>>>>> Stashed changes
 
 func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
 	_update_boss_bar()
+	_update_timed_hacks(_delta)
 
 func _exit_tree() -> void:
 	ScreenFX.clear_time_scale_override()
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.is_action_pressed("inspect"):
-		var scene = get_tree().current_scene
-		if scene and scene.name.contains("LevelBoss"):
-			EventBus.log("!! HACKS DISABLED IN CORE SECTOR !!", "error")
+	if event is InputEventKey and event.pressed:
+		var key_text = OS.get_keycode_string(event.keycode)
+		if key_text in _hack_key_map:
+			_activate_timed_hack(_hack_key_map[key_text])
+			get_tree().root.set_input_as_handled()
 			return
+<<<<<<< Updated upstream
 		return
+=======
+	
+	if event is InputEventKey and event.is_action_pressed("inspect"):
+		return
+	if not hack_panel.visible:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		var mouse_pos := get_viewport().get_mouse_position()
+		if not hack_panel.get_global_rect().has_point(mouse_pos):
+			return
+>>>>>>> Stashed changes
 
 func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
@@ -83,6 +112,50 @@ func _apply_hack_time_scale() -> void:
 		ScreenFX.set_time_scale_override(HACK_SLOW_TIME_SCALE)
 		return
 	ScreenFX.clear_time_scale_override()
+
+func _activate_timed_hack(hack_name: String) -> void:
+	_timed_hacks[hack_name] = TIMED_HACK_DURATION
+	
+	match hack_name:
+		"super_speed":
+			if not super_speed_toggle.button_pressed:
+				super_speed_toggle.button_pressed = true
+		"faster_bullets":
+			if not fast_bullets_toggle.button_pressed:
+				fast_bullets_toggle.button_pressed = true
+		"super_vision":
+			if not super_vision_toggle.button_pressed:
+				super_vision_toggle.button_pressed = true
+		"slow_time":
+			if not slow_time_toggle.button_pressed:
+				slow_time_toggle.button_pressed = true
+		"noclip":
+			if not noclip_toggle.button_pressed:
+				noclip_toggle.button_pressed = true
+
+func _update_timed_hacks(delta: float) -> void:
+	var hacks_to_remove = []
+	
+	for hack_name in _timed_hacks.keys():
+		_timed_hacks[hack_name] -= delta
+		if _timed_hacks[hack_name] <= 0.0:
+			hacks_to_remove.append(hack_name)
+	
+	for hack_name in hacks_to_remove:
+		_timed_hacks.erase(hack_name)
+		match hack_name:
+			"super_speed":
+				super_speed_toggle.button_pressed = false
+			"faster_bullets":
+				fast_bullets_toggle.button_pressed = false
+			"super_vision":
+				super_vision_toggle.button_pressed = false
+			"slow_time":
+				slow_time_toggle.button_pressed = false
+			"noclip":
+				noclip_toggle.button_pressed = false
+	
+	_update_hack_status()
 		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
@@ -116,6 +189,13 @@ func _style_hack_panel() -> void:
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))
 		toggle.focus_mode = Control.FOCUS_NONE
+
+func _set_hack_labels() -> void:
+	super_speed_toggle.text = "[1] SUPER SPEED"
+	fast_bullets_toggle.text = "[2] FASTER BULLETS"
+	super_vision_toggle.text = "[3] SUPER VISION"
+	slow_time_toggle.text = "[4] SLOW TIME"
+	noclip_toggle.text = "[5] NOCLIP"
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -164,6 +244,14 @@ func _sync_hacks_from_player() -> void:
 	_syncing_hack_ui = false
 	_update_hack_status()
 	_apply_hack_time_scale()
+	if player.has_method("set_hacked_client_modes"):
+		player.set_hacked_client_modes(
+			super_speed_toggle.button_pressed,
+			fast_bullets_toggle.button_pressed,
+			super_vision_toggle.button_pressed,
+			slow_time_toggle.button_pressed,
+			noclip_toggle.button_pressed
+		)
 
 func _on_hack_toggled(_enabled: bool) -> void:
 	if _syncing_hack_ui:
@@ -183,16 +271,22 @@ func _on_hack_toggled(_enabled: bool) -> void:
 func _update_hack_status() -> void:
 	var states: Array[String] = []
 	if super_speed_toggle.button_pressed:
-		states.append("SUPER SPEED")
+		states.append(_format_hack_status("SUPER SPEED", "super_speed"))
 	if fast_bullets_toggle.button_pressed:
-		states.append("FASTER BULLETS")
+		states.append(_format_hack_status("FASTER BULLETS", "faster_bullets"))
 	if super_vision_toggle.button_pressed:
-		states.append("SUPER VISION")
+		states.append(_format_hack_status("SUPER VISION", "super_vision"))
 	if slow_time_toggle.button_pressed:
-		states.append("SLOW TIME")
+		states.append(_format_hack_status("SLOW TIME", "slow_time"))
 	if noclip_toggle.button_pressed:
-		states.append("NOCLIP")
+		states.append(_format_hack_status("NOCLIP", "noclip"))
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
+
+func _format_hack_status(hack_label: String, hack_name: String) -> String:
+	if hack_name in _timed_hacks:
+		var remaining = int(ceil(_timed_hacks[hack_name]))
+		return "%s [%ds]" % [hack_label, remaining]
+	return hack_label
 
 func _get_player() -> Node:
 	var players = get_tree().get_nodes_in_group("player")
