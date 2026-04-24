@@ -28,9 +28,9 @@ func _ready() -> void:
 	$VBox.anchor_right = 0.5
 	$VBox.anchor_bottom = 0.5
 	$VBox.offset_left = -300
-	$VBox.offset_top = 100
+	$VBox.offset_top = 0
 	$VBox.offset_right = 300
-	$VBox.offset_bottom = 500
+	$VBox.offset_bottom = 400
 	$VBox.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
