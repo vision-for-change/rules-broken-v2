@@ -32,28 +32,36 @@ func take_damage(amount: int) -> bool:
 		return false
 	
 	var player = get_tree().get_first_node_in_group("player")
-	if player == null:
-		return false
-	
-	var can_damage = false
 	
 	if amount >= 9999:
-		can_damage = true
-	else:
-		if player.has_method("get_hacked_client_modes") and player.has_method("is_dashing"):
+		if player != null and player.has_method("get_hacked_client_modes") and player.has_method("is_dashing"):
 			var modes = player.get_hacked_client_modes()
 			var is_dashing = player.is_dashing()
 			if modes.get("super_speed", false) and is_dashing:
-				can_damage = true
-	
-	if not can_damage:
+				_health = 0
+				shatter()
+				return true
 		return false
 	
-	_health = maxi(0, _health - amount)
-	if _health > 0:
+	return false
+
+func check_dash_collision(player_node: Node) -> bool:
+	if _defeated or player_node == null:
 		return false
-	shatter()
-	return true
+	
+	if not player_node.has_method("is_dashing") or not player_node.has_method("get_hacked_client_modes"):
+		return false
+	
+	var is_dashing = player_node.is_dashing()
+	var modes = player_node.get_hacked_client_modes()
+	var has_super_speed = modes.get("super_speed", false)
+	
+	if is_dashing and has_super_speed:
+		_health = 0
+		shatter()
+		return true
+	
+	return false
 
 func _physics_process(delta: float) -> void:
 	if _defeated: return

@@ -136,6 +136,9 @@ func _physics_process(delta: float) -> void:
 	
 	if _hack_noclip:
 		_clamp_position_to_bounds()
+	
+	if _dash_timer > 0.0 and _hack_super_speed:
+		_check_dash_collision()
 
 	if velocity.length_squared() > 16.0:
 		_ghost_step(delta)
@@ -535,3 +538,17 @@ func _spawn_player_ghost(dash_blur: bool = false) -> void:
 
 func is_dashing() -> bool:
 	return _dash_timer > 0.0
+
+func _check_dash_collision() -> void:
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	for enemy in enemies:
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		if not (enemy is Node2D):
+			continue
+		if enemy.name != "worm":
+			continue
+		var distance = global_position.distance_to((enemy as Node2D).global_position)
+		if distance < 100.0:
+			if enemy.has_method("take_damage"):
+				enemy.call("take_damage", 9999)

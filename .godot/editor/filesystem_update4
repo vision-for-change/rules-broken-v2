@@ -4,3 +4,4 @@ res://scenes/player/Player.gd
 res://scenes/ui/HUD.gd
 res://scenes/ui/WeaponDisplay.gd
 res://scenes/enemy/chatgpt.tscn
+res://scenes/enemy/worm.gd
