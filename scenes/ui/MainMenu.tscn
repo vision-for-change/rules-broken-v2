@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://mm001"]
 
 [ext_resource type="Script" uid="uid://cvhy46rrn3uxi" path="res://scenes/ui/MainMenu.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ceejpftpks03c" path="res://assets/sprites/system_breach.webp" id="2_6jbdy"]
 
 [node name="MainMenu" type="Control" unique_id=1033863554]
 layout_mode = 3
@@ -35,17 +36,12 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -222.5
-offset_top = -97.0
-offset_right = 222.5
-offset_bottom = 97.0
+offset_left = -234.0
+offset_top = 50.0
+offset_right = 211.0
+offset_bottom = 287.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="TitleLabel" type="Label" parent="VBox" unique_id=2025929778]
-layout_mode = 2
-text = "SYSTEM//BREACH"
-horizontal_alignment = 1
 
 [node name="SubLabel" type="Label" parent="VBox" unique_id=172132152]
 layout_mode = 2
@@ -122,6 +118,11 @@ horizontal_alignment = 1
 [node name="CloseInstructionsBtn" type="Button" parent="InstructionsPanel/VBox" unique_id=1171733339]
 layout_mode = 2
 text = "CLOSE"
+
+[node name="SystemBreach" type="Sprite2D" parent="." unique_id=1371535118]
+position = Vector2(571, 214)
+scale = Vector2(10, 10)
+texture = ExtResource("2_6jbdy")
 
 [connection signal="pressed" from="VBox/PlayBtn" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="VBox/Floor5Btn" to="." method="_on_floor_5_pressed"]

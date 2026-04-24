@@ -33,7 +33,6 @@ func _ready() -> void:
 	$VBox.offset_bottom = 200
 	$VBox.alignment = BoxContainer.ALIGNMENT_CENTER
 
-	_style_label($VBox/TitleLabel, 40, Color(0.2, 1.0, 0.5, 1))
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
 	_style_label($VBox/PlayBtn, 20)
 	_style_label($VBox/Floor5Btn, 18)

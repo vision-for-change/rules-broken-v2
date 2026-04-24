@@ -6,3 +6,5 @@ res://scenes/ui/WeaponDisplay.gd
 res://scenes/enemy/chatgpt.tscn
 res://scenes/enemy/worm.gd
 res://scenes/enemy/Snake.gd
+res://scenes/ui/MainMenu.tscn
+res://scenes/ui/MainMenu.gd
