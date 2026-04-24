@@ -65,7 +65,7 @@ var fire_rate := 0.3
 @onready var hint_label: Label     = $HintLabel
 @onready var inventory: Node = $Inventory
 @onready var gun_sprite: Sprite2D  = $Sprite2D   # GUN NODE
-@onready var player_sprite: Sprite2D = $PlayerSprite
+@onready var player_sprite: AnimatedSprite2D = $PlayerSprite
 
 func _ready() -> void:
 	add_to_group("player")
@@ -142,6 +142,7 @@ func _physics_process(delta: float) -> void:
 		print("DEBUG: _physics_process calling _check_dash_collision: dash_timer=%.2f, super_speed=%s" % [_dash_timer, _hack_super_speed])
 		_check_dash_collision()
 
+	_update_player_animation()
 	if velocity.length_squared() > 16.0:
 		_ghost_step(delta)
 	if Input.is_action_just_pressed("interact") and _interact_target != null:
@@ -156,11 +157,19 @@ func _physics_process(delta: float) -> void:
 		_shoot()
 
 func _update_facing_to_mouse() -> void:
+	if velocity.x > 0.05:
+		player_sprite.flip_h = true
+	elif velocity.x < -0.05:
+		player_sprite.flip_h = false
+	
 	var aim_dir: Vector2 = get_global_mouse_position() - global_position
 	if aim_dir.length_squared() < 0.001:
 		return
-	rotation = aim_dir.angle()
-	hint_label.rotation = -rotation
+	if is_instance_valid(gun_sprite):
+		gun_sprite.rotation = aim_dir.angle()
+		var gun_distance: float = 30.0
+		gun_sprite.position = aim_dir.normalized() * gun_distance
+	hint_label.rotation = -aim_dir.angle()
 
 func _shoot() -> void:
 	if inventory == null or not inventory.has_method("request_shot"):
@@ -359,19 +368,27 @@ func _play_shatter_effect() -> void:
 		_spawn_shatter_from_sprite(gun_sprite, 3, 3, SHATTER_DURATION * 0.9, SHATTER_FORCE * 0.8)
 		gun_sprite.visible = false
 
-func _spawn_shatter_from_sprite(source_sprite: Sprite2D, rows: int, cols: int, duration: float, force: float) -> void:
+func _spawn_shatter_from_sprite(source_sprite: Node2D, rows: int, cols: int, duration: float, force: float) -> void:
 	if source_sprite == null:
 		return
-	if source_sprite.texture == null:
+	var texture: Texture2D = null
+	if source_sprite is Sprite2D:
+		texture = source_sprite.texture
+	elif source_sprite is AnimatedSprite2D:
+		var animated = source_sprite as AnimatedSprite2D
+		if animated.sprite_frames != null and animated.animation != "":
+			texture = animated.sprite_frames.get_frame_texture(animated.animation, animated.frame)
+	
+	if texture == null:
 		return
-	var texture_size: Vector2 = source_sprite.texture.get_size()
+	var texture_size: Vector2 = texture.get_size()
 	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return
 	var piece_size: Vector2 = texture_size / Vector2(float(cols), float(rows))
 	for y in rows:
 		for x in cols:
 			var atlas: AtlasTexture = AtlasTexture.new()
-			atlas.atlas = source_sprite.texture
+			atlas.atlas = texture
 			atlas.region = Rect2(Vector2(x, y) * piece_size, piece_size)
 			var shard: Sprite2D = Sprite2D.new()
 			shard.texture = atlas
@@ -557,3 +574,11 @@ func _check_dash_collision() -> void:
 		if distance < 50.0:
 			print("DEBUG: Enemy in range! Calling check_dash_collision")
 			enemy.call("check_dash_collision", self)
+
+func _update_player_animation() -> void:
+	if not is_instance_valid(player_sprite):
+		return
+	if velocity.length() > 0.05:
+		player_sprite.play("default")
+	else:
+		player_sprite.stop()

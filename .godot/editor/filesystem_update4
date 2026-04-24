@@ -6,3 +6,4 @@ res://scenes/ui/GameOver.gd
 res://scenes/ui/GunSelectScreen.gd
 res://scenes/ui/HUD.gd
 res://autoloads/ScreenFX.gd
+res://scenes/player/Player.tscn
