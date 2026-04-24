@@ -120,7 +120,7 @@ layout_mode = 2
 text = "CLOSE"
 
 [node name="SystemBreach" type="Sprite2D" parent="." unique_id=1371535118]
-position = Vector2(571, 214)
+position = Vector2(571.00006, 181.00002)
 scale = Vector2(10, 10)
 texture = ExtResource("2_6jbdy")
 
