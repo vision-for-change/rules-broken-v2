@@ -57,6 +57,7 @@ var _default_collision_mask := 3
 var damage := 10
 var max_ammo := 12
 var fire_rate := 0.3
+var health := 100
 
 
 @onready var body_rect: ColorRect  = $BodyRect
@@ -221,6 +222,14 @@ func _on_interact_exit(body: Node) -> void:
 	if body == _interact_target:
 		_interact_target = null
 		hint_label.visible = false
+
+func take_damage(amount: int) -> void:
+	if not is_alive:
+		return
+	health -= amount
+	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
+	if health <= 0:
+		EventBus.player_caught.emit("enemy")
 
 func _on_action_denied(action: Dictionary, reason: String) -> void:
 	if action["actor_id"] != ENTITY_ID:
