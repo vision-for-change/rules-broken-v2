@@ -73,6 +73,7 @@ func check_dash_collision(player_node: Node) -> bool:
 	if is_dashing and has_super_speed:
 		print("DEBUG: Snake shattering!")
 		_health = 0
+		ScreenFX.slow_motion_pulse(0.2, 1.0)
 		shatter()
 		return true
 	
