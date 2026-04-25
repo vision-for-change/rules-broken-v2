@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var heal_amount := 1.0
+@export var heal_amount := 3.0
 @export var lifetime := 8.0
 
 var _consumed := false
@@ -23,6 +23,11 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_consumed = true
 	RuleManager.apply_integrity_heal(heal_amount)
+	
+	# Heal the player as well
+	if body.has_method("heal"):
+		body.call("heal", int(heal_amount * 30))
+	
 	EventBus.log("HEALTH POWER-UP +%d" % int(heal_amount * 100.0), "info")
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.12)
 	queue_free()
