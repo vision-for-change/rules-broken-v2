@@ -23,6 +23,7 @@ var _demo_container: Node2D
 var _player: Node = null
 var _enemy: Node = null
 var _hud_label: Label = null
+var _demo_camera: Camera2D = null
 
 @onready var _logo: TextureRect = $Center/VBox/Logo
 @onready var _title: Label = $Center/VBox/Title
@@ -153,6 +154,15 @@ func _build_matrix_background() -> void:
 		})
 
 func _setup_demo() -> void:
+	# create a Camera2D for the demo and center it on screen
+	_demo_camera = Camera2D.new()
+	_demo_camera.current = true
+	_demo_camera.position = get_viewport_rect().size * 0.5
+	_demo_camera.zoom = Vector2(1.15, 1.15)
+	_demo_camera.position_smoothing_enabled = true
+	_demo_camera.position_smoothing_speed = 6.0
+	_demo_container.add_child(_demo_camera)
+
 	# HUD label
 	_hud_label = Label.new()
 	_hud_label.text = "ACCESS: 0%"
@@ -247,6 +257,10 @@ func _start_demo_sequence() -> void:
 	_enemy.modulate = Color(1,1,1,0)
 
 	var t := create_tween()
+	# camera slight zoom-in during intro
+	if is_instance_valid(_demo_camera):
+		var cam_zoom_t := _demo_camera.create_tween()
+		cam_zoom_t.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	# player enters
 	t.tween_property(_player, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	t.tween_property(_player, "position", Vector2(vp.x * 0.36, vp.y * 0.62), 1.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -265,6 +279,11 @@ func _start_demo_sequence() -> void:
 		var lunge := create_tween()
 		lunge.tween_property(_enemy, "position", Vector2(vp.x * 0.56, vp.y * 0.62), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		AudioManager.play_sfx_with_options("enemy-lunge", -10.0, 1.0, 1.0)
+		if is_instance_valid(_demo_camera):
+			var caml := _demo_camera.create_tween()
+			caml.tween_property(_demo_camera, "zoom", Vector2(0.88,0.88), 0.45)
+			caml.tween_interval(0.6)
+			caml.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 0.6)
 	)
 
 	# enemy fires a laser toward the player
