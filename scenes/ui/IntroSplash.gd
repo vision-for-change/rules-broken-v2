@@ -156,7 +156,8 @@ func _build_matrix_background() -> void:
 func _setup_demo() -> void:
 	# create a Camera2D for the demo and center it on screen
 	_demo_camera = Camera2D.new()
-	_demo_camera.current = true
+	# make_current() is the correct API to activate a Camera2D
+	_demo_camera.make_current()
 	_demo_camera.position = get_viewport_rect().size * 0.5
 	_demo_camera.zoom = Vector2(1.15, 1.15)
 	_demo_camera.position_smoothing_enabled = true
