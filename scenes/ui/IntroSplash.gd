@@ -8,8 +8,6 @@ const MATRIX_ROW_SPACING := 28.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.85, 0.45, 0.42)
 
-const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
-
 var _matrix_bg: Control
 var _matrix_columns: Array = []
 var _transition_started := false
@@ -18,8 +16,6 @@ var _intro_tween: Tween
 # Demo nodes
 var _canvas_layer: CanvasLayer
 var _demo_container: Node2D
-var _player: Node = null
-var _hud_label: Label = null
 var _demo_camera: Camera2D = null
 
 @onready var _logo: TextureRect = $Center/VBox/Logo
@@ -161,30 +157,6 @@ func _setup_demo() -> void:
 	_demo_camera.position_smoothing_speed = 6.0
 	_demo_container.add_child(_demo_camera)
 
-	# HUD label
-	_hud_label = Label.new()
-	_hud_label.text = "ACCESS: 0%"
-	_hud_label.add_theme_font_size_override("font_size", 18)
-	_hud_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
-	_hud_label.add_theme_font_size_override("font_size", 18)
-	# anchor across the top and center the text
-	_hud_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_hud_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hud_label.custom_minimum_size = Vector2(0, 28) # give some top padding
-	add_child(_hud_label)
-
-	# instantiate player into demo container
-	_player = PLAYER_SCENE.instantiate()
-
-	# position it offscreen initially
-	var vp = get_viewport_rect().size
-	_player.position = Vector2(-220, vp.y * 0.62)
-
-	# ensure it starts invisible
-	_player.modulate = Color(1,1,1,0)
-
-	_demo_container.add_child(_player)
-
 func _play_intro_sequence() -> void:
 	# slower timings for dramatic effect
 	_scanline.position = Vector2(0, -24)
@@ -239,37 +211,8 @@ func _start_scanline_sweep() -> void:
 		)
 
 func _start_demo_sequence() -> void:
-	# Fade in and move player to center (slower pacing)
-	var vp = get_viewport_rect().size
-	_player.modulate = Color(1,1,1,0)
-
-	var t := create_tween()
-	# camera slight zoom-in during intro
-	if is_instance_valid(_demo_camera):
-		var cam_zoom_t := _demo_camera.create_tween()
-		cam_zoom_t.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 1.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	# player enters
-	t.tween_property(_player, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(_player, "position", Vector2(vp.x * 0.5, vp.y * 0.62), 2.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-
-	# HUD progress display
-	t.tween_interval(2.2)
-	t.tween_callback(func():
-		# HUD progress faster
-		var hud_t := create_tween()
-		for i in range(1, 7):
-			var pct = i * 16
-			hud_t.tween_interval(0.16)
-			hud_t.tween_callback(func(pct_value=pct):
-				_hud_label.text = "ACCESS: %d%%" % [pct_value]
-			)
-		# final text
-		hud_t.tween_interval(0.6)
-		hud_t.tween_callback(func():
-			_hud_label.text = "ACCESS: GRANTED"
-			AudioManager.play_sfx_with_options("success-chime", -6.0, 1.0, 1.0)
-		)
-	)
+	# Demo sequence placeholder - no longer needed
+	pass
 
 func _transition_to_menu() -> void:
 	if _transition_started:
