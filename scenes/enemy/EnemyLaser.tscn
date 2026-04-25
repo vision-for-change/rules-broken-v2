@@ -1,20 +1,20 @@
 [gd_scene format=3 uid="uid://ryrejdjtk5aa"]
 
-[ext_resource type="Script" path="res://scenes/enemy/EnemyLaser.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/bullet.webp" id="2"]
+[ext_resource type="Script" uid="uid://drsqeje6ij8nm" path="res://scenes/enemy/EnemyLaser.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dt8hwt6i3p842" path="res://assets/bullet.webp" id="2"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(10, 3)
 
-[node name="EnemyLaser" type="Area2D"]
-collision_layer = 0
-collision_mask = 1
+[node name="EnemyLaser" type="Area2D" unique_id=2050838053]
 z_index = 6
+collision_layer = 0
 script = ExtResource("1")
+integrity_damage = 0.2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1866551544]
 shape = SubResource("1")
 
-[node name="Beam" type="Sprite2D" parent="."]
-texture = ExtResource("2")
+[node name="Beam" type="Sprite2D" parent="." unique_id=177580890]
 modulate = Color(1, 0.2, 0.2, 1)
+texture = ExtResource("2")
