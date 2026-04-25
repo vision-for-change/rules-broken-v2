@@ -14,3 +14,4 @@ res://scenes/levels/LevelBoss.gd
 res://scenes/objects/HealthPickup.tscn
 res://scenes/player/Bullet.gd
 res://scenes/objects/HealthPickup.gd
+res://scenes/objects/Exit.gd

@@ -709,6 +709,11 @@ func _apply_fonts() -> void:
 func _count_total_enemies() -> void:
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	_total_enemies = enemies.size()
+	# Wait a frame if count is still 0 and try again
+	if _total_enemies == 0:
+		await get_tree().process_frame
+		enemies = get_tree().get_nodes_in_group("enemy")
+		_total_enemies = enemies.size()
 
 func _create_enemy_counter_label() -> void:
 	var status := _get_enemy_kill_status()

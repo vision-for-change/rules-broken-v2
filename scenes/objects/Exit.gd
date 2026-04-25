@@ -11,24 +11,60 @@ extends Area2D
 @onready var label: Label         = $Label
 
 var _triggered := false
+var _initial_enemy_count := 0
+var _defeated_enemy_count := 0
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_update_visual()
 	EventBus.rule_removed.connect(_on_rule_removed)
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
+	EventBus.enemy_defeated.connect(_on_enemy_defeated)
+	
+	# Count initial enemies
+	var enemy_entities = EntityRegistry.get_entities_of_type("bug")
+	_initial_enemy_count += enemy_entities.size()
+	
+	var snake_entities = EntityRegistry.get_entities_of_type("snake")
+	_initial_enemy_count += snake_entities.size()
+	
+	var worm_entities = EntityRegistry.get_entities_of_type("worm")
+	_initial_enemy_count += worm_entities.size()
+	
+	var chatgpt_entities = EntityRegistry.get_entities_of_type("chatgpt")
+	_initial_enemy_count += chatgpt_entities.size()
+	
+	var trojan_entities = EntityRegistry.get_entities_of_type("trojan")
+	_initial_enemy_count += trojan_entities.size()
+	
+	var rogue_entities = EntityRegistry.get_entities_of_type("rogue")
+	_initial_enemy_count += rogue_entities.size()
 
 func _update_visual() -> void:
-	var is_locked = (locked_by != "" and RuleManager.is_rule_active(locked_by)) or (requires_tag != "" and not EntityRegistry.has_tag("player", requires_tag))
+	var enemies_remaining_to_kill = maxi(0, _initial_enemy_count - _defeated_enemy_count - (_initial_enemy_count / 2))
+	var is_locked = (_initial_enemy_count > 0 and enemies_remaining_to_kill > 0) or (locked_by != "" and RuleManager.is_rule_active(locked_by)) or (requires_tag != "" and not EntityRegistry.has_tag("player", requires_tag))
+	
 	if is_locked:
 		body_rect.color = Color(0.6, 0.1, 0.1)
-		label.text = "EXIT\nLOCKED"
+		if enemies_remaining_to_kill > 0:
+			label.text = "EXIT\nLOCKED\n[%d/%d]" % [_defeated_enemy_count, (_initial_enemy_count + 1) / 2]
+		else:
+			label.text = "EXIT\nLOCKED"
 	else:
 		body_rect.color = Color(0.1, 0.9, 0.4)
 		label.text = "EXIT"
 
 func _on_body_entered(body: Node) -> void:
 	if _triggered or not body.is_in_group("player"): return
+
+	# Check enemy defeat requirement
+	var enemies_killed = _defeated_enemy_count
+	var enemies_required = (_initial_enemy_count + 1) / 2
+	if _initial_enemy_count > 0 and enemies_killed < enemies_required:
+		EventBus.log("EXIT DENIED: killed %d/%d enemies required" % [enemies_killed, enemies_required], "warn")
+		AudioManager.play_sfx("denied")
+		ScreenFX.flash_screen(Color(1, 0.2, 0.1, 0.3), 0.2)
+		return
 
 	# Tag check
 	if requires_tag != "" and not EntityRegistry.has_tag("player", requires_tag):
@@ -52,6 +88,10 @@ func _on_body_entered(body: Node) -> void:
 		EventBus.log("EXIT BLOCKED: %s" % result["reason"], "warn")
 		AudioManager.play_sfx("denied")
 		ScreenFX.flash_screen(Color(1, 0.2, 0.1, 0.3), 0.2)
+
+func _on_enemy_defeated(_enemy_id: String) -> void:
+	_defeated_enemy_count += 1
+	_update_visual()
 
 func _on_rule_removed(rule_id: String) -> void:
 	if rule_id == locked_by:
