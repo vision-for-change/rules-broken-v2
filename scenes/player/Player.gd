@@ -244,6 +244,7 @@ func take_damage(amount: int) -> void:
 	if not is_alive:
 		return
 	health -= amount
+	EventBus.player_health_changed.emit(health, 100)
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 	if health <= 0:
 		EventBus.player_caught.emit("enemy")

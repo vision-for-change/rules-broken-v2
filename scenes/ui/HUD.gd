@@ -32,6 +32,9 @@ var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
 var _boss_ref: Node2D = null
 var _timed_hacks: Dictionary = {}  # hack_name -> remaining_time
+var _enemies_defeated := 0
+var _total_enemies := 0
+var _enemy_counter_label: Label = null
 var _hack_key_map := {
 	"1": "super_speed",
 	"2": "faster_bullets",
@@ -49,11 +52,13 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	pause_btn.process_mode = Node.PROCESS_MODE_ALWAYS
 	_max_integrity = RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
-	integrity_bar.max_value = _max_integrity * 100.0
+	integrity_bar.max_value = 100.0
 	EventBus.rule_registered.connect(_on_rule_changed.bind(true))
 	EventBus.rule_removed.connect(func(_id): _refresh_rules())
 	EventBus.integrity_changed.connect(_on_integrity_changed)
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
+	EventBus.enemy_defeated.connect(_on_enemy_defeated)
+	EventBus.player_health_changed.connect(_on_player_health_changed)
 	_style_static_labels()
 	_style_pause_button()
 	_style_hack_panel()
@@ -71,6 +76,8 @@ func _ready() -> void:
 	_timed_hacks.clear()
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
+	call_deferred("_count_total_enemies")
+	call_deferred("_create_enemy_counter_label")
 	hack_panel.visible = true
 	_apply_hack_time_scale()
 	_set_hack_labels()
@@ -422,6 +429,23 @@ func _on_tag_changed(entity_id: String, _tag: String, _added: bool) -> void:
 	if entity_id == "player":
 		_refresh_tags()
 
+func _on_player_health_changed(current_health: int, max_health: int) -> void:
+	if not is_instance_valid(integrity_bar):
+		return
+	var health_ratio := float(current_health) / float(max_health) if max_health > 0 else 0.0
+	integrity_bar.value = health_ratio * 100.0
+	var col: Color
+	if health_ratio > 0.6:
+		col = Color(0.2, 0.9, 0.4)
+	elif health_ratio > 0.3:
+		col = Color(1.0, 0.7, 0.1)
+	else:
+		col = Color(1.0, 0.2, 0.1)
+	integrity_label.text = "SYSTEM HEALTH: %d/%d" % [current_health, max_health]
+	integrity_label.add_theme_color_override("font_color", col)
+	if is_instance_valid(health_percentage_label):
+		health_percentage_label.text = "%d%%" % int(health_ratio * 100.0)
+
 func _make_label(text: String, color: Color, size: int = 7) -> Label:
 	var lbl = Label.new()
 	lbl.text = text
@@ -463,3 +487,49 @@ func _apply_fonts() -> void:
 	for node in get_tree().get_nodes_in_group("hud_label"):
 		node.add_theme_font_size_override("font_size", 7)
 		node.add_theme_color_override("font_color", Color(0.6, 0.8, 0.65))
+
+func _count_total_enemies() -> void:
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	_total_enemies = enemies.size()
+	print("DEBUG: Total enemies counted: ", _total_enemies)
+
+func _create_enemy_counter_label() -> void:
+	if _total_enemies <= 0:
+		_count_total_enemies()
+	print("DEBUG: Creating enemy counter label, total_enemies = ", _total_enemies)
+	_enemy_counter_label = Label.new()
+	_enemy_counter_label.text = "TARGETS: 0/%d" % _total_enemies
+	_enemy_counter_label.add_theme_font_size_override("font_size", 18)
+	_enemy_counter_label.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
+	_enemy_counter_label.add_theme_color_override("outline_color", Color.BLACK)
+	_enemy_counter_label.add_theme_constant_override("outline_size", 2)
+	_enemy_counter_label.position = Vector2(12, 12)
+	_enemy_counter_label.z_index = 100
+	add_child(_enemy_counter_label)
+	print("DEBUG: Enemy counter label created and added to scene")
+
+func _on_enemy_defeated(_enemy_id: String) -> void:
+	_enemies_defeated += 1
+	print("DEBUG: Enemy defeated! Count: ", _enemies_defeated, "/", _total_enemies)
+	_update_enemy_counter_display()
+
+func _update_enemy_counter_display() -> void:
+	if _enemy_counter_label != null:
+		var half_req = ceili(_total_enemies / 2.0)
+		var requirement_met = _enemies_defeated >= half_req
+		var color = Color(0.2, 1.0, 0.45) if requirement_met else Color(0.8, 1.0, 0.9)
+		_enemy_counter_label.add_theme_color_override("font_color", color)
+		_enemy_counter_label.text = "TARGETS: %d/%d" % [_enemies_defeated, _total_enemies]
+		print("DEBUG: Counter display updated: ", _enemy_counter_label.text)
+
+func _get_enemy_kill_status() -> Dictionary:
+	var half_req = ceili(_total_enemies / 2.0)
+	var requirement_met = _enemies_defeated >= half_req
+	var remaining = maxi(0, half_req - _enemies_defeated)
+	return {
+		"met": requirement_met,
+		"defeated": _enemies_defeated,
+		"total": _total_enemies,
+		"required": half_req,
+		"remaining": remaining
+	}

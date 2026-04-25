@@ -36,6 +36,8 @@ signal system_stable()
 signal terminal_accessed(terminal_id: String)
 signal door_state_changed(door_id: String, is_open: bool)
 signal loophole_discovered(loophole_id: String, description: String)
+signal enemy_defeated(enemy_id: String)
+signal player_health_changed(current_health: int, max_health: int)
 signal level_complete()
 signal player_caught(catcher_id: String)
 
