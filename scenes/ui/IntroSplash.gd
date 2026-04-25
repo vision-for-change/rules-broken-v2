@@ -8,10 +8,20 @@ const MATRIX_ROW_SPACING := 28.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.85, 0.45, 0.42)
 
+const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
+const WORM_SCENE := preload("res://scenes/enemy/worm.tscn")
+
 var _matrix_bg: Control
 var _matrix_columns: Array = []
 var _transition_started := false
 var _intro_tween: Tween
+
+# Demo nodes
+var _canvas_layer: CanvasLayer
+var _demo_container: Node2D
+var _player: Node = null
+var _enemy: Node = null
+var _hud_label: Label = null
 
 @onready var _logo: TextureRect = $Center/VBox/Logo
 @onready var _title: Label = $Center/VBox/Title
@@ -28,6 +38,16 @@ func _ready() -> void:
 	_style_static_ui()
 	_build_matrix_background()
 	move_child(_matrix_bg, 1)
+
+	# create a CanvasLayer so demo sprites render above the matrix background
+	_canvas_layer = CanvasLayer.new()
+	_canvas_layer.layer = 1
+	add_child(_canvas_layer)
+
+	_demo_container = Node2D.new()
+	_canvas_layer.add_child(_demo_container)
+
+	_setup_demo()
 
 	AudioManager.play_music_by_file(INTRO_MUSIC)
 	_play_intro_sequence()
@@ -131,6 +151,37 @@ func _build_matrix_background() -> void:
 			"direction": direction
 		})
 
+func _setup_demo() -> void:
+	# HUD label
+	_hud_label = Label.new()
+	_hud_label.text = "ACCESS: 0%"
+	_hud_label.add_theme_font_size_override("font_size", 18)
+	_hud_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
+	_hud_label.rect_position = Vector2(get_viewport_rect().size.x * 0.5 - 80, 18)
+	add_child(_hud_label)
+
+	# instantiate player and enemy into demo container
+	_player = PLAYER_SCENE.instantiate()
+	_enemy = WORM_SCENE.instantiate()
+
+	# position them offscreen initially
+	var vp = get_viewport_rect().size
+	_player.position = Vector2(-220, vp.y * 0.62)
+	_enemy.position = Vector2(vp.x + 220, vp.y * 0.62)
+
+	# ensure they start invisible
+	if _player.has_method("set_modulate"):
+		_player.modulate = Color(1,1,1,0)
+	else:
+		# many nodes have modulate property at root, try setting on a Sprite child
+		pass
+
+	if _enemy.has_method("set_modulate"):
+		_enemy.modulate = Color(1,1,1,0)
+
+	_demo_container.add_child(_player)
+	_demo_container.add_child(_enemy)
+
 func _play_intro_sequence() -> void:
 	_scanline.position = Vector2(0, -24)
 	_scanline.size = Vector2(get_viewport_rect().size.x, 5)
@@ -163,9 +214,88 @@ func _play_intro_sequence() -> void:
 		_status.text = "SYNCING INTERFACE"
 		_status.modulate.a = 1.0
 		_start_scanline_sweep()
+		# start the player/enemy demo shortly after sync
+		var demo_delay := create_tween()
+		demo_delay.tween_interval(0.5)
+		demo_delay.tween_callback(_start_demo_sequence)
 	)
 	_intro_tween.tween_interval(1.45)
 	_intro_tween.tween_callback(_transition_to_menu)
+
+func _start_scanline_sweep() -> void:
+	if is_instance_valid(_scanline):
+		_scanline.modulate.a = 0.34
+		_scanline.position = Vector2(0, -24)
+		var sweep := create_tween()
+		sweep.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		sweep.tween_property(_scanline, "position", Vector2(0, get_viewport_rect().size.y + 24.0), 0.85)
+		sweep.tween_callback(func():
+			if is_instance_valid(_scanline):
+				_scanline.modulate.a = 0.0
+		)
+
+func _start_demo_sequence() -> void:
+	# Fade in and move player to center
+	var vp = get_viewport_rect().size
+	_player.modulate = Color(1,1,1,0)
+	_enemy.modulate = Color(1,1,1,0)
+
+	var t := create_tween()
+	# player enters
+	t.tween_property(_player, "modulate:a", 1.0, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	t.tween_property(_player, "position", Vector2(vp.x * 0.36, vp.y * 0.62), 0.8).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# enemy enters slightly later
+	t.tween_interval(0.25)
+	t.tween_callback(func():
+		AudioManager.play_sfx_with_options("enemy-approach", -10.0, 1.0, 1.0)
+	)
+	t.tween_property(_enemy, "modulate:a", 1.0, 0.25)
+	t.tween_property(_enemy, "position", Vector2(vp.x * 0.66, vp.y * 0.62), 0.9).set_trans(Tween.TRANS_LINEAR)
+
+	# simulate brief duel: player 'shoots' and enemy flashes then disintegrates
+	t.tween_interval(1.1)
+	t.tween_callback(func():
+		AudioManager.play_sfx_with_options("laser-shoot", -6.0, 1.0, 1.0)
+		# small recoil
+		var recoil := create_tween()
+		recoil.tween_property(_player, "position", _player.position + Vector2(-12,0), 0.06).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		recoil.tween_property(_player, "position", _player.position, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		# enemy flash
+		_enemy.modulate = Color(1,1,1,1)
+		var eflash := create_tween()
+		eflash.tween_property(_enemy, "modulate:a", 0.2, 0.06)
+		eflash.tween_property(_enemy, "modulate:a", 1.0, 0.08)
+	)
+
+	# enemy disintegrates
+	t.tween_interval(0.25)
+	t.tween_callback(func():
+		var die := create_tween()
+		die.tween_property(_enemy, "scale", Vector2(1.6,1.6), 0.28).set_trans(Tween.TRANS_BOUNCE)
+		die.tween_property(_enemy, "modulate:a", 0.0, 0.35)
+		# HUD progress
+		var prog := 0
+		var hud_t := create_tween()
+		for i in 1:6:
+			var pct = i * 16
+			hud_t.tween_interval(0.05)
+			hud_t.tween_callback(func(p=pct):
+				_hud_label.text = "ACCESS: %d%%" % [p]
+			)
+		# final text
+		hud_t.tween_interval(0.25)
+		hud_t.tween_callback(func():
+			_hud_label.text = "ACCESS: GRANTED"
+			AudioManager.play_sfx_with_options("success-chime", -6.0, 1.0, 1.0)
+		)
+	)
+
+func _transition_to_menu() -> void:
+	if _transition_started:
+		return
+	_transition_started = true
+	ScreenFX.transition_to_scene(MAIN_MENU_SCENE, 0.28, 0.48)
 
 func _start_scanline_sweep() -> void:
 	if is_instance_valid(_scanline):
