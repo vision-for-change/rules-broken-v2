@@ -28,3 +28,4 @@ res://scenes/enemy/TrojanHorse.gd
 res://scenes/ui/HUD.tscn
 res://scenes/enemy/EnemyLaser.tscn
 res://scenes/enemy/RogueAI.gd
+res://scenes/ui/WinScreen.gd
