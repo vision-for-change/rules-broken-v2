@@ -31,7 +31,7 @@ var _syncing_hack_ui := false
 var _minimap_world_size := Vector2.ZERO
 var _max_integrity := 1.0
 var _boss_ref: Node2D = null
-var _timed_hacks: Dictionary = {}  # hack_name -> remaining_time
+var _active_hacks_queue: Array[String] = []  # Tracks order of active hacks (max 2)
 var _enemies_defeated := 0
 var _total_enemies := 0
 var _enemy_counter_label: Label = null
@@ -63,17 +63,16 @@ func _ready() -> void:
 	_style_pause_button()
 	_style_hack_panel()
 	pause_btn.pressed.connect(_on_pause_pressed)
-	super_speed_toggle.toggled.connect(_on_hack_toggled)
-	fast_bullets_toggle.toggled.connect(_on_hack_toggled)
-	super_vision_toggle.toggled.connect(_on_hack_toggled)
-	slow_time_toggle.toggled.connect(_on_hack_toggled)
-	noclip_toggle.toggled.connect(_on_hack_toggled)
+	super_speed_toggle.toggled.connect(func(enabled): _on_hack_toggled("super_speed", enabled))
+	fast_bullets_toggle.toggled.connect(func(enabled): _on_hack_toggled("faster_bullets", enabled))
+	super_vision_toggle.toggled.connect(func(enabled): _on_hack_toggled("super_vision", enabled))
+	slow_time_toggle.toggled.connect(func(enabled): _on_hack_toggled("slow_time", enabled))
+	noclip_toggle.toggled.connect(func(enabled): _on_hack_toggled("noclip", enabled))
 	if unlimited_bullets_toggle != null:
-		unlimited_bullets_toggle.toggled.connect(_on_hack_toggled)
+		unlimited_bullets_toggle.toggled.connect(func(enabled): _on_hack_toggled("unlimited_bullets", enabled))
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
-	_timed_hacks.clear()
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
 	call_deferred("_count_total_enemies")
@@ -86,7 +85,6 @@ func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
 	_update_boss_bar()
-	_update_timed_hacks(_delta)
 	_update_hack_display()
 
 func _exit_tree() -> void:
@@ -101,7 +99,18 @@ func _input(event: InputEvent) -> void:
 				if unlimited_bullets_toggle != null:
 					unlimited_bullets_toggle.button_pressed = not unlimited_bullets_toggle.button_pressed
 			else:
-				_activate_timed_hack(hack_name)
+				# Toggle the hack directly
+				match hack_name:
+					"super_speed":
+						super_speed_toggle.button_pressed = not super_speed_toggle.button_pressed
+					"faster_bullets":
+						fast_bullets_toggle.button_pressed = not fast_bullets_toggle.button_pressed
+					"super_vision":
+						super_vision_toggle.button_pressed = not super_vision_toggle.button_pressed
+					"slow_time":
+						slow_time_toggle.button_pressed = not slow_time_toggle.button_pressed
+					"noclip":
+						noclip_toggle.button_pressed = not noclip_toggle.button_pressed
 			get_tree().root.set_input_as_handled()
 			return
 		return
@@ -124,49 +133,8 @@ func _apply_hack_time_scale() -> void:
 		return
 	ScreenFX.clear_time_scale_override()
 
-func _activate_timed_hack(hack_name: String) -> void:
-	_timed_hacks[hack_name] = TIMED_HACK_DURATION
-	
-	match hack_name:
-		"super_speed":
-			if not super_speed_toggle.button_pressed:
-				super_speed_toggle.button_pressed = true
-		"faster_bullets":
-			if not fast_bullets_toggle.button_pressed:
-				fast_bullets_toggle.button_pressed = true
-		"super_vision":
-			if not super_vision_toggle.button_pressed:
-				super_vision_toggle.button_pressed = true
-		"slow_time":
-			if not slow_time_toggle.button_pressed:
-				slow_time_toggle.button_pressed = true
-		"noclip":
-			if not noclip_toggle.button_pressed:
-				noclip_toggle.button_pressed = true
-
 func _update_timed_hacks(delta: float) -> void:
-	var hacks_to_remove = []
-	
-	for hack_name in _timed_hacks.keys():
-		_timed_hacks[hack_name] -= delta
-		if _timed_hacks[hack_name] <= 0.0:
-			hacks_to_remove.append(hack_name)
-	
-	for hack_name in hacks_to_remove:
-		_timed_hacks.erase(hack_name)
-		match hack_name:
-			"super_speed":
-				super_speed_toggle.button_pressed = false
-			"faster_bullets":
-				fast_bullets_toggle.button_pressed = false
-			"super_vision":
-				super_vision_toggle.button_pressed = false
-			"slow_time":
-				slow_time_toggle.button_pressed = false
-			"noclip":
-				noclip_toggle.button_pressed = false
-	
-	_update_hack_status()
+	pass
 		
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
@@ -225,13 +193,13 @@ func _style_hack_panel() -> void:
 		toggle.focus_mode = Control.FOCUS_NONE
 
 func _set_hack_labels() -> void:
-	super_speed_toggle.text = _format_hack_label("[1] SUPER SPEED", "super_speed")
-	fast_bullets_toggle.text = _format_hack_label("[2] FASTER BULLETS", "faster_bullets")
-	super_vision_toggle.text = _format_hack_label("[3] SUPER VISION", "super_vision")
-	slow_time_toggle.text = _format_hack_label("[4] SLOW TIME", "slow_time")
-	noclip_toggle.text = _format_hack_label("[5] NOCLIP", "noclip")
+	super_speed_toggle.text = "[1] SUPER SPEED"
+	fast_bullets_toggle.text = "[2] FASTER BULLETS"
+	super_vision_toggle.text = "[3] SUPER VISION"
+	slow_time_toggle.text = "[4] SLOW TIME"
+	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
-		unlimited_bullets_toggle.text = _format_hack_label("[6] UNLIMITED AMMO", "unlimited_bullets")
+		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -291,12 +259,23 @@ func _sync_hacks_from_player() -> void:
 			unlimited_bullets_toggle.button_pressed
 		)
 
-func _on_hack_toggled(enabled: bool) -> void:
+func _on_hack_toggled(hack_name: String, enabled: bool) -> void:
 	if _syncing_hack_ui:
 		return
 	
 	if enabled:
-		_start_timer_for_toggled_hack()
+		# Add to queue
+		if hack_name not in _active_hacks_queue:
+			_active_hacks_queue.append(hack_name)
+		
+		# If we now have more than 2 hacks, disable the oldest one
+		if _active_hacks_queue.size() > 2:
+			var oldest = _active_hacks_queue.pop_front()
+			_disable_hack(oldest)
+	else:
+		# Remove from queue
+		if hack_name in _active_hacks_queue:
+			_active_hacks_queue.erase(hack_name)
 	
 	var player = _get_player()
 	if player != null and player.has_method("set_hacked_client_modes"):
@@ -311,19 +290,23 @@ func _on_hack_toggled(enabled: bool) -> void:
 	_update_hack_status()
 	_apply_hack_time_scale()
 
-func _start_timer_for_toggled_hack() -> void:
-	if super_speed_toggle.button_pressed and "super_speed" not in _timed_hacks:
-		_timed_hacks["super_speed"] = TIMED_HACK_DURATION
-	if fast_bullets_toggle.button_pressed and "faster_bullets" not in _timed_hacks:
-		_timed_hacks["faster_bullets"] = TIMED_HACK_DURATION
-	if super_vision_toggle.button_pressed and "super_vision" not in _timed_hacks:
-		_timed_hacks["super_vision"] = TIMED_HACK_DURATION
-	if slow_time_toggle.button_pressed and "slow_time" not in _timed_hacks:
-		_timed_hacks["slow_time"] = TIMED_HACK_DURATION
-	if noclip_toggle.button_pressed and "noclip" not in _timed_hacks:
-		_timed_hacks["noclip"] = TIMED_HACK_DURATION
-	if unlimited_bullets_toggle != null and unlimited_bullets_toggle.button_pressed and "unlimited_bullets" not in _timed_hacks:
-		_timed_hacks["unlimited_bullets"] = TIMED_HACK_DURATION
+func _disable_hack(hack_name: String) -> void:
+	_syncing_hack_ui = true
+	match hack_name:
+		"super_speed":
+			super_speed_toggle.button_pressed = false
+		"faster_bullets":
+			fast_bullets_toggle.button_pressed = false
+		"super_vision":
+			super_vision_toggle.button_pressed = false
+		"slow_time":
+			slow_time_toggle.button_pressed = false
+		"noclip":
+			noclip_toggle.button_pressed = false
+		"unlimited_bullets":
+			if unlimited_bullets_toggle != null:
+				unlimited_bullets_toggle.button_pressed = false
+	_syncing_hack_ui = false
 
 func _update_hack_status() -> void:
 	var states: Array[String] = []
@@ -342,25 +325,19 @@ func _update_hack_status() -> void:
 	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _format_hack_status(hack_label: String, hack_name: String) -> String:
-	if hack_name in _timed_hacks:
-		var remaining = int(ceil(_timed_hacks[hack_name]))
-		return "%s [%ds]" % [hack_label, remaining]
 	return hack_label
 
 func _format_hack_label(base_label: String, hack_name: String) -> String:
-	if hack_name in _timed_hacks:
-		var remaining = int(ceil(_timed_hacks[hack_name]))
-		return "%s [%ds]" % [base_label, remaining]
 	return base_label
 
 func _update_hack_display() -> void:
-	super_speed_toggle.text = _format_hack_label("[1] SUPER SPEED", "super_speed")
-	fast_bullets_toggle.text = _format_hack_label("[2] FASTER BULLETS", "faster_bullets")
-	super_vision_toggle.text = _format_hack_label("[3] SUPER VISION", "super_vision")
-	slow_time_toggle.text = _format_hack_label("[4] SLOW TIME", "slow_time")
-	noclip_toggle.text = _format_hack_label("[5] NOCLIP", "noclip")
+	super_speed_toggle.text = "[1] SUPER SPEED"
+	fast_bullets_toggle.text = "[2] FASTER BULLETS"
+	super_vision_toggle.text = "[3] SUPER VISION"
+	slow_time_toggle.text = "[4] SLOW TIME"
+	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
-		unlimited_bullets_toggle.text = _format_hack_label("[6] UNLIMITED AMMO", "unlimited_bullets")
+		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
 
 func _get_player() -> Node:
 	var players = get_tree().get_nodes_in_group("player")
@@ -491,12 +468,10 @@ func _apply_fonts() -> void:
 func _count_total_enemies() -> void:
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	_total_enemies = enemies.size()
-	print("DEBUG: Total enemies counted: ", _total_enemies)
 
 func _create_enemy_counter_label() -> void:
 	if _total_enemies <= 0:
 		_count_total_enemies()
-	print("DEBUG: Creating enemy counter label, total_enemies = ", _total_enemies)
 	_enemy_counter_label = Label.new()
 	_enemy_counter_label.text = "TARGETS: 0/%d" % _total_enemies
 	_enemy_counter_label.add_theme_font_size_override("font_size", 18)
@@ -506,11 +481,9 @@ func _create_enemy_counter_label() -> void:
 	_enemy_counter_label.position = Vector2(12, 12)
 	_enemy_counter_label.z_index = 100
 	add_child(_enemy_counter_label)
-	print("DEBUG: Enemy counter label created and added to scene")
 
 func _on_enemy_defeated(_enemy_id: String) -> void:
 	_enemies_defeated += 1
-	print("DEBUG: Enemy defeated! Count: ", _enemies_defeated, "/", _total_enemies)
 	_update_enemy_counter_display()
 
 func _update_enemy_counter_display() -> void:
@@ -520,7 +493,6 @@ func _update_enemy_counter_display() -> void:
 		var color = Color(0.2, 1.0, 0.45) if requirement_met else Color(0.8, 1.0, 0.9)
 		_enemy_counter_label.add_theme_color_override("font_color", color)
 		_enemy_counter_label.text = "TARGETS: %d/%d" % [_enemies_defeated, _total_enemies]
-		print("DEBUG: Counter display updated: ", _enemy_counter_label.text)
 
 func _get_enemy_kill_status() -> Dictionary:
 	var half_req = ceili(_total_enemies / 2.0)

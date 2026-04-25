@@ -52,6 +52,7 @@ func get_max_health() -> int:
 	return max_health
 
 func _play_death_animation() -> void:
+	EventBus.enemy_defeated.emit(entity_id)
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	collision_layer = 0

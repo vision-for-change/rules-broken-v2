@@ -27,6 +27,7 @@ func take_damage(_amount: int) -> bool:
 	if _defeated:
 		return false
 	_defeated = true
+	EventBus.enemy_defeated.emit(entity_id)
 	_transform_into_bug()
 	return true
 

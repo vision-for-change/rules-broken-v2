@@ -34,12 +34,6 @@ func _process(delta: float) -> void:
 		return
 	if system_integrity <= 0.0:
 		return
-	var active_hacks := _count_active_player_hacks()
-	if active_hacks <= 0:
-		return
-	var hack_factor := float(active_hacks)
-	var scaled_drain := HACK_DRAIN_PER_SECOND * hack_factor * hack_factor
-	_adjust_integrity(-scaled_drain * delta)
 
 # ─── Public API ───────────────────────────────────────────────────
 
