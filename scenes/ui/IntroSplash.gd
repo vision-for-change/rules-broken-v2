@@ -47,6 +47,12 @@ func _ready() -> void:
 	AudioManager.play_music_by_file(INTRO_MUSIC)
 	_play_intro_sequence()
 
+func _input(event: InputEvent) -> void:
+	if not _transition_started and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
+		if event.pressed:
+			get_tree().root.set_input_as_handled()
+			_transition_to_menu()
+
 func _process(delta: float) -> void:
 	if _matrix_columns.is_empty():
 		return
