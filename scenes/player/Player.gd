@@ -10,6 +10,7 @@ const DEFAULT_CAMERA_ZOOM := Vector2(1.5, 1.5)
 const SUPER_VISION_CAMERA_ZOOM := Vector2(1.0, 1.0)
 const ENTITY_ID = "player"
 const BULLET_SCENE = preload("res://scenes/player/Bullet.tscn")
+const SLASH_SPRITE = preload("res://assets/sprites/slash.webp")
 const GHOST_INTERVAL := 0.045
 const DASH_GHOST_INTERVAL := 0.015
 const GHOST_LIFETIME := 0.16

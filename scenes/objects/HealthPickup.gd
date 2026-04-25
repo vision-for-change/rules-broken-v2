@@ -4,9 +4,18 @@ extends Area2D
 @export var lifetime := 8.0
 
 var _consumed := false
+var _start_position: Vector2
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	_start_position = global_position
+	_start_bobbing()
+
+func _start_bobbing() -> void:
+	var tween := create_tween()
+	tween.set_loops()
+	tween.tween_property(self, "global_position:y", _start_position.y - 8.0, 0.6)
+	tween.tween_property(self, "global_position:y", _start_position.y, 0.6)
 
 func _physics_process(delta: float) -> void:
 	lifetime -= delta

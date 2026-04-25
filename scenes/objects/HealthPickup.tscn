@@ -17,4 +17,4 @@ shape = SubResource("1")
 
 [node name="Core" type="Sprite2D" parent="."]
 texture = ExtResource("2")
-scale = Vector2(1.5, 1.5)
+scale = Vector2(0.6, 0.6)

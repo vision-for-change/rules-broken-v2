@@ -14,7 +14,7 @@ matrix_ak.webp::CompressedTexture2D::5868212879590024874::1776963411::1776963411
 matrix_gun.webp::CompressedTexture2D::2145338967321586748::1776697194::1776697194::1::::<><><>0<>0<>de377b8f8478e54ffb449b766eccab33<>res://.godot/imported/matrix_gun.webp-c501e2300faa4795a2f93a882b21b2a8.ctex::
 trojan_horse.webp::CompressedTexture2D::8504329212033190589::1777076051::1777076055::1::::<><><>0<>0<>3665287945ab705655334fc9a5692c8e<>res://.godot/imported/trojan_horse.webp-b3fe0188f920ea22f2df551ae53958ee.ctex::
 UMP.webp::CompressedTexture2D::3902296875884929521::1777126503::1777126529::1::::<><><>0<>0<>323575dbd83ca3a40debd7b668c4a15f<>res://.godot/imported/UMP.webp-c14badaf868d73edf0ac7a3ac982176e.ctex::
-::res://assets/sprites/::1777152618
+::res://assets/sprites/::1777152941
 Assault rifle.png::CompressedTexture2D::6179233912457772487::1776874205::1776874246::1::::<><><>0<>0<>af82cf6e05313386966c652f350933d6<>res://.godot/imported/Assault rifle.png-b4a618c726c21f54bdbc4b4e9a6d5e89.ctex::
 bug.webp::CompressedTexture2D::5180193860152076698::1776720696::1776720690::1::::<><><>0<>0<>bd2e95bb3a53b06e4e950e93ffbafcb1<>res://.godot/imported/bug.webp-880176d2de63e747bc2a45214865fd3f.ctex::
 EndScreen.jpg::CompressedTexture2D::6932970789014842484::1776963842::1776963875::1::::<><><>0<>0<>1e09426792d4cf3bd63c7b43f13bd025<>res://.godot/imported/EndScreen.jpg-45076807601e99a5b0b7b9b1483e62b4.ctex::
@@ -26,6 +26,7 @@ Pistol-removebg-preview (1).png::CompressedTexture2D::2067981405200506215::17768
 pixilart-sprite.webp::CompressedTexture2D::864569804124181081::1777068168::1777068168::1::::<><><>0<>0<>98ba20280412b81d89c900191f3e7352<>res://.godot/imported/pixilart-sprite.webp-1f2d59ad04ee9acd0b582c5057e3685e.ctex::
 Player.webp::CompressedTexture2D::1528239566783033741::1776874205::1776874246::1::::<><><>0<>0<>ba50dc1be5733de556ec39ef3451340b<>res://.godot/imported/Player.webp-4511bab7b16b9afdfd029020df6458a3.ctex::
 PUT_KENNEY_SPRITES_HERE.txt::TextFile::-1::1776630741::0::1::::<><><>0<>0<><>::
+slash.webp::CompressedTexture2D::2154085675200736670::1777152941::1777152941::1::::<><><>0<>0<>fc89cfa0c6346a2bc88fd3e9059a1a47<>res://.godot/imported/slash.webp-aae4499e59f956464564c5f75b6e17b3.ctex::
 snake_segment.webp::CompressedTexture2D::4503152989202493278::1776964869::1776964870::1::::<><><>0<>0<>23f6dd8b91e3f3dac2abcc389ad2d15f<>res://.godot/imported/snake_segment.webp-a2fb2a6c13de94a50f7fb9d77649adf1.ctex::
 system_breach.webp::CompressedTexture2D::5062427785461709038::1777053966::1777053967::1::::<><><>0<>0<>6fda37fa018b74b039497de9454a720e<>res://.godot/imported/system_breach.webp-fa0c7db927d24156a8efaf27a4ea19fd.ctex::
 USP.jpg::CompressedTexture2D::9185243717968667606::1776874205::1776874246::1::::<><><>0<>0<>30b99e9b17812a95495ee84087fb1c37<>res://.godot/imported/USP.jpg-6044899e2d43b1bff86c64603a1f7a2c.ctex::
@@ -69,7 +70,7 @@ TerrainPainter.gd::GDScript::2811713657254189848::1776636615::0::1::::<>TileMapL
 Exit.gd::GDScript::1620526890335362651::1776631742::0::1::::<>Area2D<><>0<>0<><>::
 Exit.tscn::PackedScene::7235699657::1776630741::0::1::::<><><>0<>0<><>::res://scenes/objects/Exit.gd
 HealthPickup.gd::GDScript::3889708876367515446::1777076929::0::1::::<>Area2D<><>0<>0<><>::
-HealthPickup.tscn::PackedScene::-1::1776698909::0::1::::<><><>0<>0<><>::res://scenes/objects/HealthPickup.gd
+HealthPickup.tscn::PackedScene::-1::1777152906::0::1::::<><><>0<>0<><>::res://scenes/objects/HealthPickup.gd<>uid://qhfj2fpv3d6u::::res://assets/sprites/medkit.webp
 RuleSign.gd::GDScript::1754312901263274047::1776630741::0::1::::<>StaticBody2D<><>0<>0<><>::
 RuleSign.tscn::PackedScene::36328643679221529::1776630741::0::1::::<><><>0<>0<><>::res://scenes/objects/RuleSign.gd
 Terminal.gd::GDScript::6477316491288515538::1776960964::0::1::::<>StaticBody2D<><>0<>0<><>::

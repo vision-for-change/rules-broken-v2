@@ -2,7 +2,9 @@ extends Area2D
 
 @export var speed := 520.0
 @export var lifetime := 1.2
+const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
 const HEALTH_PICKUP_SCENE := preload("res://scenes/objects/HealthPickup.tscn")
+const SLASH_SPRITE := preload("res://assets/sprites/slash.webp")
 const HEALTH_DROP_CHANCE_DENOM := 3
 const ENEMY_HEALTH_PICKUP_HEAL_AMOUNT := 0.5
 const GHOST_INTERVAL := 0.02
@@ -29,7 +31,8 @@ func setup_as_lightsaber(owner_body: PhysicsBody2D, direction: Vector2) -> void:
 	setup(owner_body, direction, 1.2) # Faster
 	_is_lightsaber_bullet = true
 	if is_instance_valid(bullet_sprite):
-		bullet_sprite.modulate = Color(0.2, 1.0, 0.8) # Cyan energy color
+		bullet_sprite.texture = SLASH_SPRITE
+		bullet_sprite.rotation += PI
 	lifetime = 0.5 # Shorter range
 
 func _physics_process(delta: float) -> void:
@@ -109,6 +112,8 @@ func _spawn_ghost() -> void:
 	ghost.scale = bullet_sprite.scale * 1.2
 	ghost.global_position = global_position
 	ghost.global_rotation = rotation
+	if _is_lightsaber_bullet:
+		ghost.rotation += PI
 	ghost.z_index = z_index - 1
 	ghost.modulate = Color(0.45, 1.0, 0.65, 0.75)
 	scene_root.add_child(ghost)
