@@ -10,3 +10,5 @@ res://scenes/enemy/chatgpt.gd
 res://scenes/levels/BaseLevel.gd
 res://scenes/ui/WeaponDisplay.gd
 res://scenes/ui/HUD.tscn
+res://scenes/levels/LevelBoss.gd
+res://scenes/objects/HealthPickup.tscn
