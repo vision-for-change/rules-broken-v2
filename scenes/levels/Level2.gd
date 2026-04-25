@@ -9,6 +9,7 @@ const EXTRA_HALLWAYS := 28
 const HALLWAY_WIDTH := 12
 const BUG_SCENE := preload("res://scenes/enemy/bugs.tscn")
 const SNAKE_SCENE := preload("res://scenes/enemy/Snake.tscn")
+const TROJAN_SCENE := preload("res://scenes/enemy/TrojanHorse.tscn")
 const CHATGPT_BOSS_SCENE := preload("res://scenes/enemy/chatgpt.tscn")
 const FLOOR_DOOR_SCRIPT := preload("res://scenes/levels/FloorDoor.gd")
 const MIN_BUGS_PER_ROOM := 2
@@ -336,10 +337,39 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		if not is_floor_five and room != main_room and room != door_room:
 			_spawn_room_obstacles(obstacle_root, room)
 		if not is_floor_five and room != main_room:
-			if _rng.randf() > 0.4:
-				_spawn_room_bugs(enemy_root, room)
-			else:
-				_spawn_room_snakes(enemy_root, room)
+			match _floor_index:
+				1:
+					# Level 1: Only bugs
+					_spawn_room_bugs(enemy_root, room)
+				2:
+					# Level 2: Bugs + Snakes
+					if _rng.randf() > 0.4:
+						_spawn_room_bugs(enemy_root, room)
+					else:
+						_spawn_room_snakes(enemy_root, room)
+				3:
+					# Level 3: Bugs + Snakes + Trojans
+					var r := _rng.randf()
+					if r > 0.6:
+						_spawn_room_bugs(enemy_root, room)
+					elif r > 0.3:
+						_spawn_room_snakes(enemy_root, room)
+					else:
+						_spawn_room_trojans(enemy_root, room)
+				4:
+					# Level 4: Level 3 + higher intensity
+					var r := _rng.randf()
+					if r > 0.6:
+						_spawn_room_bugs(enemy_root, room, 2.5) # 2.5x more bugs
+					elif r > 0.3:
+						_spawn_room_snakes(enemy_root, room, 2.0) # 2x more snakes
+					else:
+						_spawn_room_trojans(enemy_root, room, 2.0) # 2x more trojans
+				_:
+					if _rng.randf() > 0.4:
+						_spawn_room_bugs(enemy_root, room)
+					else:
+						_spawn_room_snakes(enemy_root, room)
 
 	if is_floor_five:
 		var big_room := rooms[1] if rooms.size() > 1 else main_room
@@ -500,8 +530,9 @@ func _spawn_obstacle(parent: Node2D, obstacle_cells: Rect2i) -> void:
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
 
-func _spawn_room_bugs(parent: Node2D, room: Rect2i) -> void:
-	var bug_count := _rng.randi_range(MIN_BUGS_PER_ROOM, MAX_BUGS_PER_ROOM)
+func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
+	var base_count := _rng.randi_range(MIN_BUGS_PER_ROOM, MAX_BUGS_PER_ROOM)
+	var bug_count := int(base_count * count_mult)
 	for i in range(bug_count):
 		var bug := BUG_SCENE.instantiate()
 		if bug == null:
@@ -509,10 +540,16 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i) -> void:
 		_bug_spawn_index += 1
 		bug.set("entity_id", "bug_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		bug.position = _cell_to_world(_random_cell_in_room(room, 3))
+		# Level 4 intensity increase: higher speed
+		if _floor_index == 4:
+			var current_speed = bug.get("move_speed")
+			if current_speed == null: current_speed = 140.0
+			bug.set("move_speed", current_speed * 1.3)
 		parent.add_child(bug)
 
-func _spawn_room_snakes(parent: Node2D, room: Rect2i) -> void:
-	var count := _rng.randi_range(1, 2)
+func _spawn_room_snakes(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
+	var base_count := _rng.randi_range(1, 2)
+	var count := int(base_count * count_mult)
 	for i in range(count):
 		var snake := SNAKE_SCENE.instantiate()
 		if snake == null:
@@ -520,7 +557,27 @@ func _spawn_room_snakes(parent: Node2D, room: Rect2i) -> void:
 		_bug_spawn_index += 1
 		snake.set("entity_id", "snake_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		snake.position = _cell_to_world(_random_cell_in_room(room, 3))
+		if _floor_index == 4:
+			var current_speed = snake.get("move_speed")
+			if current_speed == null: current_speed = 120.0
+			snake.set("move_speed", current_speed * 1.3)
 		parent.add_child(snake)
+
+func _spawn_room_trojans(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
+	var base_count := _rng.randi_range(1, 2)
+	var count := int(base_count * count_mult)
+	for i in range(count):
+		var trojan := TROJAN_SCENE.instantiate()
+		if trojan == null:
+			continue
+		_bug_spawn_index += 1
+		trojan.set("entity_id", "trojan_floor_%d_%d" % [_floor_index, _bug_spawn_index])
+		trojan.position = _cell_to_world(_random_cell_in_room(room, 3))
+		if _floor_index == 4:
+			var current_speed = trojan.get("move_speed")
+			if current_speed == null: current_speed = 100.0
+			trojan.set("move_speed", current_speed * 1.3)
+		parent.add_child(trojan)
 
 func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 	var min_x := room.position.x + margin
@@ -623,9 +680,10 @@ func _on_floor_door_used() -> void:
 		return
 	_transitioning = true
 	
-	if _floor_index >= 5:
+	if _floor_index >= 4: # Level 4 leads to Level 5 (Boss)
+		_advance_requested = true
 		await _play_exit_transition()
-		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
+		ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
 		return
 
 	_advance_requested = true
@@ -636,9 +694,8 @@ func _on_chatgpt_death() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
-	_advance_requested = true
 	await _play_exit_transition()
-	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+	ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")
 
 func _on_chatgpt_shatter() -> void:
 	if _player_for_death_cam == null or _camera_at_player == null:

@@ -180,7 +180,7 @@ func _spawn_final_key_interactive(room: Rect2i, parent: Node2D) -> void:
 	
 	var visual := ColorRect.new()
 	visual.size = Vector2(14, 14); visual.position = Vector2(-7, -7)
-	visual.color = Color(1, 0.9, 0)
+	visual.color = Color(1, 0.9, 0)	
 	key_obj.add_child(visual)
 	
 	var shape = CollisionShape2D.new()
