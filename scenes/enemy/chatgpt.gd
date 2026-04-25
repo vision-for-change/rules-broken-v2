@@ -215,7 +215,7 @@ func _perform_spin_barrage() -> void:
 
 	# Fire projectiles over the duration; timers are scaled by Engine.time_scale
 	var interval := BARRAGE_DURATION / float(BARRAGE_PROJECTILES)
-	for i in BARRAGE_PROJECTILES:
+	for i in range(BARRAGE_PROJECTILES):
 		if _defeated:
 			break
 		var angle := TAU * float(i) / float(BARRAGE_PROJECTILES) + randf_range(-BARRAGE_SPREAD_JITTER, BARRAGE_SPREAD_JITTER)
