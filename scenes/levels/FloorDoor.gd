@@ -10,7 +10,7 @@ func get_interact_hint() -> String:
 		var status = hud.call("_get_enemy_kill_status")
 		if not status["met"]:
 			return "Eliminate %d more targets" % status["remaining"]
-	return "Enter next floor"
+	return "Collect access key"
 
 func on_player_interact(_result: Dictionary) -> void:
 	if _used:

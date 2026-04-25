@@ -15,6 +15,7 @@ var _ghost_timer := 0.0
 var _player_ref: Node2D = null
 var _dash_dodge_armed := false
 var _dash_dodge_triggered := false
+var _player_damage := 15
 
 @onready var beam: Sprite2D = $Beam
 
@@ -27,6 +28,7 @@ func setup(owner_body: Node2D, direction: Vector2) -> void:
 	_owner_body = owner_body
 	_direction = direction.normalized() if direction.length_squared() > 0.0 else Vector2.RIGHT
 	rotation = _direction.angle()
+	_player_damage = _resolve_player_damage(owner_body)
 
 func _physics_process(delta: float) -> void:
 	global_position += _direction * speed * delta
@@ -57,7 +59,7 @@ func _on_body_entered(body: Node) -> void:
 			RuleManager.apply_integrity_damage(1.0) # ~11% of integrity
 		
 		if body.has_method("take_damage"):
-			body.take_damage(15) # 15% of health
+			body.take_damage(_player_damage)
 			
 		EventBus.log("SYSTEM INTEGRITY COMPROMISED", "error")
 		queue_free()
@@ -147,3 +149,10 @@ func _try_trigger_dash_dodge_slowmo() -> void:
 		_dash_dodge_triggered = true
 		ScreenFX.flash_screen(Color(0.1, 1.0, 0.35, 0.28), 0.14)
 		ScreenFX.slow_motion_pulse()
+
+func _resolve_player_damage(owner_body: Node2D) -> int:
+	if owner_body == null:
+		return 15
+	if owner_body.get_script() != null and str(owner_body.get_script().resource_path) == "res://scenes/enemy/bugs.gd":
+		return 5
+	return 15

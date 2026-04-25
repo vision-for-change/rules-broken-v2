@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://trojan001"]
 
 [ext_resource type="Script" path="res://scenes/enemy/TrojanHorse.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://cf2lbhws1a23w" path="res://assets/sprites/bug.webp" id="2"]
+[ext_resource type="Texture2D" uid="uid://dtftca6p5bcuf" path="res://assets/trojan_horse.webp" id="2"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(32, 32)

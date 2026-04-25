@@ -18,6 +18,12 @@ const MIN_OBSTACLES_PER_ROOM := 2
 const MAX_OBSTACLES_PER_ROOM := 5
 const OUTER_WALL_THICKNESS_TILES := 100
 const OUTER_WALL_COLLISION_LAYER := 8
+const EXIT_KILL_REQUIREMENTS := {
+	1: 10,
+	2: 15,
+	3: 20,
+	4: 25
+}
 
 var _rng := RandomNumberGenerator.new()
 var _wall_material: ShaderMaterial
@@ -28,6 +34,10 @@ var _floor_five_cutscene_played := false
 var _floor_five_boss: Node2D
 var _camera_at_player: Camera2D
 var _player_for_death_cam: Node2D
+var _door_room: Rect2i
+var _interactable_root_ref: Node2D
+var _exit_spawned := false
+var _current_kill_requirement := 0
 
 static var _floor_index := 1
 static var _advance_requested := false
@@ -43,13 +53,22 @@ static func reset_start_floor() -> void:
 	_advance_requested = false
 	_floor_index = 1
 
+func get_stage_number() -> int:
+	return _floor_index
+
+func get_enemy_kill_requirement() -> int:
+	return _current_kill_requirement
+
 func _ready() -> void:
+	if not EventBus.enemy_defeated.is_connected(_on_enemy_defeated_for_exit):
+		EventBus.enemy_defeated.connect(_on_enemy_defeated_for_exit)
 	if _advance_requested:
 		_floor_index += 1
 	else:
 		_floor_index = _queued_start_floor
 	_queued_start_floor = 1
 	_advance_requested = false
+	level_number = _floor_index
 	level_title_text = "LEVEL %d" % _floor_index
 	_transitioning = false
 	_bug_spawn_index = 0
@@ -330,7 +349,18 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	var door_room := Rect2i()
 	if not is_floor_five:
 		door_room = _pick_farthest_room(main_room, rooms)
-		_spawn_floor_door(interactable_root, door_room)
+		_door_room = door_room
+		_interactable_root_ref = interactable_root
+		_exit_spawned = false
+		_current_kill_requirement = int(EXIT_KILL_REQUIREMENTS.get(_floor_index, 0))
+		if _current_kill_requirement <= 0:
+			_spawn_floor_door(interactable_root, door_room)
+			_exit_spawned = true
+	else:
+		_current_kill_requirement = 0
+		_door_room = Rect2i()
+		_interactable_root_ref = null
+		_exit_spawned = false
 
 	for room in rooms:
 		# Keep both the spawn room and floor door room clear.
@@ -452,7 +482,7 @@ func _pick_farthest_room(main_room: Rect2i, rooms: Array[Rect2i]) -> Rect2i:
 
 func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 	var door := StaticBody2D.new()
-	door.name = "FloorDoor"
+	door.name = "FloorKey"
 	door.collision_layer = 2
 	door.collision_mask = 0
 	door.position = _cell_to_world(_room_center(room))
@@ -463,29 +493,30 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(18.0, 18.0)
+	rect.size = Vector2(14.0, 22.0)
 	shape.shape = rect
 	door.add_child(shape)
 
 	var plate := ColorRect.new()
-	plate.offset_left = -9.0
-	plate.offset_top = -9.0
-	plate.offset_right = 9.0
-	plate.offset_bottom = 9.0
-	plate.color = Color(0.08, 0.15, 0.12, 1.0)
+	plate.offset_left = -7.0
+	plate.offset_top = -11.0
+	plate.offset_right = 7.0
+	plate.offset_bottom = 11.0
+	plate.color = Color(0.08, 0.16, 0.2, 1.0)
 	door.add_child(plate)
 
 	var mark := Label.new()
-	mark.text = "D"
-	mark.offset_left = -6
+	mark.text = "KEY"
+	mark.offset_left = -12
 	mark.offset_top = -10
-	mark.offset_right = 6
+	mark.offset_right = 12
 	mark.offset_bottom = 8
 	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mark.add_theme_font_size_override("font_size", 12)
-	mark.add_theme_color_override("font_color", Color(0.3, 1.0, 0.6))
+	mark.add_theme_font_size_override("font_size", 8)
+	mark.add_theme_color_override("font_color", Color(0.5, 1.0, 0.95))
 	door.add_child(mark)
+	EventBus.log("ACCESS KEY SPAWNED // EXIT TO LEVEL %d" % (_floor_index + 1), "exploit")
 
 func _spawn_room_obstacles(parent: Node2D, room: Rect2i) -> void:
 	var obstacle_count := _rng.randi_range(MIN_OBSTACLES_PER_ROOM, MAX_OBSTACLES_PER_ROOM)
@@ -680,15 +711,34 @@ func _on_floor_door_used() -> void:
 		return
 	_transitioning = true
 	
-	if _floor_index >= 4: # Level 4 leads to Level 5 (Boss)
-		_advance_requested = true
+	if _floor_index >= 4:
+		_advance_requested = false
+		_queued_start_floor = 1
 		await _play_exit_transition()
-		ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
 		return
 
 	_advance_requested = true
 	await _play_exit_transition()
 	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+
+func _on_enemy_defeated_for_exit(_enemy_id: String) -> void:
+	if _floor_index >= 5:
+		return
+	if _exit_spawned:
+		return
+	if _current_kill_requirement <= 0:
+		return
+	var hud_node := get_node_or_null("HUD")
+	if hud_node == null or not hud_node.has_method("_get_enemy_kill_status"):
+		return
+	var status: Dictionary = hud_node.call("_get_enemy_kill_status")
+	if not bool(status.get("met", false)):
+		return
+	if _interactable_root_ref == null or not is_instance_valid(_interactable_root_ref):
+		return
+	_spawn_floor_door(_interactable_root_ref, _door_room)
+	_exit_spawned = true
 
 func _on_chatgpt_death() -> void:
 	if _transitioning:

@@ -43,6 +43,13 @@ var _hack_key_map := {
 	"5": "noclip",
 	"6": "unlimited_bullets"
 }
+var _hack_unlock_by_stage := {
+	"super_speed": 1,
+	"faster_bullets": 2,
+	"super_vision": 3,
+	"slow_time": 4,
+	"unlimited_bullets": 5
+}
 
 const HACK_PANEL_TIME_SCALE := 0.2
 const HACK_SLOW_TIME_SCALE := 0.45
@@ -78,6 +85,7 @@ func _ready() -> void:
 	call_deferred("_count_total_enemies")
 	call_deferred("_create_enemy_counter_label")
 	hack_panel.visible = true
+	_refresh_hack_availability()
 	_apply_hack_time_scale()
 	_set_hack_labels()
 
@@ -85,6 +93,7 @@ func _process(_delta: float) -> void:
 	_sync_minimap()
 	_update_minimap_player_dot()
 	_update_boss_bar()
+	_refresh_hack_availability()
 	_update_hack_display()
 
 func _exit_tree() -> void:
@@ -95,6 +104,8 @@ func _input(event: InputEvent) -> void:
 		var key_text = OS.get_keycode_string(event.keycode)
 		if key_text in _hack_key_map:
 			var hack_name = _hack_key_map[key_text]
+			if not _is_hack_unlocked(hack_name):
+				return
 			if hack_name == "unlimited_bullets":
 				if unlimited_bullets_toggle != null:
 					unlimited_bullets_toggle.button_pressed = not unlimited_bullets_toggle.button_pressed
@@ -126,6 +137,68 @@ func _input(event: InputEvent) -> void:
 
 func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
+
+func _get_current_stage() -> int:
+	var level = get_tree().current_scene
+	if level != null and level.has_method("get_stage_number"):
+		return int(level.call("get_stage_number"))
+	if level != null and level.get("level_number") != null:
+		return int(level.get("level_number"))
+	return 1
+
+func _is_hack_unlocked(hack_name: String) -> bool:
+	if hack_name == "noclip":
+		return false
+	var required_stage = _hack_unlock_by_stage.get(hack_name, 99)
+	return _get_current_stage() >= required_stage
+
+func _refresh_hack_availability() -> void:
+	var unlock_labels := {
+		"super_speed": "LV1",
+		"faster_bullets": "LV2",
+		"super_vision": "LV3",
+		"slow_time": "LV4",
+		"noclip": "LOCKED",
+		"unlimited_bullets": "LV5"
+	}
+	var toggle_map := {
+		"super_speed": super_speed_toggle,
+		"faster_bullets": fast_bullets_toggle,
+		"super_vision": super_vision_toggle,
+		"slow_time": slow_time_toggle,
+		"noclip": noclip_toggle,
+		"unlimited_bullets": unlimited_bullets_toggle
+	}
+	for hack_name in toggle_map.keys():
+		var toggle: CheckBox = toggle_map[hack_name]
+		if toggle == null:
+			continue
+		var unlocked := _is_hack_unlocked(hack_name)
+		toggle.visible = unlocked
+		toggle.disabled = not unlocked
+		if not unlocked and toggle.button_pressed:
+			_syncing_hack_ui = true
+			toggle.button_pressed = false
+			_syncing_hack_ui = false
+		var base_text := _format_hack_label(toggle.text, hack_name)
+		if unlocked:
+			toggle.text = base_text
+		else:
+			toggle.text = "%s [%s]" % [base_text, str(unlock_labels.get(hack_name, "LOCKED"))]
+	_apply_allowed_hacks_to_player()
+
+func _apply_allowed_hacks_to_player() -> void:
+	var player = _get_player()
+	if player == null or not player.has_method("set_hacked_client_modes"):
+		return
+	player.set_hacked_client_modes(
+		super_speed_toggle.button_pressed and _is_hack_unlocked("super_speed"),
+		fast_bullets_toggle.button_pressed and _is_hack_unlocked("faster_bullets"),
+		super_vision_toggle.button_pressed and _is_hack_unlocked("super_vision"),
+		slow_time_toggle.button_pressed and _is_hack_unlocked("slow_time"),
+		false,
+		unlimited_bullets_toggle.button_pressed and _is_hack_unlocked("unlimited_bullets")
+	)
 
 func _apply_hack_time_scale() -> void:
 	if slow_time_toggle.button_pressed:
@@ -240,27 +313,23 @@ func _sync_hacks_from_player() -> void:
 		return
 	var modes: Dictionary = player.get_hacked_client_modes()
 	_syncing_hack_ui = true
-	super_speed_toggle.button_pressed = modes.get("super_speed", false)
-	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false)
-	super_vision_toggle.button_pressed = modes.get("super_vision", false)
-	slow_time_toggle.button_pressed = modes.get("slow_time", false)
-	noclip_toggle.button_pressed = modes.get("noclip", false)
-	unlimited_bullets_toggle.button_pressed = modes.get("unlimited_bullets", false)
+	super_speed_toggle.button_pressed = modes.get("super_speed", false) and _is_hack_unlocked("super_speed")
+	fast_bullets_toggle.button_pressed = modes.get("faster_bullets", false) and _is_hack_unlocked("faster_bullets")
+	super_vision_toggle.button_pressed = modes.get("super_vision", false) and _is_hack_unlocked("super_vision")
+	slow_time_toggle.button_pressed = modes.get("slow_time", false) and _is_hack_unlocked("slow_time")
+	noclip_toggle.button_pressed = false
+	unlimited_bullets_toggle.button_pressed = modes.get("unlimited_bullets", false) and _is_hack_unlocked("unlimited_bullets")
 	_syncing_hack_ui = false
+	_refresh_hack_availability()
 	_update_hack_status()
 	_apply_hack_time_scale()
-	if player.has_method("set_hacked_client_modes"):
-		player.set_hacked_client_modes(
-			super_speed_toggle.button_pressed,
-			fast_bullets_toggle.button_pressed,
-			super_vision_toggle.button_pressed,
-			slow_time_toggle.button_pressed,
-			noclip_toggle.button_pressed,
-			unlimited_bullets_toggle.button_pressed
-		)
+	_apply_allowed_hacks_to_player()
 
 func _on_hack_toggled(hack_name: String, enabled: bool) -> void:
 	if _syncing_hack_ui:
+		return
+	if enabled and not _is_hack_unlocked(hack_name):
+		_disable_hack(hack_name)
 		return
 	
 	if enabled:
@@ -277,16 +346,7 @@ func _on_hack_toggled(hack_name: String, enabled: bool) -> void:
 		if hack_name in _active_hacks_queue:
 			_active_hacks_queue.erase(hack_name)
 	
-	var player = _get_player()
-	if player != null and player.has_method("set_hacked_client_modes"):
-		player.set_hacked_client_modes(
-			super_speed_toggle.button_pressed,
-			fast_bullets_toggle.button_pressed,
-			super_vision_toggle.button_pressed,
-			slow_time_toggle.button_pressed,
-			noclip_toggle.button_pressed,
-			unlimited_bullets_toggle.button_pressed
-		)
+	_apply_allowed_hacks_to_player()
 	_update_hack_status()
 	_apply_hack_time_scale()
 
@@ -322,13 +382,21 @@ func _update_hack_status() -> void:
 		states.append("NOCLIP")
 	if unlimited_bullets_toggle.button_pressed:
 		states.append("UNLIMITED BULLETS")
-	hack_status.text = "// ACTIVE: " + (", ".join(states) if not states.is_empty() else "NONE")
+	hack_status.text = "// LV%d HACKS: " % _get_current_stage() + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _format_hack_status(hack_label: String, hack_name: String) -> String:
 	return hack_label
 
 func _format_hack_label(base_label: String, hack_name: String) -> String:
-	return base_label
+	var base_map := {
+		"super_speed": "[1] SUPER SPEED",
+		"faster_bullets": "[2] FASTER BULLETS",
+		"super_vision": "[3] SUPER VISION",
+		"slow_time": "[4] SLOW TIME",
+		"noclip": "[5] NOCLIP",
+		"unlimited_bullets": "[6] UNLIMITED AMMO"
+	}
+	return str(base_map.get(hack_name, base_label))
 
 func _update_hack_display() -> void:
 	super_speed_toggle.text = "[1] SUPER SPEED"
@@ -470,10 +538,9 @@ func _count_total_enemies() -> void:
 	_total_enemies = enemies.size()
 
 func _create_enemy_counter_label() -> void:
-	if _total_enemies <= 0:
-		_count_total_enemies()
+	var status := _get_enemy_kill_status()
 	_enemy_counter_label = Label.new()
-	_enemy_counter_label.text = "TARGETS: 0/%d" % _total_enemies
+	_enemy_counter_label.text = "TARGETS: 0/%d" % int(status.get("required", 0))
 	_enemy_counter_label.add_theme_font_size_override("font_size", 18)
 	_enemy_counter_label.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 	_enemy_counter_label.add_theme_color_override("outline_color", Color.BLACK)
@@ -488,20 +555,26 @@ func _on_enemy_defeated(_enemy_id: String) -> void:
 
 func _update_enemy_counter_display() -> void:
 	if _enemy_counter_label != null:
-		var half_req = ceili(_total_enemies / 2.0)
-		var requirement_met = _enemies_defeated >= half_req
+		var status := _get_enemy_kill_status()
+		var requirement_met = bool(status.get("met", false))
+		var required = int(status.get("required", 0))
 		var color = Color(0.2, 1.0, 0.45) if requirement_met else Color(0.8, 1.0, 0.9)
 		_enemy_counter_label.add_theme_color_override("font_color", color)
-		_enemy_counter_label.text = "TARGETS: %d/%d" % [_enemies_defeated, _total_enemies]
+		_enemy_counter_label.text = "TARGETS: %d/%d" % [_enemies_defeated, required]
 
 func _get_enemy_kill_status() -> Dictionary:
-	var half_req = ceili(_total_enemies / 2.0)
-	var requirement_met = _enemies_defeated >= half_req
-	var remaining = maxi(0, half_req - _enemies_defeated)
+	var required := 0
+	var level = get_tree().current_scene
+	if level != null and level.has_method("get_enemy_kill_requirement"):
+		required = int(level.call("get_enemy_kill_requirement"))
+	elif _total_enemies > 0:
+		required = ceili(_total_enemies / 2.0)
+	var requirement_met = required <= 0 or _enemies_defeated >= required
+	var remaining = maxi(0, required - _enemies_defeated)
 	return {
 		"met": requirement_met,
 		"defeated": _enemies_defeated,
 		"total": _total_enemies,
-		"required": half_req,
+		"required": required,
 		"remaining": remaining
 	}

@@ -235,17 +235,8 @@ func _adjust_integrity(delta: float) -> void:
 		EventBus.system_unstable.emit()
 		EventBus.log("! SYSTEM UNSTABLE — integrity below 50%", "warn")
 
-	# ⭐ NEW DEATH THRESHOLD ⭐
-	# Player dies when integrity < 5% instead of EXACTLY 0.0
-	var death_threshold := MAX_SYSTEM_INTEGRITY * 0.05
-
-	if _is_player_invincible():
-		return
-
-	if system_integrity <= death_threshold and old > death_threshold:
-		_death_triggered = true
-		EventBus.log("!! INTEGRITY ZERO — PLAYER CAUGHT !!", "error")
-		EventBus.player_caught.emit("integrity_failure")
+	# Integrity still drives warnings and lockdowns, but it should not
+	# instantly kill the player while their actual health is still high.
 
 
 func _recalculate_integrity() -> void:
