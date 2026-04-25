@@ -2,8 +2,9 @@ extends "res://scenes/levels/Level2.gd"
 
 const ROGUE_AI_SCENE := preload("res://scenes/enemy/RogueAI.tscn")
 const BOSS_INTERACTABLE_SCRIPT := preload("res://scenes/levels/BossInteractable.gd")
-const OVERRIDE_KEYS_PER_PHASE := 3
-const SHIELD_DOWN_TIME := 7.0
+const OVERRIDE_KEYS_PER_PHASE := 2
+const SHIELD_DOWN_TIME := 9.0
+const BOSS_LOADOUT := ["pistol", "ump", "ak47", "lightsaber"]
 
 var _welcome_banner: CanvasLayer
 var _boss: Node2D
@@ -28,6 +29,16 @@ func _ready() -> void:
 func get_stage_number() -> int:
 	return 5
 
+func get_boss_objective_status() -> Dictionary:
+	var shielded := true
+	if is_instance_valid(_boss) and _boss.has_method("is_shielded"):
+		shielded = bool(_boss.call("is_shielded"))
+	return {
+		"remaining": _keys_remaining,
+		"total": OVERRIDE_KEYS_PER_PHASE,
+		"shielded": shielded
+	}
+
 func _build_wall_material() -> ShaderMaterial:
 	var mat = super._build_wall_material()
 	mat.set_shader_parameter("code_color", Color(1.0, 0.2, 0.2))
@@ -40,7 +51,7 @@ func _show_welcome_message() -> void:
 	add_child(_welcome_banner)
 	
 	var label = Label.new()
-	label.text = "FINAL BOSS ONLINE\nCOLLECT OVERRIDE KEYS\nDROP THE SHIELD // FIRE FAST"
+	label.text = "FINAL BOSS ONLINE\n[1-4] SWITCH WEAPONS // AMMO UNLOCKED\n[7] GHOST SIGNAL // COLLECT OVERRIDE KEYS"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.set_anchors_preset(Control.PRESET_CENTER)
 	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -73,9 +84,31 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	var player := get_node_or_null("Player") as Node2D
 	if player != null:
 		player.global_position = _cell_to_world(_room_center(main_room))
+		_configure_player_for_boss_fight(player)
 
 	_spawn_boss(enemy_root)
 	_start_override_key_phase(interactable_root)
+
+func _configure_player_for_boss_fight(player: Node2D) -> void:
+	if player == null:
+		return
+	if player.has_method("set_hacked_client_modes"):
+		player.call("set_hacked_client_modes", false, false, false, false, false, true, false)
+	if player.get("health") != null:
+		player.set("health", 100)
+		EventBus.player_health_changed.emit(100, 100)
+	if player.has_node("Inventory"):
+		var inventory = player.get_node("Inventory")
+		if inventory != null:
+			if inventory.has_method("set_max_slots"):
+				inventory.call("set_max_slots", 4)
+			var equip_id := PlayerState.selected_gun_id if PlayerState.selected_gun_id in BOSS_LOADOUT else "ump"
+			if inventory.has_method("set_loadout"):
+				inventory.call("set_loadout", BOSS_LOADOUT, equip_id)
+	var hud_node := get_node_or_null("HUD")
+	if is_instance_valid(hud_node) and hud_node.has_method("set_boss_mode_defaults"):
+		hud_node.call("set_boss_mode_defaults")
+	EventBus.log("BOSS LOADOUT ONLINE // [1-4] SWITCH WEAPONS // [7] GHOST SIGNAL", "exploit")
 
 func _spawn_boss(parent: Node2D) -> void:
 	var boss = ROGUE_AI_SCENE.instantiate()

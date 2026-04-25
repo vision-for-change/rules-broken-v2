@@ -5,13 +5,12 @@ signal ammo_changed(gun_id: String, current: int, max_ammo: int)
 signal reload_state_changed(is_reloading: bool, current: int, max_ammo: int, reload_time: float)
 signal inventory_full()
 
-const MAX_SLOTS := 3
-
 var slots: Array[Dictionary] = []
 var current_slot: int = 0
 var _reload_timer: float = 0.0
 var _fire_timer: float = 0.0
 var is_reloading: bool = false
+var max_slots: int = 3
 
 func _ready() -> void:
 	var gun_id: String = "pistol"
@@ -61,6 +60,8 @@ func _input(event: InputEvent) -> void:
 		switch_to(1)
 	elif event.keycode == KEY_3:
 		switch_to(2)
+	elif event.keycode == KEY_4:
+		switch_to(3)
 	elif event.keycode == KEY_Q:
 		if not slots.is_empty():
 			switch_to((current_slot + 1) % slots.size())
@@ -77,7 +78,7 @@ func add_gun(gun_data: Dictionary) -> bool:
 			ammo_changed.emit(slots[i]["id"], slots[i]["ammo"], slots[i]["max_ammo"])
 			return true
 
-	if slots.size() >= MAX_SLOTS:
+	if slots.size() >= max_slots:
 		inventory_full.emit()
 		return false
 
@@ -107,6 +108,36 @@ func get_current_gun() -> Dictionary:
 	if slots.is_empty():
 		return {}
 	return slots[current_slot]
+
+func set_max_slots(count: int) -> void:
+	max_slots = maxi(1, count)
+	if slots.size() > max_slots:
+		slots.resize(max_slots)
+		current_slot = clampi(current_slot, 0, max_slots - 1)
+		if not slots.is_empty():
+			gun_changed.emit(slots[current_slot])
+
+func set_loadout(gun_ids: Array[String], equip_id: String = "") -> void:
+	slots.clear()
+	current_slot = 0
+	is_reloading = false
+	_reload_timer = 0.0
+	for gun_id in gun_ids:
+		var gun := GunDatabase.get_gun(gun_id)
+		if gun.is_empty():
+			continue
+		if slots.size() >= max_slots:
+			break
+		slots.append(gun)
+	if slots.is_empty():
+		return
+	var equip_index := 0
+	if equip_id != "":
+		for i in range(slots.size()):
+			if slots[i]["id"] == equip_id:
+				equip_index = i
+				break
+	switch_to(equip_index)
 
 func start_reload() -> void:
 	if slots.is_empty() or is_reloading:

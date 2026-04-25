@@ -35,20 +35,25 @@ var _active_hacks_queue: Array[String] = []  # Tracks order of active hacks (max
 var _enemies_defeated := 0
 var _total_enemies := 0
 var _enemy_counter_label: Label = null
+var _invisible_toggle: CheckBox = null
+var _boss_loadout_root: PanelContainer = null
+var _boss_loadout_slots: Array = []
 var _hack_key_map := {
 	"1": "super_speed",
 	"2": "faster_bullets",
 	"3": "super_vision",
 	"4": "slow_time",
 	"5": "noclip",
-	"6": "unlimited_bullets"
+	"6": "unlimited_bullets",
+	"7": "invisible"
 }
 var _hack_unlock_by_stage := {
 	"super_speed": 1,
 	"faster_bullets": 2,
 	"super_vision": 3,
 	"slow_time": 4,
-	"unlimited_bullets": 5
+	"unlimited_bullets": 5,
+	"invisible": 5
 }
 
 const HACK_PANEL_TIME_SCALE := 0.2
@@ -68,6 +73,7 @@ func _ready() -> void:
 	EventBus.player_health_changed.connect(_on_player_health_changed)
 	_style_static_labels()
 	_style_pause_button()
+	_ensure_special_hud_controls()
 	_style_hack_panel()
 	pause_btn.pressed.connect(_on_pause_pressed)
 	super_speed_toggle.toggled.connect(func(enabled): _on_hack_toggled("super_speed", enabled))
@@ -77,6 +83,8 @@ func _ready() -> void:
 	noclip_toggle.toggled.connect(func(enabled): _on_hack_toggled("noclip", enabled))
 	if unlimited_bullets_toggle != null:
 		unlimited_bullets_toggle.toggled.connect(func(enabled): _on_hack_toggled("unlimited_bullets", enabled))
+	if _invisible_toggle != null:
+		_invisible_toggle.toggled.connect(func(enabled): _on_hack_toggled("invisible", enabled))
 	_refresh_rules()
 	_refresh_tags()
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
@@ -94,6 +102,7 @@ func _process(_delta: float) -> void:
 	_update_minimap_player_dot()
 	_update_boss_bar()
 	_refresh_hack_availability()
+	_update_boss_loadout_bar()
 	_update_hack_display()
 
 func _exit_tree() -> void:
@@ -106,22 +115,7 @@ func _input(event: InputEvent) -> void:
 			var hack_name = _hack_key_map[key_text]
 			if not _is_hack_unlocked(hack_name):
 				return
-			if hack_name == "unlimited_bullets":
-				if unlimited_bullets_toggle != null:
-					unlimited_bullets_toggle.button_pressed = not unlimited_bullets_toggle.button_pressed
-			else:
-				# Toggle the hack directly
-				match hack_name:
-					"super_speed":
-						super_speed_toggle.button_pressed = not super_speed_toggle.button_pressed
-					"faster_bullets":
-						fast_bullets_toggle.button_pressed = not fast_bullets_toggle.button_pressed
-					"super_vision":
-						super_vision_toggle.button_pressed = not super_vision_toggle.button_pressed
-					"slow_time":
-						slow_time_toggle.button_pressed = not slow_time_toggle.button_pressed
-					"noclip":
-						noclip_toggle.button_pressed = not noclip_toggle.button_pressed
+			_toggle_hack_by_name(hack_name)
 			get_tree().root.set_input_as_handled()
 			return
 		return
@@ -138,6 +132,99 @@ func _input(event: InputEvent) -> void:
 func _set_hack_panel_visible(visible: bool) -> void:
 	hack_panel.visible = visible
 
+func _ensure_special_hud_controls() -> void:
+	if _invisible_toggle == null and has_node("HackPanel/HackVBox"):
+		_invisible_toggle = CheckBox.new()
+		_invisible_toggle.name = "InvisibleToggle"
+		_invisible_toggle.text = "GHOST SIGNAL"
+		$HackPanel/HackVBox.add_child(_invisible_toggle)
+		$HackPanel/HackVBox.move_child(_invisible_toggle, $HackPanel/HackVBox.get_child_count() - 1)
+	if _boss_loadout_root != null:
+		return
+	_boss_loadout_root = PanelContainer.new()
+	_boss_loadout_root.visible = false
+	_boss_loadout_root.anchor_left = 0.5
+	_boss_loadout_root.anchor_top = 1.0
+	_boss_loadout_root.anchor_right = 0.5
+	_boss_loadout_root.anchor_bottom = 1.0
+	_boss_loadout_root.offset_left = -236.0
+	_boss_loadout_root.offset_top = -124.0
+	_boss_loadout_root.offset_right = 236.0
+	_boss_loadout_root.offset_bottom = -48.0
+	var root_style := StyleBoxFlat.new()
+	root_style.bg_color = Color(0.03, 0.08, 0.09, 0.8)
+	root_style.border_color = Color(0.25, 0.8, 0.95, 0.8)
+	root_style.border_width_left = 2
+	root_style.border_width_right = 2
+	root_style.border_width_top = 2
+	root_style.border_width_bottom = 2
+	root_style.set_corner_radius_all(8)
+	_boss_loadout_root.add_theme_stylebox_override("panel", root_style)
+	add_child(_boss_loadout_root)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	_boss_loadout_root.add_child(margin)
+
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 8)
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_child(hbox)
+
+	for i in range(4):
+		var slot := PanelContainer.new()
+		slot.custom_minimum_size = Vector2(106, 58)
+		var slot_style := StyleBoxFlat.new()
+		slot_style.bg_color = Color(0.06, 0.11, 0.13, 0.95)
+		slot_style.border_color = Color(0.15, 0.36, 0.45, 1.0)
+		slot_style.border_width_left = 1
+		slot_style.border_width_right = 1
+		slot_style.border_width_top = 1
+		slot_style.border_width_bottom = 1
+		slot_style.set_corner_radius_all(6)
+		slot.add_theme_stylebox_override("panel", slot_style)
+		hbox.add_child(slot)
+
+		var slot_margin := MarginContainer.new()
+		slot_margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+		slot_margin.add_theme_constant_override("margin_left", 6)
+		slot_margin.add_theme_constant_override("margin_top", 5)
+		slot_margin.add_theme_constant_override("margin_right", 6)
+		slot_margin.add_theme_constant_override("margin_bottom", 5)
+		slot.add_child(slot_margin)
+
+		var slot_vbox := VBoxContainer.new()
+		slot_vbox.add_theme_constant_override("separation", 2)
+		slot_margin.add_child(slot_vbox)
+
+		var key_label := Label.new()
+		key_label.text = "[%d]" % (i + 1)
+		key_label.add_theme_font_size_override("font_size", 11)
+		key_label.add_theme_color_override("font_color", Color(0.58, 0.96, 1.0))
+		slot_vbox.add_child(key_label)
+
+		var name_label := Label.new()
+		name_label.text = "---"
+		name_label.add_theme_font_size_override("font_size", 11)
+		name_label.add_theme_color_override("font_color", Color(0.9, 0.96, 0.98))
+		slot_vbox.add_child(name_label)
+
+		var ammo_label := Label.new()
+		ammo_label.text = "INF"
+		ammo_label.add_theme_font_size_override("font_size", 10)
+		ammo_label.add_theme_color_override("font_color", Color(0.7, 0.9, 0.78))
+		slot_vbox.add_child(ammo_label)
+
+		_boss_loadout_slots.append({
+			"panel": slot,
+			"name": name_label,
+			"ammo": ammo_label
+		})
+
 func _get_current_stage() -> int:
 	var level = get_tree().current_scene
 	if level != null and level.has_method("get_stage_number"):
@@ -149,6 +236,8 @@ func _get_current_stage() -> int:
 func _is_hack_unlocked(hack_name: String) -> bool:
 	if hack_name == "noclip":
 		return false
+	if hack_name == "invisible":
+		return _get_current_stage() == 5
 	var required_stage = _hack_unlock_by_stage.get(hack_name, 99)
 	return _get_current_stage() >= required_stage
 
@@ -159,7 +248,8 @@ func _refresh_hack_availability() -> void:
 		"super_vision": "LV3",
 		"slow_time": "LV4",
 		"noclip": "LOCKED",
-		"unlimited_bullets": "LV5"
+		"unlimited_bullets": "LV5",
+		"invisible": "BOSS"
 	}
 	var toggle_map := {
 		"super_speed": super_speed_toggle,
@@ -167,7 +257,8 @@ func _refresh_hack_availability() -> void:
 		"super_vision": super_vision_toggle,
 		"slow_time": slow_time_toggle,
 		"noclip": noclip_toggle,
-		"unlimited_bullets": unlimited_bullets_toggle
+		"unlimited_bullets": unlimited_bullets_toggle,
+		"invisible": _invisible_toggle
 	}
 	for hack_name in toggle_map.keys():
 		var toggle: CheckBox = toggle_map[hack_name]
@@ -197,7 +288,8 @@ func _apply_allowed_hacks_to_player() -> void:
 		super_vision_toggle.button_pressed and _is_hack_unlocked("super_vision"),
 		slow_time_toggle.button_pressed and _is_hack_unlocked("slow_time"),
 		false,
-		unlimited_bullets_toggle.button_pressed and _is_hack_unlocked("unlimited_bullets")
+		unlimited_bullets_toggle.button_pressed and _is_hack_unlocked("unlimited_bullets"),
+		_invisible_toggle != null and _invisible_toggle.button_pressed and _is_hack_unlocked("invisible")
 	)
 
 func _apply_hack_time_scale() -> void:
@@ -257,7 +349,7 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle]:
+	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle, _invisible_toggle]:
 		if toggle == null:
 			continue
 		toggle.add_theme_font_size_override("font_size", 11)
@@ -273,6 +365,8 @@ func _set_hack_labels() -> void:
 	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
 		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
+	if _invisible_toggle != null:
+		_invisible_toggle.text = "[7] GHOST SIGNAL"
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -319,6 +413,8 @@ func _sync_hacks_from_player() -> void:
 	slow_time_toggle.button_pressed = modes.get("slow_time", false) and _is_hack_unlocked("slow_time")
 	noclip_toggle.button_pressed = false
 	unlimited_bullets_toggle.button_pressed = modes.get("unlimited_bullets", false) and _is_hack_unlocked("unlimited_bullets")
+	if _invisible_toggle != null:
+		_invisible_toggle.button_pressed = modes.get("invisible", false) and _is_hack_unlocked("invisible")
 	_syncing_hack_ui = false
 	_refresh_hack_availability()
 	_update_hack_status()
@@ -366,6 +462,9 @@ func _disable_hack(hack_name: String) -> void:
 		"unlimited_bullets":
 			if unlimited_bullets_toggle != null:
 				unlimited_bullets_toggle.button_pressed = false
+		"invisible":
+			if _invisible_toggle != null:
+				_invisible_toggle.button_pressed = false
 	_syncing_hack_ui = false
 
 func _update_hack_status() -> void:
@@ -382,6 +481,8 @@ func _update_hack_status() -> void:
 		states.append("NOCLIP")
 	if unlimited_bullets_toggle.button_pressed:
 		states.append("UNLIMITED BULLETS")
+	if _invisible_toggle != null and _invisible_toggle.button_pressed:
+		states.append("GHOST SIGNAL")
 	hack_status.text = "// LV%d HACKS: " % _get_current_stage() + (", ".join(states) if not states.is_empty() else "NONE")
 
 func _format_hack_status(hack_label: String, hack_name: String) -> String:
@@ -394,7 +495,8 @@ func _format_hack_label(base_label: String, hack_name: String) -> String:
 		"super_vision": "[3] SUPER VISION",
 		"slow_time": "[4] SLOW TIME",
 		"noclip": "[5] NOCLIP",
-		"unlimited_bullets": "[6] UNLIMITED AMMO"
+		"unlimited_bullets": "[6] UNLIMITED AMMO",
+		"invisible": "[7] GHOST SIGNAL"
 	}
 	return str(base_map.get(hack_name, base_label))
 
@@ -406,6 +508,62 @@ func _update_hack_display() -> void:
 	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
 		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
+	if _invisible_toggle != null:
+		_invisible_toggle.text = "[7] GHOST SIGNAL"
+
+func _toggle_hack_by_name(hack_name: String) -> void:
+	var toggle = _get_toggle_for_hack(hack_name)
+	if toggle != null:
+		toggle.button_pressed = not toggle.button_pressed
+
+func _get_toggle_for_hack(hack_name: String) -> BaseButton:
+	match hack_name:
+		"super_speed":
+			return super_speed_toggle
+		"faster_bullets":
+			return fast_bullets_toggle
+		"super_vision":
+			return super_vision_toggle
+		"slow_time":
+			return slow_time_toggle
+		"noclip":
+			return noclip_toggle
+		"unlimited_bullets":
+			return unlimited_bullets_toggle
+		"invisible":
+			return _invisible_toggle
+	return null
+
+func _update_boss_loadout_bar() -> void:
+	if _boss_loadout_root == null:
+		return
+	var is_boss_stage := _get_current_stage() == 5
+	_boss_loadout_root.visible = is_boss_stage
+	if not is_boss_stage:
+		return
+	var player = _get_player()
+	if player == null or not player.has_node("Inventory"):
+		return
+	var inventory = player.get_node("Inventory")
+	if inventory == null:
+		return
+	var slots: Array = inventory.get("slots")
+	var current_slot: int = int(inventory.get("current_slot"))
+	for i in range(_boss_loadout_slots.size()):
+		var slot_ui: Dictionary = _boss_loadout_slots[i]
+		var panel: PanelContainer = slot_ui["panel"]
+		var name_label: Label = slot_ui["name"]
+		var ammo_label: Label = slot_ui["ammo"]
+		if i < slots.size():
+			var gun: Dictionary = slots[i]
+			name_label.text = str(gun.get("display_name", "---")).to_upper()
+			var max_ammo := int(gun.get("max_ammo", 0))
+			ammo_label.text = "INF" if max_ammo == 0 or unlimited_bullets_toggle.button_pressed else "%d" % int(gun.get("ammo", max_ammo))
+			panel.self_modulate = Color(1, 1, 1, 1) if i == current_slot else Color(0.72, 0.82, 0.86, 0.88)
+		else:
+			name_label.text = "---"
+			ammo_label.text = ""
+			panel.self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 func _get_player() -> Node:
 	var players = get_tree().get_nodes_in_group("player")
@@ -526,6 +684,15 @@ func _update_boss_bar() -> void:
 		boss_health_bar.value = current_health
 	if is_instance_valid(boss_health_label):
 		boss_health_label.text = "%d / %d" % [current_health, max_health]
+	var level = get_tree().current_scene
+	if level != null and level.has_method("get_boss_objective_status") and _enemy_counter_label != null:
+		var boss_status: Dictionary = level.call("get_boss_objective_status")
+		if bool(boss_status.get("shielded", false)):
+			_enemy_counter_label.text = "OVERRIDE KEYS: %d / %d" % [int(boss_status.get("remaining", 0)), int(boss_status.get("total", 0))]
+			_enemy_counter_label.add_theme_color_override("font_color", Color(0.85, 1.0, 1.0))
+		else:
+			_enemy_counter_label.text = "SHIELD DOWN // FIRE NOW"
+			_enemy_counter_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.65))
 
 
 func _apply_fonts() -> void:
@@ -555,6 +722,16 @@ func _on_enemy_defeated(_enemy_id: String) -> void:
 
 func _update_enemy_counter_display() -> void:
 	if _enemy_counter_label != null:
+		var level = get_tree().current_scene
+		if level != null and level.has_method("get_boss_objective_status"):
+			var boss_status: Dictionary = level.call("get_boss_objective_status")
+			if bool(boss_status.get("shielded", false)):
+				_enemy_counter_label.add_theme_color_override("font_color", Color(0.85, 1.0, 1.0))
+				_enemy_counter_label.text = "OVERRIDE KEYS: %d / %d" % [int(boss_status.get("remaining", 0)), int(boss_status.get("total", 0))]
+			else:
+				_enemy_counter_label.add_theme_color_override("font_color", Color(1.0, 0.72, 0.65))
+				_enemy_counter_label.text = "SHIELD DOWN // FIRE NOW"
+			return
 		var status := _get_enemy_kill_status()
 		var requirement_met = bool(status.get("met", false))
 		var required = int(status.get("required", 0))
@@ -578,3 +755,13 @@ func _get_enemy_kill_status() -> Dictionary:
 		"required": required,
 		"remaining": remaining
 	}
+
+func set_boss_mode_defaults() -> void:
+	_syncing_hack_ui = true
+	if unlimited_bullets_toggle != null:
+		unlimited_bullets_toggle.button_pressed = true
+	if _invisible_toggle != null:
+		_invisible_toggle.button_pressed = false
+	_syncing_hack_ui = false
+	_apply_allowed_hacks_to_player()
+	_update_hack_status()
