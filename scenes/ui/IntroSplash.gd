@@ -275,13 +275,12 @@ func _start_demo_sequence() -> void:
 		die.tween_property(_enemy, "scale", Vector2(1.6,1.6), 0.28).set_trans(Tween.TRANS_BOUNCE)
 		die.tween_property(_enemy, "modulate:a", 0.0, 0.35)
 		# HUD progress
-		var prog := 0
 		var hud_t := create_tween()
-		for i in 1:6:
+		for i in range(1, 7):
 			var pct = i * 16
 			hud_t.tween_interval(0.05)
-			hud_t.tween_callback(func(p=pct):
-				_hud_label.text = "ACCESS: %d%%" % [p]
+			hud_t.tween_callback(func(pct_value=pct):
+				_hud_label.text = "ACCESS: %d%%" % [pct_value]
 			)
 		# final text
 		hud_t.tween_interval(0.25)
@@ -290,24 +289,6 @@ func _start_demo_sequence() -> void:
 			AudioManager.play_sfx_with_options("success-chime", -6.0, 1.0, 1.0)
 		)
 	)
-
-func _transition_to_menu() -> void:
-	if _transition_started:
-		return
-	_transition_started = true
-	ScreenFX.transition_to_scene(MAIN_MENU_SCENE, 0.28, 0.48)
-
-func _start_scanline_sweep() -> void:
-	if is_instance_valid(_scanline):
-		_scanline.modulate.a = 0.34
-		_scanline.position = Vector2(0, -24)
-		var sweep := create_tween()
-		sweep.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		sweep.tween_property(_scanline, "position", Vector2(0, get_viewport_rect().size.y + 24.0), 0.85)
-		sweep.tween_callback(func():
-			if is_instance_valid(_scanline):
-				_scanline.modulate.a = 0.0
-		)
 
 func _transition_to_menu() -> void:
 	if _transition_started:
