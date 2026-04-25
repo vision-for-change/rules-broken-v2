@@ -15,6 +15,8 @@ const SHATTER_ROWS := 6
 const SHATTER_COLS := 6
 const SHATTER_DURATION := 2.2
 const SHATTER_FORCE := 260.0
+
+# Attack timing and circle/ring settings
 const ATTACK_COOLDOWN := 6.0
 const CIRCLE_COUNT := 3
 const CIRCLE_SPAWN_DELAY := 2.0
@@ -22,6 +24,14 @@ const CIRCLE_GROW_DURATION := 1.5
 const CIRCLE_MAX_RADIUS := 120.0
 const CIRCLE_COLOR := Color(1.0, 0.2, 0.2, 0.6)
 const PLAYER_DAMAGE_PERCENT := 0.3
+
+# Spin barrage settings
+const BARRAGE_PROJECTILE_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
+const BARRAGE_PROJECTILES := 64
+const BARRAGE_DURATION := 2.0
+const BARRAGE_SLOW_SCALE := 0.28
+const BARRAGE_SPIN_SPEED := 12.0 # radians per second for visual spin
+const BARRAGE_SPREAD_JITTER := 0.14
 
 var _health := 0
 var _defeated := false
@@ -185,7 +195,46 @@ func _start_attack_loop() -> void:
 	while not _defeated:
 		await get_tree().create_timer(ATTACK_COOLDOWN).timeout
 		if not _defeated:
-			_perform_circle_attack()
+			if randi() % 2 == 0:
+				_perform_circle_attack()
+			else:
+				_perform_spin_barrage()
+
+func _perform_spin_barrage() -> void:
+	# Slow time, spin sprite visually, and fire a dense radial projectile pattern with jitter to create gaps
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	# Store previous time scale and apply slow motion
+	var prev_ts := Engine.time_scale
+	Engine.time_scale = BARRAGE_SLOW_SCALE
+
+	# Visual spin: rotate the sprite quickly for the duration
+	var spin_tween := _sprite.create_tween()
+	spin_tween.set_parallel(true)
+	spin_tween.tween_property(_sprite, "rotation", _sprite.rotation + BARRAGE_SPIN_SPEED * BARRAGE_DURATION, BARRAGE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# Fire projectiles over the duration; timers are scaled by Engine.time_scale
+	var interval := BARRAGE_DURATION / float(BARRAGE_PROJECTILES)
+	for i in range(BARRAGE_PROJECTILES):
+		if _defeated:
+			break
+		var angle := TAU * float(i) / float(BARRAGE_PROJECTILES) + randf_range(-BARRAGE_SPREAD_JITTER, BARRAGE_SPREAD_JITTER)
+		_spawn_barrage_projectile(angle)
+		await get_tree().create_timer(interval).timeout
+
+	# Restore time scale
+	Engine.time_scale = prev_ts
+
+func _spawn_barrage_projectile(angle: float) -> void:
+	var proj := BARRAGE_PROJECTILE_SCENE.instantiate()
+	if proj == null:
+		return
+	var dir := Vector2.RIGHT.rotated(angle)
+	proj.global_position = global_position
+	get_tree().current_scene.add_child(proj)
+	if proj.has_method("setup"):
+		proj.call("setup", self, dir)
 
 func _perform_circle_attack() -> void:
 	for i in range(CIRCLE_COUNT):
