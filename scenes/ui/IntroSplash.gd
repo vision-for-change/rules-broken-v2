@@ -157,7 +157,10 @@ func _setup_demo() -> void:
 	_hud_label.text = "ACCESS: 0%"
 	_hud_label.add_theme_font_size_override("font_size", 18)
 	_hud_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
-	_hud_label.rect_position = Vector2(get_viewport_rect().size.x * 0.5 - 80, 18)
+	# position using Control margins (compatible with Label/Control API)
+	_hud_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_hud_label.margin_left = get_viewport_rect().size.x * 0.5 - 80
+	_hud_label.margin_top = 18
 	add_child(_hud_label)
 
 	# instantiate player and enemy into demo container
