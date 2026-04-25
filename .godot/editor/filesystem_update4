@@ -21,3 +21,5 @@ res://scenes/levels/Level2.gd
 res://scenes/enemy/TrojanHorse.tscn
 res://scenes/levels/LevelBoss.gd
 res://scenes/levels/Level2.tscn
+res://autoloads/EventBus.gd
+res://scenes/levels/FloorDoor.gd
