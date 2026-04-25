@@ -19,6 +19,7 @@ func _ready() -> void:
 	_queued_start_floor = 5
 	_floor_index = 5
 	level_number = 5
+	PlayerState.record_level_reached(5)
 	level_title_text = "FINAL SECTOR // CORE COLLAPSE"
 	
 	super._ready()
@@ -203,5 +204,8 @@ func _on_victory() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
+	PlayerState.boss_defeated_this_run = true
+	PlayerState.endless_unlocked = true
+	PlayerState.record_level_reached(5)
 	AudioManager.play_sfx("level_complete")
 	ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")

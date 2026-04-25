@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=377128107]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.02, 0.04, 0.03, 0.55)
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=534533220]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -34,57 +34,64 @@ offset_bottom = 170.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="Panel"]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=510178904]
 layout_mode = 2
 theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=582932016]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="Eyebrow" type="Label" parent="Panel/Margin/VBox"]
+[node name="Eyebrow" type="Label" parent="Panel/Margin/VBox" unique_id=897544116]
 layout_mode = 2
 text = "MISSION COMPLETE"
 horizontal_alignment = 1
 
-[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox" unique_id=749974443]
 layout_mode = 2
 text = "SYSTEM BREACH COMPLETE"
 horizontal_alignment = 1
 
-[node name="Sub" type="Label" parent="Panel/Margin/VBox"]
+[node name="Sub" type="Label" parent="Panel/Margin/VBox" unique_id=1311960764]
 layout_mode = 2
-text = "All sectors cleared.\nThe network collapsed cleanly."
+text = "All sectors cleared.
+The network collapsed cleanly."
 horizontal_alignment = 1
 
-[node name="Divider" type="ColorRect" parent="Panel/Margin/VBox"]
+[node name="Divider" type="ColorRect" parent="Panel/Margin/VBox" unique_id=1089823181]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 color = Color(0.3, 1, 0.7, 0.4)
 
-[node name="Hint" type="Label" parent="Panel/Margin/VBox"]
+[node name="Hint" type="Label" parent="Panel/Margin/VBox" unique_id=251667642]
 layout_mode = 2
-text = "[ SPACE ] PLAY AGAIN    [ ESC ] TERMINATE"
+text = "[ SPACE ] KEEP GOING    [ ENTER ] PLAY AGAIN    [ ESC ] TERMINATE"
 horizontal_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/VBox"]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=724851136]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="ReplayBtn" type="Button" parent="Panel/Margin/VBox/Buttons"]
+[node name="ContinueBtn" type="Button" parent="Panel/Margin/VBox/Buttons" unique_id=142836415]
+custom_minimum_size = Vector2(180, 46)
+layout_mode = 2
+text = "KEEP GOING"
+
+[node name="ReplayBtn" type="Button" parent="Panel/Margin/VBox/Buttons" unique_id=2068464784]
 custom_minimum_size = Vector2(180, 46)
 layout_mode = 2
 text = "PLAY AGAIN"
 
-[node name="QuitBtn" type="Button" parent="Panel/Margin/VBox/Buttons"]
+[node name="QuitBtn" type="Button" parent="Panel/Margin/VBox/Buttons" unique_id=1714630506]
 custom_minimum_size = Vector2(180, 46)
 layout_mode = 2
 text = "TERMINATE"
 
+[connection signal="pressed" from="Panel/Margin/VBox/Buttons/ContinueBtn" to="." method="_on_continue_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Buttons/ReplayBtn" to="." method="_on_replay_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Buttons/QuitBtn" to="." method="_on_quit_pressed"]

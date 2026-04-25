@@ -37,6 +37,11 @@ grow_vertical = 2
 theme_override_constants/separation = 15
 alignment = 1
 
+[node name="SummaryLabel" type="Label" parent="VBox" unique_id=152865664]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
 [node name="RetryBtn" type="Button" parent="VBox" unique_id=1878569532]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2

@@ -29,3 +29,5 @@ res://scenes/ui/HUD.tscn
 res://scenes/enemy/EnemyLaser.tscn
 res://scenes/enemy/RogueAI.gd
 res://scenes/ui/WinScreen.gd
+res://autoloads/PlayerState.gd
+res://scenes/ui/WinScreen.tscn

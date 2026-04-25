@@ -24,6 +24,8 @@ const EXIT_KILL_REQUIREMENTS := {
 	3: 20,
 	4: 25
 }
+const ENDLESS_BASE_KILL_REQUIREMENT := 30
+const ENDLESS_KILL_INCREMENT := 5
 
 var _rng := RandomNumberGenerator.new()
 var _wall_material: ShaderMaterial
@@ -57,6 +59,8 @@ func get_stage_number() -> int:
 	return _floor_index
 
 func get_enemy_kill_requirement() -> int:
+	if _floor_index >= 6:
+		return ENDLESS_BASE_KILL_REQUIREMENT + ((_floor_index - 6) * ENDLESS_KILL_INCREMENT)
 	return _current_kill_requirement
 
 func _ready() -> void:
@@ -69,6 +73,7 @@ func _ready() -> void:
 	_queued_start_floor = 1
 	_advance_requested = false
 	level_number = _floor_index
+	PlayerState.record_level_reached(_floor_index)
 	level_title_text = "LEVEL %d" % _floor_index
 	_transitioning = false
 	_bug_spawn_index = 0
@@ -352,7 +357,7 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		_door_room = door_room
 		_interactable_root_ref = interactable_root
 		_exit_spawned = false
-		_current_kill_requirement = int(EXIT_KILL_REQUIREMENTS.get(_floor_index, 0))
+		_current_kill_requirement = int(get_enemy_kill_requirement())
 		if _current_kill_requirement <= 0:
 			_spawn_floor_door(interactable_root, door_room)
 			_exit_spawned = true
@@ -396,10 +401,14 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 					else:
 						_spawn_room_trojans(enemy_root, room, 2.0) # 2x more trojans
 				_:
-					if _rng.randf() > 0.4:
-						_spawn_room_bugs(enemy_root, room)
+					var endless_mult := _get_endless_enemy_multiplier()
+					var r := _rng.randf()
+					if r > 0.55:
+						_spawn_room_bugs(enemy_root, room, 2.5 * endless_mult)
+					elif r > 0.2:
+						_spawn_room_snakes(enemy_root, room, 2.0 * endless_mult)
 					else:
-						_spawn_room_snakes(enemy_root, room)
+						_spawn_room_trojans(enemy_root, room, 2.0 * endless_mult)
 
 	if is_floor_five:
 		var big_room := rooms[1] if rooms.size() > 1 else main_room
@@ -571,11 +580,11 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> 
 		_bug_spawn_index += 1
 		bug.set("entity_id", "bug_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		bug.position = _cell_to_world(_random_cell_in_room(room, 3))
-		# Level 4 intensity increase: higher speed
-		if _floor_index == 4:
+		# Higher floors increase speed.
+		if _floor_index >= 4:
 			var current_speed = bug.get("move_speed")
 			if current_speed == null: current_speed = 140.0
-			bug.set("move_speed", current_speed * 1.3)
+			bug.set("move_speed", current_speed * _get_enemy_speed_multiplier())
 		parent.add_child(bug)
 
 func _spawn_room_snakes(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
@@ -588,10 +597,10 @@ func _spawn_room_snakes(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -
 		_bug_spawn_index += 1
 		snake.set("entity_id", "snake_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		snake.position = _cell_to_world(_random_cell_in_room(room, 3))
-		if _floor_index == 4:
+		if _floor_index >= 4:
 			var current_speed = snake.get("move_speed")
 			if current_speed == null: current_speed = 120.0
-			snake.set("move_speed", current_speed * 1.3)
+			snake.set("move_speed", current_speed * _get_enemy_speed_multiplier())
 		parent.add_child(snake)
 
 func _spawn_room_trojans(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
@@ -604,11 +613,23 @@ func _spawn_room_trojans(parent: Node2D, room: Rect2i, count_mult: float = 1.0) 
 		_bug_spawn_index += 1
 		trojan.set("entity_id", "trojan_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		trojan.position = _cell_to_world(_random_cell_in_room(room, 3))
-		if _floor_index == 4:
+		if _floor_index >= 4:
 			var current_speed = trojan.get("move_speed")
 			if current_speed == null: current_speed = 100.0
-			trojan.set("move_speed", current_speed * 1.3)
+			trojan.set("move_speed", current_speed * _get_enemy_speed_multiplier())
 		parent.add_child(trojan)
+
+func _get_enemy_speed_multiplier() -> float:
+	if _floor_index <= 3:
+		return 1.0
+	if _floor_index == 4:
+		return 1.3
+	return 1.3 + (float(_floor_index - 4) * 0.08)
+
+func _get_endless_enemy_multiplier() -> float:
+	if _floor_index <= 5:
+		return 1.0
+	return 1.0 + (float(_floor_index - 5) * 0.2)
 
 func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 	var min_x := room.position.x + margin
@@ -711,7 +732,7 @@ func _on_floor_door_used() -> void:
 		return
 	_transitioning = true
 	
-	if _floor_index >= 4:
+	if _floor_index == 4:
 		_advance_requested = false
 		_queued_start_floor = 1
 		await _play_exit_transition()

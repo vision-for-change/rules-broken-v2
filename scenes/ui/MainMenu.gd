@@ -179,11 +179,13 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 
 func _on_play_pressed() -> void:
 	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:
 	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.queue_start_floor(5)
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 

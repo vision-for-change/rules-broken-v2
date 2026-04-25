@@ -19,6 +19,7 @@ func _ready() -> void:
 	move_child(_matrix_bg, 0)
 	_style_panel()
 	_style_labels()
+	_style_button($Panel/Margin/VBox/Buttons/ContinueBtn, 18, Color(0.95, 0.9, 0.35))
 	_style_button($Panel/Margin/VBox/Buttons/ReplayBtn, 18, Color(0.2, 1.0, 0.6))
 	_style_button($Panel/Margin/VBox/Buttons/QuitBtn, 18, Color(1.0, 0.45, 0.35))
 
@@ -115,6 +116,8 @@ func _style_labels() -> void:
 
 	$Panel/Margin/VBox/Sub.add_theme_font_size_override("font_size", 16)
 	$Panel/Margin/VBox/Sub.add_theme_color_override("font_color", Color(0.74, 0.9, 0.82))
+	if PlayerState.endless_unlocked:
+		$Panel/Margin/VBox/Sub.text = "Boss defeated.\nEndless sectors unlocked.\nPush deeper into the network."
 
 	$Panel/Margin/VBox/Hint.add_theme_font_size_override("font_size", 12)
 	$Panel/Margin/VBox/Hint.add_theme_color_override("font_color", Color(0.46, 0.72, 0.63))
@@ -152,7 +155,14 @@ func _style_button(btn: Button, size: int, color: Color) -> void:
 	btn.mouse_entered.connect(func(): AudioManager.play_sfx_with_options("hover", -20.0, 0.7, 1.3))
 	btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
+func _on_continue_pressed() -> void:
+	PlayerState.current_health = PlayerState.max_health
+	LEVEL2_SCRIPT.queue_start_floor(6)
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+
 func _on_replay_pressed() -> void:
+	PlayerState.reset_run_progression()
+	PlayerState.current_health = PlayerState.max_health
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
@@ -162,6 +172,8 @@ func _on_quit_pressed() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_SPACE:
+			_on_continue_pressed()
+		elif event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 			_on_replay_pressed()
 		elif event.keycode == KEY_ESCAPE:
 			_on_quit_pressed()
