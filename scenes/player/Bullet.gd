@@ -44,33 +44,16 @@ func _on_body_entered(body: Node) -> void:
 		return
 	
 	if body.is_in_group("enemy"):
-		# Instant-kill for bug enemies: check entity type via EntityRegistry or group membership
-		var is_bug := false
-		# Try entity_id-based detection (used elsewhere)
-		var entity_id = null
-		if body.has_method("get"):
-			entity_id = body.get("entity_id")
-		if entity_id:
-			var entity = EntityRegistry.get_entity(entity_id)
-			is_bug = entity.get("type", "") == "bug"
-		# Fallback: check 'bug' group
-		if not is_bug and body.has_method("is_in_group"):
-			is_bug = body.is_in_group("bug")
-		if is_bug:
-			# Immediate removal on hit
-			body.queue_free()
-			_try_spawn_health_pickup(body)
+		if _is_lightsaber_bullet:
+			_handle_lightsaber_hit(body)
 		else:
-			if _is_lightsaber_bullet:
-				_handle_lightsaber_hit(body)
-			else:
-				if body.has_method("take_damage"):
-					var defeated := bool(body.call("take_damage", damage))
-					if defeated:
-						_try_spawn_health_pickup(body)
-				else:
-					body.queue_free()
+			if body.has_method("take_damage"):
+				var defeated := bool(body.call("take_damage", damage))
+				if defeated:
 					_try_spawn_health_pickup(body)
+			else:
+				body.queue_free()
+				_try_spawn_health_pickup(body)
 		queue_free()
 	elif not body is PhysicsBody2D:
 		# Static collision or wall
