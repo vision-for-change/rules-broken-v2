@@ -12,7 +12,7 @@ config_version=5
 
 config/name="SYSTEM//BREACH"
 config/description="A systemic rule-exploitation stealth game."
-run/main_scene="res://scenes/ui/MainMenu.tscn"
+run/main_scene="res://scenes/ui/IntroSplash.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
