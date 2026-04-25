@@ -243,6 +243,8 @@ func _create_matrix_transition_overlay() -> Control:
 	var viewport_size = get_viewport().get_visible_rect().size
 	var cols = int(ceil(viewport_size.x / TRANSITION_COL_SPACING)) + 2
 	var rows = int(ceil(viewport_size.y / TRANSITION_ROW_SPACING)) + 3
+	
+	var minecraft_font = load("res://Minecraft.ttf") as FontFile
 
 	for col in range(cols):
 		var x_pos = col * TRANSITION_COL_SPACING + 8.0
@@ -253,6 +255,7 @@ func _create_matrix_transition_overlay() -> Control:
 			var lbl = Label.new()
 			lbl.text = str(randi() % 2)
 			lbl.position = Vector2(x_pos, row * TRANSITION_ROW_SPACING + randf_range(-10.0, 10.0))
+			lbl.add_theme_font_override("font", minecraft_font)
 			lbl.add_theme_font_size_override("font_size", TRANSITION_FONT_SIZE)
 			lbl.add_theme_color_override("font_color", TRANSITION_BASE_COLOR)
 			lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE

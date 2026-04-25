@@ -10,6 +10,7 @@ const MATRIX_COL_SPACING := 34.0
 const MATRIX_ROW_SPACING := 28.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.8, 0.4, 0.5)
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
 	_selected_id = GunDatabase.selected_gun_id
@@ -169,6 +170,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	var name_lbl = Label.new()
 	name_lbl.text = gun["display_name"]
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.add_theme_font_override("font", MINECRAFT_FONT)
 	name_lbl.add_theme_font_size_override("font_size", 13)
 	name_lbl.add_theme_color_override("font_color", gun.get("color", Color.WHITE))
 	vbox.add_child(name_lbl)
@@ -177,6 +179,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	var stats = Label.new()
 	stats.text = "DMG:%d  AMMO:%d" % [gun["damage"], gun["max_ammo"]]
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stats.add_theme_font_override("font", MINECRAFT_FONT)
 	stats.add_theme_font_size_override("font_size", 10)
 	stats.add_theme_color_override("font_color", Color(0.6, 0.7, 0.6))
 	vbox.add_child(stats)
@@ -184,6 +187,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 	# Select button
 	var btn = Button.new()
 	btn.text = "SELECT"
+	btn.add_theme_font_override("font", MINECRAFT_FONT)
 	btn.add_theme_font_size_override("font_size", 11)
 	btn.pressed.connect(func():
 		_selected_id = gid
@@ -230,6 +234,7 @@ func _make_highlight_style(color: Color) -> StyleBoxFlat:
 	return s
 
 func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) -> void:
+	btn.add_theme_font_override("font", MINECRAFT_FONT)
 	btn.add_theme_font_size_override("font_size", size)
 	btn.add_theme_color_override("font_color", color)
 	btn.add_theme_color_override("font_hover_color", Color(0.5, 1.0, 0.7))

@@ -1,6 +1,7 @@
 extends Control
 
 const LEVEL2_SCRIPT := preload("res://scenes/levels/Level2.gd")
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
 	_style_summary()
@@ -16,12 +17,14 @@ func _style_summary() -> void:
 		lines.append("BOSS DEFEATED")
 	lines.append("MAXIMUM LEVEL ACHIEVED: LEVEL %d" % PlayerState.max_level_achieved)
 	$VBox/SummaryLabel.text = "\n".join(lines)
+	$VBox/SummaryLabel.add_theme_font_override("font", MINECRAFT_FONT)
 	$VBox/SummaryLabel.add_theme_font_size_override("font_size", 16)
 	$VBox/SummaryLabel.add_theme_color_override("font_color", Color(0.9, 1.0, 0.9))
 	$VBox/SummaryLabel.add_theme_color_override("font_outline_color", Color.BLACK)
 	$VBox/SummaryLabel.add_theme_constant_override("outline_size", 2)
 
 func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) -> void:
+	btn.add_theme_font_override("font", MINECRAFT_FONT)
 	btn.add_theme_font_size_override("font_size", size)
 	btn.add_theme_color_override("font_color", color)
 	btn.add_theme_color_override("font_hover_color", Color(0.5, 1.0, 0.7))

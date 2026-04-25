@@ -5,6 +5,8 @@
 ## - Player tags (for debugging exploits)
 extends CanvasLayer
 
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
+
 @onready var integrity_bar:    ProgressBar        = $HealthBar
 @onready var integrity_label:  Label              = $Panel/VBox/IntegrityLabel
 @onready var health_percentage_label: Label       = %HealthPercentageLabel
@@ -304,6 +306,7 @@ func _update_timed_hacks(delta: float) -> void:
 func _style_static_labels() -> void:
 	for lbl in [$Panel/VBox/SysLabel, $Panel/VBox/IntegrityLabel,
 				$Panel/VBox/TagsLabel, $Panel/VBox/HintLabel]:
+		lbl.add_theme_font_override("font", MINECRAFT_FONT)
 		lbl.add_theme_font_size_override("font_size", 14)
 		lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 0.9))
 		lbl.add_theme_color_override("outline_color", Color.BLACK)
@@ -312,6 +315,7 @@ func _style_static_labels() -> void:
 
 func _style_pause_button() -> void:
 	var color = Color(0.15, 1.0, 0.45)
+	pause_btn.add_theme_font_override("font", MINECRAFT_FONT)
 	pause_btn.add_theme_font_size_override("font_size", 14)
 	pause_btn.add_theme_color_override("font_color", color)
 	pause_btn.add_theme_color_override("font_hover_color", Color(0.5, 1.0, 0.7))
@@ -341,6 +345,7 @@ func _style_pause_button() -> void:
 
 func _style_hack_panel() -> void:
 	for lbl in [$HackPanel/HackVBox/HackTitle, $HackPanel/HackVBox/HackHint, hack_status]:
+		lbl.add_theme_font_override("font", MINECRAFT_FONT)
 		lbl.add_theme_color_override("outline_color", Color.BLACK)
 		lbl.add_theme_constant_override("outline_size", 1)
 	$HackPanel/HackVBox/HackTitle.add_theme_font_size_override("font_size", 14)
@@ -352,6 +357,7 @@ func _style_hack_panel() -> void:
 	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle, _invisible_toggle]:
 		if toggle == null:
 			continue
+		toggle.add_theme_font_override("font", MINECRAFT_FONT)
 		toggle.add_theme_font_size_override("font_size", 11)
 		toggle.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 		toggle.add_theme_color_override("font_hover_color", Color(0.95, 1.0, 1.0))

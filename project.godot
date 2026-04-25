@@ -39,6 +39,10 @@ window/size/mode=3
 window/stretch/mode="canvas_items"
 window/mode=3
 
+[gui]
+
+theme/default_theme="res://themes/default_theme.tres"
+
 [physics]
 
 2d/default_gravity=0

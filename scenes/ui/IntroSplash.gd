@@ -7,6 +7,7 @@ const MATRIX_COL_SPACING := 34.0
 const MATRIX_ROW_SPACING := 28.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.85, 0.45, 0.42)
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 var _matrix_bg: Control
 var _matrix_columns: Array = []
@@ -103,6 +104,7 @@ func _style_static_ui() -> void:
 	_flash.modulate = Color(0.9, 1.0, 0.95, 0.0)
 
 func _style_label(lbl: Label, size: int, color: Color) -> void:
+	lbl.add_theme_font_override("font", MINECRAFT_FONT)
 	lbl.add_theme_font_size_override("font_size", size)
 	lbl.add_theme_color_override("font_color", color)
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -139,6 +141,7 @@ func _build_matrix_background() -> void:
 		for row in range(rows):
 			var lbl := Label.new()
 			lbl.text = str(randi() % 2)
+			lbl.add_theme_font_override("font", MINECRAFT_FONT)
 			lbl.add_theme_font_size_override("font_size", MATRIX_FONT_SIZE)
 			lbl.add_theme_color_override("font_color", MATRIX_BASE_COLOR)
 			lbl.position = Vector2(x_pos, row * MATRIX_ROW_SPACING + randf_range(-8.0, 8.0))
