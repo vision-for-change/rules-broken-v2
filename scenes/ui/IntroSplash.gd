@@ -195,7 +195,7 @@ func _play_intro_sequence() -> void:
 		demo_delay.tween_interval(1.8)
 		demo_delay.tween_callback(_start_demo_sequence)
 	)
-	_intro_tween.tween_interval(7.4)
+	_intro_tween.tween_interval(5.0)
 	_intro_tween.tween_callback(_transition_to_menu)
 
 func _start_scanline_sweep() -> void:

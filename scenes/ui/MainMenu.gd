@@ -123,7 +123,6 @@ func _process(delta: float) -> void:
 		var speed: float = column["speed"]
 		var direction: float = column["direction"]
 		var labels: Array = column["labels"]
-
 		for lbl in labels:
 			var y = lbl.position.y + (speed * direction * delta)
 
