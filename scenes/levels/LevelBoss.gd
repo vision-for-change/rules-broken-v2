@@ -4,7 +4,7 @@ const ROGUE_AI_SCENE := preload("res://scenes/enemy/RogueAI.tscn")
 const BOSS_INTERACTABLE_SCRIPT := preload("res://scenes/levels/BossInteractable.gd")
 const OVERRIDE_KEYS_PER_PHASE := 2
 const SHIELD_DOWN_TIME := 9.0
-const BOSS_LOADOUT: Array[String] := ["pistol", "ump", "ak47", "lightsaber"]
+const BOSS_LOADOUT: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
 
 var _welcome_banner: CanvasLayer
 var _boss: Node2D
