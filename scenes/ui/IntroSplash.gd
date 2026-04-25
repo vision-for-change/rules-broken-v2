@@ -202,35 +202,35 @@ func _play_intro_sequence() -> void:
 	_intro_tween.tween_callback(func():
 		AudioManager.play_sfx_with_options("whoosh", -18.0, 0.95, 1.02)
 	)
-	_intro_tween.tween_interval(0.28)
+	_intro_tween.tween_interval(0.4)
 	_intro_tween.set_parallel(true)
-	_intro_tween.tween_property(_logo, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_intro_tween.tween_property(_logo, "scale", Vector2.ONE, 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_intro_tween.tween_property(_title, "modulate:a", 1.0, 0.6)
+	_intro_tween.tween_property(_logo, "modulate:a", 1.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_intro_tween.tween_property(_logo, "scale", Vector2.ONE, 1.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_intro_tween.tween_property(_title, "modulate:a", 1.0, 0.8)
 	_intro_tween.set_parallel(false)
-	_intro_tween.tween_interval(0.6)
+	_intro_tween.tween_interval(0.8)
 	_intro_tween.tween_callback(func():
 		AudioManager.play_sfx("dragon-studio-cinematic-boom")
 		_flash.modulate.a = 0.8
 		var flash_tween := create_tween()
-		flash_tween.tween_property(_flash, "modulate:a", 0.0, 0.4)
+		flash_tween.tween_property(_flash, "modulate:a", 0.0, 0.6)
 	)
-	_intro_tween.tween_interval(0.28)
+	_intro_tween.tween_interval(0.4)
 	_intro_tween.tween_callback(func():
 		_subtitle.text = "BOOT SEQUENCE // BREACH LINK ESTABLISHED"
 		_subtitle.modulate.a = 1.0
 	)
-	_intro_tween.tween_interval(1.2)
+	_intro_tween.tween_interval(1.6)
 	_intro_tween.tween_callback(func():
 		_status.text = "SYNCING INTERFACE"
 		_status.modulate.a = 1.0
 		_start_scanline_sweep()
 		# start the player/enemy demo shortly after sync, slower
 		var demo_delay := create_tween()
-		demo_delay.tween_interval(1.6)
+		demo_delay.tween_interval(1.8)
 		demo_delay.tween_callback(_start_demo_sequence)
 	)
-	_intro_tween.tween_interval(2.4)
+	_intro_tween.tween_interval(3.4)
 	_intro_tween.tween_callback(_transition_to_menu)
 
 func _start_scanline_sweep() -> void:
@@ -255,34 +255,34 @@ func _start_demo_sequence() -> void:
 	# camera slight zoom-in during intro
 	if is_instance_valid(_demo_camera):
 		var cam_zoom_t := _demo_camera.create_tween()
-		cam_zoom_t.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		cam_zoom_t.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 1.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	# player enters
-	t.tween_property(_player, "modulate:a", 1.0, 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(_player, "position", Vector2(vp.x * 0.36, vp.y * 0.62), 1.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_player, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	t.tween_property(_player, "position", Vector2(vp.x * 0.36, vp.y * 0.62), 2.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 	# enemy enters slightly later and then pressures the player
-	t.tween_interval(0.6)
+	t.tween_interval(0.8)
 	t.tween_callback(func():
 		AudioManager.play_sfx_with_options("enemy-approach", -12.0, 0.95, 1.0)
 	)
-	t.tween_property(_enemy, "modulate:a", 1.0, 0.6)
-	t.tween_property(_enemy, "position", Vector2(vp.x * 0.66, vp.y * 0.62), 1.8).set_trans(Tween.TRANS_LINEAR)
+	t.tween_property(_enemy, "modulate:a", 1.0, 0.8)
+	t.tween_property(_enemy, "position", Vector2(vp.x * 0.66, vp.y * 0.62), 2.2).set_trans(Tween.TRANS_LINEAR)
 
 	# enemy lunges closer (threatening move)
-	t.tween_interval(0.9)
+	t.tween_interval(1.2)
 	t.tween_callback(func():
 		var lunge := create_tween()
-		lunge.tween_property(_enemy, "position", Vector2(vp.x * 0.56, vp.y * 0.62), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		lunge.tween_property(_enemy, "position", Vector2(vp.x * 0.56, vp.y * 0.62), 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		AudioManager.play_sfx_with_options("enemy-lunge", -10.0, 1.0, 1.0)
 		if is_instance_valid(_demo_camera):
 			var caml := _demo_camera.create_tween()
-			caml.tween_property(_demo_camera, "zoom", Vector2(0.88,0.88), 0.45)
-			caml.tween_interval(0.6)
-			caml.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 0.6)
+			caml.tween_property(_demo_camera, "zoom", Vector2(0.88,0.88), 0.6)
+			caml.tween_interval(0.8)
+			caml.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 0.8)
 	)
 
 	# enemy fires a laser toward the player
-	t.tween_interval(1.1)
+	t.tween_interval(1.4)
 	t.tween_callback(func():
 		AudioManager.play_sfx_with_options("laser-shoot", -6.0, 1.0, 1.0)
 		# spawn a projectile from the enemy aimed at the player
@@ -306,21 +306,21 @@ func _start_demo_sequence() -> void:
 	)
 
 	# enemy disintegrates after a short pause
-	t.tween_interval(1.6)
+	t.tween_interval(2.0)
 	t.tween_callback(func():
 		var die := create_tween()
-		die.tween_property(_enemy, "scale", Vector2(1.6,1.6), 0.9).set_trans(Tween.TRANS_BOUNCE)
-		die.tween_property(_enemy, "modulate:a", 0.0, 1.0)
+		die.tween_property(_enemy, "scale", Vector2(1.6,1.6), 1.2).set_trans(Tween.TRANS_BOUNCE)
+		die.tween_property(_enemy, "modulate:a", 0.0, 1.2)
 		# HUD progress slower
 		var hud_t := create_tween()
 		for i in range(1, 7):
 			var pct = i * 16
-			hud_t.tween_interval(0.12)
+			hud_t.tween_interval(0.16)
 			hud_t.tween_callback(func(pct_value=pct):
 				_hud_label.text = "ACCESS: %d%%" % [pct_value]
 			)
 		# final text
-		hud_t.tween_interval(0.5)
+		hud_t.tween_interval(0.6)
 		hud_t.tween_callback(func():
 			_hud_label.text = "ACCESS: GRANTED"
 			AudioManager.play_sfx_with_options("success-chime", -6.0, 1.0, 1.0)
