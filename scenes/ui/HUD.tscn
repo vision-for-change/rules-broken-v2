@@ -110,13 +110,26 @@ offset_right = 320.0
 offset_bottom = -8.0
 theme_override_styles/background = SubResource("StyleBoxFlat_health_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
-max_value = 200.0
-value = 200.0
 show_percentage = false
 
-[node name="BossBar" type="Control" parent="."]
+[node name="HealthPercentageLabel" type="Label" parent="HealthBar" unique_id=652784634]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+text = "100%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BossBar" type="Control" parent="." unique_id=71177171]
 visible = false
-anchors_preset = 10
+layout_mode = 3
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -260.0
@@ -124,7 +137,7 @@ offset_top = 14.0
 offset_right = 260.0
 offset_bottom = 74.0
 
-[node name="BossName" type="Label" parent="BossBar"]
+[node name="BossName" type="Label" parent="BossBar" unique_id=747777344]
 layout_mode = 0
 offset_right = 520.0
 offset_bottom = 22.0
@@ -135,7 +148,7 @@ theme_override_font_sizes/font_size = 18
 text = "CHATGPT"
 horizontal_alignment = 1
 
-[node name="BossHealthBar" type="ProgressBar" parent="BossBar"]
+[node name="BossHealthBar" type="ProgressBar" parent="BossBar" unique_id=72510538]
 layout_mode = 0
 offset_top = 28.0
 offset_right = 520.0
@@ -146,7 +159,7 @@ max_value = 1000.0
 value = 1000.0
 show_percentage = false
 
-[node name="BossHealthLabel" type="Label" parent="BossBar/BossHealthBar"]
+[node name="BossHealthLabel" type="Label" parent="BossBar/BossHealthBar" unique_id=507043999]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -159,34 +172,20 @@ text = "1000 / 1000"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="HackHintBox" type="PanelContainer" parent="."]
+[node name="HackHintBox" type="PanelContainer" parent="." unique_id=1211264667]
 offset_left = 16.0
 offset_top = -72.0
 offset_right = 236.0
 offset_bottom = -44.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_white")
 
-[node name="PersistentHackHint" type="Label" parent="HackHintBox"]
+[node name="PersistentHackHint" type="Label" parent="HackHintBox" unique_id=1568429148]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.4, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 1
 theme_override_font_sizes/font_size = 13
 text = "PRESS [TAB] FOR SPECIAL FEATURES"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="HealthPercentageLabel" type="Label" parent="HealthBar"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-text = "100%"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -271,7 +270,7 @@ text = "SLOW TIME"
 layout_mode = 2
 text = "NOCLIP"
 
-[node name="UnlimitedBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox"]
+[node name="UnlimitedBulletsToggle" type="CheckBox" parent="HackPanel/HackVBox" unique_id=541928175]
 layout_mode = 2
 text = "UNLIMITED AMMO"
 
@@ -292,7 +291,7 @@ grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("2_atyv1")
 
-[node name="Panel" type="PanelContainer" parent="WeaponDisplay"]
+[node name="Panel" type="PanelContainer" parent="WeaponDisplay" unique_id=507728661]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -301,26 +300,22 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
 
-[node name="Accent" type="ColorRect" parent="WeaponDisplay/Panel"]
-layout_mode = 1
-anchors_preset = 6
-anchor_right = 1.0
-offset_right = -210.0
-offset_bottom = 4.0
+[node name="Accent" type="ColorRect" parent="WeaponDisplay/Panel" unique_id=420524691]
+layout_mode = 2
 color = Color(0.18, 0.88, 0.72, 1)
 
-[node name="Margin" type="MarginContainer" parent="WeaponDisplay/Panel"]
+[node name="Margin" type="MarginContainer" parent="WeaponDisplay/Panel" unique_id=345884376]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="HBox" type="HBoxContainer" parent="WeaponDisplay/Panel/Margin"]
+[node name="HBox" type="HBoxContainer" parent="WeaponDisplay/Panel/Margin" unique_id=1436063152]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="GunFrame" type="PanelContainer" parent="WeaponDisplay/Panel/Margin/HBox"]
+[node name="GunFrame" type="PanelContainer" parent="WeaponDisplay/Panel/Margin/HBox" unique_id=180722096]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_icon")
 
@@ -330,12 +325,12 @@ layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Info" type="VBoxContainer" parent="WeaponDisplay/Panel/Margin/HBox"]
+[node name="Info" type="VBoxContainer" parent="WeaponDisplay/Panel/Margin/HBox" unique_id=512853964]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="WeaponNameLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info"]
+[node name="WeaponNameLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info" unique_id=651106250]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.54, 0.93, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -351,7 +346,7 @@ theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 22
 text = "Ammo: 12 / 12"
 
-[node name="StatusLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info"]
+[node name="StatusLabel" type="Label" parent="WeaponDisplay/Panel/Margin/HBox/Info" unique_id=749237117]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.84, 0.92, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)

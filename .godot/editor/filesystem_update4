@@ -22,3 +22,4 @@ res://scenes/enemy/TrojanHorse.tscn
 res://autoloads/RuleManager.gd
 res://scenes/enemy/chatgpt.gd
 res://scenes/enemy/TrojanHorse.gd
+res://scenes/ui/HUD.tscn
