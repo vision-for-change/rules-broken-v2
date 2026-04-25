@@ -8,6 +8,7 @@ const MATRIX_COL_SPACING := 34.0
 const MATRIX_ROW_SPACING := 28.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.8, 0.4, 0.5)
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
 	AudioManager.play_music_by_file("freesound_community-matrix-redux-78819")
@@ -101,6 +102,7 @@ func _create_matrix_background() -> void:
 		for row in range(rows):
 			var lbl = Label.new()
 			lbl.text = str(randi() % 2)
+			lbl.add_theme_font_override("font", MINECRAFT_FONT)
 			lbl.add_theme_font_size_override("font_size", MATRIX_FONT_SIZE)
 			lbl.add_theme_color_override("font_color", MATRIX_BASE_COLOR)
 			lbl.position = Vector2(x_pos, row * MATRIX_ROW_SPACING + randf_range(-8.0, 8.0))
@@ -138,6 +140,7 @@ func _process(delta: float) -> void:
 			lbl.position.y = y
 
 func _style_label(lbl: Control, size: int, color: Color = Color.WHITE) -> void:
+	lbl.add_theme_font_override("font", MINECRAFT_FONT)
 	lbl.add_theme_font_size_override("font_size", size)
 	if color != Color.WHITE:
 		lbl.add_theme_color_override("font_color", color)
@@ -148,6 +151,7 @@ func _style_label(lbl: Control, size: int, color: Color = Color.WHITE) -> void:
 		(lbl as Label).vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) -> void:
+	btn.add_theme_font_override("font", MINECRAFT_FONT)
 	btn.add_theme_font_size_override("font_size", size)
 	btn.add_theme_color_override("font_color", color)
 	btn.add_theme_color_override("font_hover_color", Color(0.5, 1.0, 0.7))

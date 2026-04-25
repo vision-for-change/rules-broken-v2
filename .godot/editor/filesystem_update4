@@ -1,2 +1,10 @@
 res://scenes/ui/IntroSplash.gd
 res://scenes/ui/MainMenu.gd
+res://scenes/ui/GameOver.gd
+res://scenes/ui/GunSelectScreen.gd
+res://scenes/ui/HUD.gd
+res://scenes/ui/WinScreen.gd
+res://autoloads/ScreenFX.gd
+res://scenes/player/Player.gd
+res://scenes/enemy/chatgpt.gd
+res://scenes/levels/BaseLevel.gd

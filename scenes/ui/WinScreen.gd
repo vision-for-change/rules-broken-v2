@@ -8,6 +8,7 @@ const MATRIX_COL_SPACING := 26.0
 const MATRIX_ROW_SPACING := 21.0
 const MATRIX_FONT_SIZE := 16
 const MATRIX_COLOR := Color(0.42, 1.0, 0.76, 0.62)
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
 	AudioManager.play_music("stable")
@@ -104,25 +105,30 @@ func _style_panel() -> void:
 	$Panel.add_theme_stylebox_override("panel", panel_box)
 
 func _style_labels() -> void:
+	$Panel/Margin/VBox/Eyebrow.add_theme_font_override("font", MINECRAFT_FONT)
 	$Panel/Margin/VBox/Eyebrow.add_theme_font_size_override("font_size", 13)
 	$Panel/Margin/VBox/Eyebrow.add_theme_color_override("font_color", Color(0.55, 1.0, 0.86))
 	$Panel/Margin/VBox/Eyebrow.add_theme_color_override("font_outline_color", Color.BLACK)
 	$Panel/Margin/VBox/Eyebrow.add_theme_constant_override("outline_size", 1)
 
+	$Panel/Margin/VBox/TitleLabel.add_theme_font_override("font", MINECRAFT_FONT)
 	$Panel/Margin/VBox/TitleLabel.add_theme_font_size_override("font_size", 32)
 	$Panel/Margin/VBox/TitleLabel.add_theme_color_override("font_color", Color(0.92, 1.0, 0.95))
 	$Panel/Margin/VBox/TitleLabel.add_theme_color_override("font_outline_color", Color.BLACK)
 	$Panel/Margin/VBox/TitleLabel.add_theme_constant_override("outline_size", 2)
 
+	$Panel/Margin/VBox/Sub.add_theme_font_override("font", MINECRAFT_FONT)
 	$Panel/Margin/VBox/Sub.add_theme_font_size_override("font_size", 16)
 	$Panel/Margin/VBox/Sub.add_theme_color_override("font_color", Color(0.74, 0.9, 0.82))
 	if PlayerState.endless_unlocked:
 		$Panel/Margin/VBox/Sub.text = "Boss defeated.\nEndless sectors unlocked.\nPush deeper into the network."
 
+	$Panel/Margin/VBox/Hint.add_theme_font_override("font", MINECRAFT_FONT)
 	$Panel/Margin/VBox/Hint.add_theme_font_size_override("font_size", 12)
 	$Panel/Margin/VBox/Hint.add_theme_color_override("font_color", Color(0.46, 0.72, 0.63))
 
 func _style_button(btn: Button, size: int, color: Color) -> void:
+	btn.add_theme_font_override("font", MINECRAFT_FONT)
 	btn.add_theme_font_size_override("font_size", size)
 	btn.add_theme_color_override("font_color", color)
 	btn.add_theme_color_override("font_hover_color", Color(1, 1, 1))

@@ -346,6 +346,7 @@ func _spawn_death_binary_cataclysm() -> void:
 		digit.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y))
 		digit.rotation = randf_range(-0.4, 0.4)
 		digit.modulate.a = 0.0
+		digit.add_theme_font_override("font", preload("res://Minecraft.ttf"))
 		digit.add_theme_font_size_override("font_size", randi_range(12, 30))
 		digit.add_theme_color_override("font_color", Color(0.2, 1.0, 0.45, 0.95))
 		digit.add_theme_color_override("outline_color", Color(0.0, 0.18, 0.07, 0.95))

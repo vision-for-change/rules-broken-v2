@@ -135,6 +135,7 @@ func _setup_pause_overlay() -> void:
 	_pause_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pause_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_pause_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pause_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
 	_pause_label.add_theme_font_size_override("font_size", 18)
 	_pause_label.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	_pause_label.add_theme_color_override("outline_color", Color.BLACK)
