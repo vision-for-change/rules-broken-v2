@@ -186,14 +186,8 @@ func _setup_demo() -> void:
 	_enemy.position = Vector2(vp.x + 220, vp.y * 0.62)
 
 	# ensure they start invisible
-	if _player.has_method("set_modulate"):
-		_player.modulate = Color(1,1,1,0)
-	else:
-		# many nodes have modulate property at root, try setting on a Sprite child
-		pass
-
-	if _enemy.has_method("set_modulate"):
-		_enemy.modulate = Color(1,1,1,0)
+	_player.modulate = Color(1,1,1,0)
+	_enemy.modulate = Color(1,1,1,0)
 
 	_demo_container.add_child(_player)
 	_demo_container.add_child(_enemy)
@@ -294,7 +288,7 @@ func _start_demo_sequence() -> void:
 		# spawn a projectile from the enemy aimed at the player
 		if is_instance_valid(_enemy) and is_instance_valid(_player):
 			var laser = ENEMY_LASER.instantiate()
-			get_tree().current_scene.add_child(laser)
+			_demo_container.add_child(laser)
 			laser.global_position = _enemy.global_position
 			var dir = (_player.global_position - _enemy.global_position).normalized()
 			if laser.has_method("setup"):
