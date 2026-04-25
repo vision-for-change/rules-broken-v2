@@ -4,23 +4,22 @@ extends Area2D
 @export var lifetime := 8.0
 
 var _consumed := false
-var _start_position: Vector2
+var _bob_time := 0.0
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
-	_start_position = global_position
-	_start_bobbing()
 
 func _start_bobbing() -> void:
-	var tween := create_tween()
-	tween.set_loops()
-	tween.tween_property(self, "global_position:y", _start_position.y - 8.0, 0.6)
-	tween.tween_property(self, "global_position:y", _start_position.y, 0.6)
+	_bob_time = 0.0
 
 func _physics_process(delta: float) -> void:
 	lifetime -= delta
 	if lifetime <= 0.0:
 		queue_free()
+	
+	_bob_time += delta
+	var bob_offset = sin(_bob_time * PI / 0.8) * 3.0
+	global_position.y += bob_offset - (sin((_bob_time - delta) * PI / 0.8) * 3.0 if _bob_time > delta else 0.0)
 
 func _on_body_entered(body: Node) -> void:
 	if _consumed:
