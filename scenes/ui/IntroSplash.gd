@@ -9,8 +9,6 @@ const MATRIX_FONT_SIZE := 16
 const MATRIX_BASE_COLOR := Color(0.1, 0.85, 0.45, 0.42)
 
 const PLAYER_SCENE := preload("res://scenes/player/Player.tscn")
-const WORM_SCENE := preload("res://scenes/enemy/worm.tscn")
-const ENEMY_LASER := preload("res://scenes/enemy/EnemyLaser.tscn")
 
 var _matrix_bg: Control
 var _matrix_columns: Array = []
@@ -21,7 +19,6 @@ var _intro_tween: Tween
 var _canvas_layer: CanvasLayer
 var _demo_container: Node2D
 var _player: Node = null
-var _enemy: Node = null
 var _hud_label: Label = null
 var _demo_camera: Camera2D = null
 
@@ -176,21 +173,17 @@ func _setup_demo() -> void:
 	_hud_label.custom_minimum_size = Vector2(0, 28) # give some top padding
 	add_child(_hud_label)
 
-	# instantiate player and enemy into demo container
+	# instantiate player into demo container
 	_player = PLAYER_SCENE.instantiate()
-	_enemy = WORM_SCENE.instantiate()
 
-	# position them offscreen initially
+	# position it offscreen initially
 	var vp = get_viewport_rect().size
 	_player.position = Vector2(-220, vp.y * 0.62)
-	_enemy.position = Vector2(vp.x + 220, vp.y * 0.62)
 
-	# ensure they start invisible
+	# ensure it starts invisible
 	_player.modulate = Color(1,1,1,0)
-	_enemy.modulate = Color(1,1,1,0)
 
 	_demo_container.add_child(_player)
-	_demo_container.add_child(_enemy)
 
 func _play_intro_sequence() -> void:
 	# slower timings for dramatic effect
@@ -249,7 +242,6 @@ func _start_demo_sequence() -> void:
 	# Fade in and move player to center (slower pacing)
 	var vp = get_viewport_rect().size
 	_player.modulate = Color(1,1,1,0)
-	_enemy.modulate = Color(1,1,1,0)
 
 	var t := create_tween()
 	# camera slight zoom-in during intro
@@ -258,60 +250,12 @@ func _start_demo_sequence() -> void:
 		cam_zoom_t.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 1.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	# player enters
 	t.tween_property(_player, "modulate:a", 1.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(_player, "position", Vector2(vp.x * 0.36, vp.y * 0.62), 2.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_player, "position", Vector2(vp.x * 0.5, vp.y * 0.62), 2.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-	# enemy enters slightly later and then pressures the player
-	t.tween_interval(0.8)
+	# HUD progress display
+	t.tween_interval(2.2)
 	t.tween_callback(func():
-		AudioManager.play_sfx_with_options("enemy-approach", -12.0, 0.95, 1.0)
-	)
-	t.tween_property(_enemy, "modulate:a", 1.0, 0.8)
-	t.tween_property(_enemy, "position", Vector2(vp.x * 0.66, vp.y * 0.62), 2.2).set_trans(Tween.TRANS_LINEAR)
-
-	# enemy lunges closer (threatening move)
-	t.tween_interval(1.2)
-	t.tween_callback(func():
-		var lunge := create_tween()
-		lunge.tween_property(_enemy, "position", Vector2(vp.x * 0.56, vp.y * 0.62), 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		AudioManager.play_sfx_with_options("enemy-lunge", -10.0, 1.0, 1.0)
-		if is_instance_valid(_demo_camera):
-			var caml := _demo_camera.create_tween()
-			caml.tween_property(_demo_camera, "zoom", Vector2(0.88,0.88), 0.6)
-			caml.tween_interval(0.8)
-			caml.tween_property(_demo_camera, "zoom", Vector2(1.0,1.0), 0.8)
-	)
-
-	# enemy fires a laser toward the player
-	t.tween_interval(1.4)
-	t.tween_callback(func():
-		AudioManager.play_sfx_with_options("laser-shoot", -6.0, 1.0, 1.0)
-		# spawn a projectile from the enemy aimed at the player
-		if is_instance_valid(_enemy) and is_instance_valid(_player):
-			var laser = ENEMY_LASER.instantiate()
-			_demo_container.add_child(laser)
-			laser.global_position = _enemy.global_position
-			var dir = (_player.global_position - _enemy.global_position).normalized()
-			if laser.has_method("setup"):
-				laser.setup(_enemy, dir)
-			# ensure it reaches in this slowed demo
-			laser.speed = 360.0
-			laser.lifetime = 2.6
-			# if player exists, simulate near hit/damage
-			if _player.has_method("take_damage"):
-				# small damage to show stakes
-				_player.take_damage(8)
-			# visual cue on player
-			ScreenFX.screen_shake(6.0, 0.22)
-			ScreenFX.flash_screen(Color(1.0, 0.15, 0.15, 0.35), 0.18)
-	)
-
-	# enemy disintegrates after a short pause
-	t.tween_interval(2.0)
-	t.tween_callback(func():
-		var die := create_tween()
-		die.tween_property(_enemy, "scale", Vector2(1.6,1.6), 1.2).set_trans(Tween.TRANS_BOUNCE)
-		die.tween_property(_enemy, "modulate:a", 0.0, 1.2)
-		# HUD progress slower
+		# HUD progress faster
 		var hud_t := create_tween()
 		for i in range(1, 7):
 			var pct = i * 16
