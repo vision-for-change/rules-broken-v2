@@ -180,6 +180,7 @@ func shatter() -> void:
 	if _defeated:
 		return
 	_defeated = true
+	EventBus.enemy_defeated.emit(entity_id)
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	collision_layer = 0
