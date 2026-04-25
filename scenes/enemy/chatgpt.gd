@@ -33,9 +33,16 @@ const BARRAGE_SLOW_SCALE := 0.28
 const BARRAGE_SPIN_SPEED := 12.0 # radians per second for visual spin
 const BARRAGE_SPREAD_JITTER := 0.14
 
+# Continuous barrage settings (always-on 360)
+const BARRAGE_CONTINUOUS := true
+const BARRAGE_INTERVAL := 0.06              # seconds between ticks
+const BARRAGE_PROJECTILES_PER_TICK := 8     # projectiles spawned each tick forming a partial ring
+const BARRAGE_ROTATION_SPEED := 1.2         # radians per second for phase rotation
+
 var _health := 0
 var _defeated := false
 var _attack_cooldown := 0.0
+var _barrage_phase := 0.0
 
 @onready var _sprite: Sprite2D = $Sprite2D
 
@@ -43,6 +50,9 @@ func _ready() -> void:
 	add_to_group("enemy")
 	_health = maxi(1, max_health)
 	_start_attack_loop()
+	# Start continuous barrage if enabled
+	if BARRAGE_CONTINUOUS:
+		_start_continuous_barrage()
 
 func take_damage(amount: int) -> bool:
 	if _defeated:
@@ -205,9 +215,8 @@ func _perform_spin_barrage() -> void:
 	var scene_root := get_tree().current_scene
 	if scene_root == null:
 		return
-	# Store previous time scale and apply slow motion
-	var prev_ts := Engine.time_scale
-	Engine.time_scale = BARRAGE_SLOW_SCALE
+	# Visual spin only (no global time scaling for always-on barrage)
+	# (Keeping this function as a burst visual effect without changing Engine.time_scale.)
 
 	# Visual spin: rotate the sprite quickly for the duration
 	var spin_tween := _sprite.create_tween()
@@ -223,8 +232,7 @@ func _perform_spin_barrage() -> void:
 		_spawn_barrage_projectile(angle)
 		await get_tree().create_timer(interval).timeout
 
-	# Restore time scale
-	Engine.time_scale = prev_ts
+	# No time scale to restore when used as a visual burst
 
 func _spawn_barrage_projectile(angle: float) -> void:
 	var proj := BARRAGE_PROJECTILE_SCENE.instantiate()
@@ -235,6 +243,16 @@ func _spawn_barrage_projectile(angle: float) -> void:
 	get_tree().current_scene.add_child(proj)
 	if proj.has_method("setup"):
 		proj.call("setup", self, dir)
+
+func _start_continuous_barrage() -> void:
+	# Continuously spawn partial rings that rotate over time to create a constant 360° threat
+	_barrage_phase = 0.0
+	while not _defeated:
+		for i in range(BARRAGE_PROJECTILES_PER_TICK):
+			var angle := TAU * float(i) / float(BARRAGE_PROJECTILES_PER_TICK) + _barrage_phase + randf_range(-BARRAGE_SPREAD_JITTER, BARRAGE_SPREAD_JITTER)
+			_spawn_barrage_projectile(angle)
+		await get_tree().create_timer(BARRAGE_INTERVAL).timeout
+		_barrage_phase += BARRAGE_ROTATION_SPEED * BARRAGE_INTERVAL
 
 func _perform_circle_attack() -> void:
 	for i in range(CIRCLE_COUNT):
