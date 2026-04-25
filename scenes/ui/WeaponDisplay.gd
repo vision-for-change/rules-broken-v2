@@ -4,6 +4,7 @@ const LOW_AMMO_COLOR := Color(1.0, 0.35, 0.25)
 const MID_AMMO_COLOR := Color(1.0, 0.75, 0.2)
 const READY_COLOR := Color(0.8, 0.92, 1.0)
 const EMPTY_COLOR := Color(1.0, 0.45, 0.35)
+const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 var _inventory: Node = null
 var _gun_color: Color = READY_COLOR
@@ -26,9 +27,16 @@ func _ready() -> void:
 	_inventory.ammo_changed.connect(_on_ammo_changed)
 	_inventory.reload_state_changed.connect(_on_reload_state_changed)
 
+	_style_labels()
+	
 	var gun: Dictionary = _inventory.get_current_gun()
 	if not gun.is_empty():
 		_on_gun_changed(gun)
+
+func _style_labels() -> void:
+	weapon_name_label.add_theme_font_override("font", MINECRAFT_FONT)
+	ammo_label.add_theme_font_override("font", MINECRAFT_FONT)
+	status_label.add_theme_font_override("font", MINECRAFT_FONT)
 
 func _on_gun_changed(gun: Dictionary) -> void:
 	var path: String = str(gun.get("sprite", ""))

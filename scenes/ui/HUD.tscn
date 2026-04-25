@@ -27,7 +27,7 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_panel"]
-bg_color = Color(0.04, 0.08, 0.11, 0.92)
+bg_color = Color(0.05, 0.15, 0.08, 0.92)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -136,6 +136,7 @@ offset_left = -260.0
 offset_top = 14.0
 offset_right = 260.0
 offset_bottom = 74.0
+grow_horizontal = 2
 
 [node name="BossName" type="Label" parent="BossBar" unique_id=747777344]
 layout_mode = 0
@@ -302,7 +303,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
 
 [node name="Accent" type="ColorRect" parent="WeaponDisplay/Panel" unique_id=420524691]
 layout_mode = 2
-color = Color(0.18, 0.88, 0.72, 1)
+color = Color(0.17029431, 0.733232, 0, 1)
 
 [node name="Margin" type="MarginContainer" parent="WeaponDisplay/Panel" unique_id=345884376]
 layout_mode = 2

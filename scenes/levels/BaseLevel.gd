@@ -37,6 +37,7 @@ func _ready() -> void:
 
 	_show_title()
 	_play_enter_transition()
+	_trigger_player_spawn_animation()
 	EventBus.log("// SECTOR %d INITIALISED //" % level_number, "info")
 	EventBus.log("Active rules: %d" % initial_rules.size(), "info")
 
@@ -51,6 +52,7 @@ func _show_title() -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.set_anchors_preset(Control.PRESET_CENTER)
 	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
 	label.add_theme_font_size_override("font_size", 42)
 	label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
 	label.add_theme_color_override("outline_color", Color.BLACK)
@@ -68,6 +70,14 @@ func _show_title() -> void:
 	if is_instance_valid(title_label):
 		title_label.text = level_title_text
 		title_label.modulate.a = 0.0 # Keep it hidden or secondary
+
+func _trigger_player_spawn_animation() -> void:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return
+	var player = players[0]
+	if player.has_method("play_spawn_animation"):
+		player.play_spawn_animation()
 
 func _on_level_complete() -> void:
 	if _complete:

@@ -600,6 +600,24 @@ func _apply_camera_modes() -> void:
 		return
 	camera.zoom = SUPER_VISION_CAMERA_ZOOM if _hack_super_vision else DEFAULT_CAMERA_ZOOM
 
+func play_spawn_animation() -> void:
+	var spawn_tween: Tween = create_tween()
+	
+	# Get initial scale and color
+	var initial_scale = player_sprite.scale
+	var initial_color = player_sprite.modulate
+	
+	# Stretch horizontally (wider)
+	spawn_tween.tween_property(player_sprite, "scale:x", initial_scale.x * 1.5, 0.2)
+	# Stretch vertically (taller)
+	spawn_tween.parallel().tween_property(player_sprite, "scale:y", initial_scale.y * 1.5, 0.2)
+	# Change color from green to white (normal)
+	spawn_tween.parallel().tween_property(player_sprite, "modulate", Color.WHITE, 0.2)
+	
+	# Back to normal size and color
+	spawn_tween.tween_property(player_sprite, "scale", initial_scale, 0.15)
+	spawn_tween.parallel().tween_property(player_sprite, "modulate", initial_color, 0.15)
+
 func _ghost_step(delta: float) -> void:
 	var dash_blur: bool = is_dashing()
 	var ghost_interval: float = DASH_GHOST_INTERVAL if dash_blur else GHOST_INTERVAL
