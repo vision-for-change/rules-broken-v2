@@ -549,7 +549,7 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> 
 
 func _spawn_room_snakes(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
 	var base_count := _rng.randi_range(1, 2)
-	var count := int(base_count * count_mult)
+	var count := int(base_count * count_mult) 
 	for i in range(count):
 		var snake := SNAKE_SCENE.instantiate()
 		if snake == null:
