@@ -355,6 +355,10 @@ func _update_bloom_overlay() -> void:
 	_bloom_mat.set_shader_parameter("strength", lerpf(0.10, 0.22, stress))
 	_bloom_mat.set_shader_parameter("pulse_strength", lerpf(0.05, 0.14, stress))
 
+func set_vignette_visible(visible: bool) -> void:
+	if is_instance_valid(_vignette):
+		_vignette.visible = visible
+
 func _setup_vignette() -> void:
 	_vignette = ColorRect.new()
 	_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)

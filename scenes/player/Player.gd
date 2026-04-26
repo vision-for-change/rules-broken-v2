@@ -94,6 +94,8 @@ func _ready() -> void:
 	_apply_noclip_mode()
 	AudioManager.play_music("stable")
 	_apply_camera_modes()
+	
+	_start_teleport_in_effect()
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
@@ -256,6 +258,82 @@ func take_damage(amount: int) -> void:
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 	if health <= 0:
 		EventBus.player_caught.emit("enemy")
+
+func heal(amount: int) -> void:
+	if not is_alive:
+		return
+	health = mini(health + amount, 100)
+	EventBus.player_health_changed.emit(health, 100)
+
+func _start_teleport_in_effect() -> void:
+	if is_instance_valid(player_sprite):
+		player_sprite.visible = false
+	if is_instance_valid(gun_sprite):
+		gun_sprite.visible = false
+	
+	var timer: SceneTreeTimer = get_tree().create_timer(2.0, false)
+	timer.timeout.connect(_play_teleport_in_effect)
+
+func _play_teleport_in_effect() -> void:
+	var scene_root: Node = get_tree().current_scene
+	if scene_root == null:
+		return
+	
+	const TELEPORT_DIGIT_COUNT := 70
+	const TELEPORT_DURATION := 1.2
+	const SPAWN_RADIUS := 140.0
+	
+	var player_center: Vector2 = global_position
+	
+	if is_instance_valid(player_sprite):
+		player_sprite.visible = true
+		player_sprite.modulate = Color(0.1, 1.0, 0.2, 0.3)
+	if is_instance_valid(gun_sprite):
+		gun_sprite.visible = true
+		gun_sprite.modulate = Color(0.1, 1.0, 0.2, 0.3)
+	
+	for i in range(TELEPORT_DIGIT_COUNT):
+		var digit: Label = Label.new()
+		digit.text = "1" if randi() % 2 == 0 else "0"
+		
+		var angle: float = randf() * TAU
+		var distance: float = randf_range(SPAWN_RADIUS * 0.5, SPAWN_RADIUS)
+		var start_pos: Vector2 = player_center + Vector2(cos(angle), sin(angle)) * distance
+		
+		digit.global_position = start_pos
+		digit.rotation = randf_range(-0.5, 0.5)
+		digit.modulate = Color(0.1, 1.0, 0.2, 0.95)
+		digit.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+		digit.add_theme_font_size_override("font_size", randi_range(16, 32))
+		digit.add_theme_color_override("font_color", Color(0.1, 1.0, 0.2, 0.95))
+		digit.add_theme_color_override("outline_color", Color(0.0, 0.18, 0.07, 0.95))
+		digit.add_theme_constant_override("outline_size", 2)
+		digit.z_index = 100
+		scene_root.add_child(digit)
+		
+		var digit_tween: Tween = digit.create_tween()
+		digit_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		
+		var start_delay: float = randf_range(0.0, 0.1)
+		var target_pos: Vector2 = player_center
+		
+		digit_tween.tween_interval(start_delay)
+		digit_tween.tween_property(digit, "global_position", target_pos, TELEPORT_DURATION)
+		digit_tween.parallel().tween_property(digit, "rotation", digit.rotation + randf_range(-1.5, 1.5), TELEPORT_DURATION)
+		digit_tween.parallel().tween_property(digit, "modulate:a", 0.0, TELEPORT_DURATION * 0.5)
+		digit_tween.tween_callback(digit.queue_free)
+	
+	var color_fade_timer: SceneTreeTimer = get_tree().create_timer(TELEPORT_DURATION, false)
+	color_fade_timer.timeout.connect(func():
+		if is_instance_valid(player_sprite):
+			var color_tween: Tween = player_sprite.create_tween()
+			color_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			color_tween.tween_property(player_sprite, "modulate", Color.WHITE, 0.8)
+		if is_instance_valid(gun_sprite):
+			var gun_tween: Tween = gun_sprite.create_tween()
+			gun_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			gun_tween.tween_property(gun_sprite, "modulate", Color.WHITE, 0.8)
+	)
 
 func _on_action_denied(action: Dictionary, reason: String) -> void:
 	if action["actor_id"] != ENTITY_ID:

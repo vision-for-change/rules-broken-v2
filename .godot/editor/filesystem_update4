@@ -15,3 +15,8 @@ res://scenes/objects/HealthPickup.tscn
 res://scenes/player/Bullet.gd
 res://scenes/objects/HealthPickup.gd
 res://scenes/objects/Exit.gd
+res://scenes/player/Player.tscn
+res://scenes/ui/GameOver.tscn
+res://autoloads/GunDatabase.gd
+res://scenes/enemy/bugs.tscn
+res://scenes/levels/Level2.gd

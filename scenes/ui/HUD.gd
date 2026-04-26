@@ -92,8 +92,7 @@ func _ready() -> void:
 	_on_integrity_changed(RuleManager.get_integrity(), 0.0)
 	call_deferred("_sync_hacks_from_player")
 	call_deferred("_sync_minimap")
-	call_deferred("_count_total_enemies")
-	call_deferred("_create_enemy_counter_label")
+	call_deferred("_count_and_create_enemy_counter")
 	hack_panel.visible = true
 	_refresh_hack_availability()
 	_apply_hack_time_scale()
@@ -543,7 +542,7 @@ func _get_toggle_for_hack(hack_name: String) -> BaseButton:
 func _update_boss_loadout_bar() -> void:
 	if _boss_loadout_root == null:
 		return
-	var is_boss_stage := _get_current_stage() == 5
+	var is_boss_stage := false
 	_boss_loadout_root.visible = is_boss_stage
 	if not is_boss_stage:
 		return
@@ -621,7 +620,7 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 	if not is_instance_valid(integrity_bar):
 		return
 	var ratio := new_val / _max_integrity if _max_integrity > 0.0 else 0.0
-	integrity_bar.value = new_val * 100.0
+	integrity_bar.value = ratio * 100.0
 	var col: Color
 	if ratio > 0.6:
 		col = Color(0.2, 0.9, 0.4)
@@ -715,6 +714,10 @@ func _count_total_enemies() -> void:
 		enemies = get_tree().get_nodes_in_group("enemy")
 		_total_enemies = enemies.size()
 
+func _count_and_create_enemy_counter() -> void:
+	await _count_total_enemies()
+	_create_enemy_counter_label()
+
 func _create_enemy_counter_label() -> void:
 	var status := _get_enemy_kill_status()
 	_enemy_counter_label = Label.new()
@@ -752,11 +755,12 @@ func _update_enemy_counter_display() -> void:
 
 func _get_enemy_kill_status() -> Dictionary:
 	var required := 0
-	var level = get_tree().current_scene
-	if level != null and level.has_method("get_enemy_kill_requirement"):
-		required = int(level.call("get_enemy_kill_requirement"))
-	elif _total_enemies > 0:
+	if _total_enemies > 0:
 		required = ceili(_total_enemies / 2.0)
+	else:
+		var level = get_tree().current_scene
+		if level != null and level.has_method("get_enemy_kill_requirement"):
+			required = int(level.call("get_enemy_kill_requirement"))
 	var requirement_met = required <= 0 or _enemies_defeated >= required
 	var remaining = maxi(0, required - _enemies_defeated)
 	return {

@@ -9,6 +9,7 @@ func _ready() -> void:
 	$VBox/MenuBtn.add_theme_font_size_override("font_size", 16)
 	_style_button($VBox/RetryBtn, 16, Color(0.2, 1.0, 0.5))
 	_style_button($VBox/MenuBtn, 16, Color(0.2, 1.0, 0.5))
+	ScreenFX.set_vignette_visible(false)
 	ScreenFX.flash_screen(Color(0.086, 0.642, 0.287, 0.6), 0.5)
 
 func _style_summary() -> void:
@@ -54,11 +55,13 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 	btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
 func _on_retry_pressed() -> void:
+	ScreenFX.set_vignette_visible(true)
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
 	
 func _on_menu_pressed() -> void:
+	ScreenFX.set_vignette_visible(true)
 	PlayerState.reset_run_progression()
 	ScreenFX.transition_to_scene("res://scenes/ui/MainMenu.tscn")
 

@@ -64,7 +64,23 @@ func _show_title() -> void:
 	t.tween_property(label, "modulate:a", 1.0, 0.3)
 	t.tween_interval(2.0)
 	t.tween_property(label, "modulate:a", 0.0, 0.5)
-	t.tween_callback(banner.queue_free)
+	t.tween_callback(func():
+		# Move label to persistent top center display
+		banner.remove_child(label)
+		add_child(label)
+		label.layout_mode = 1
+		label.anchor_left = 0.5
+		label.anchor_top = 0.0
+		label.anchor_right = 0.5
+		label.anchor_bottom = 0.0
+		label.offset_left = -200.0
+		label.offset_top = 12.0
+		label.offset_right = 200.0
+		label.offset_bottom = 40.0
+		label.add_theme_font_size_override("font_size", 20)
+		label.modulate.a = 1.0
+		banner.queue_free()
+	)
 	
 	# Also update the small top-left/top-center label if it exists
 	if is_instance_valid(title_label):

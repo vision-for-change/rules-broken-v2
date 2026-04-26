@@ -14,6 +14,7 @@ var _direction := Vector2.RIGHT
 var _owner_body: PhysicsBody2D = null
 var _ghost_timer := 0.0
 var _is_lightsaber_bullet := false
+var _lightsaber_rotation_offset := 0.0
 var damage := 10
 
 @onready var bullet_sprite: Sprite2D = $Sprite2D
@@ -30,10 +31,13 @@ func setup(owner_body: PhysicsBody2D, direction: Vector2, speed_mult: float = 1.
 func setup_as_lightsaber(owner_body: PhysicsBody2D, direction: Vector2) -> void:
 	setup(owner_body, direction, 1.2) # Faster
 	_is_lightsaber_bullet = true
+	_lightsaber_rotation_offset = -PI / 2 + PI / 9
 	if is_instance_valid(bullet_sprite):
 		bullet_sprite.texture = SLASH_SPRITE
 		bullet_sprite.rotation += PI
-	lifetime = 0.5 # Shorter range
+		bullet_sprite.scale *= 2.0
+		bullet_sprite.rotation += _lightsaber_rotation_offset
+	lifetime = 0.15
 
 func _physics_process(delta: float) -> void:
 	global_position += _direction * speed * delta
@@ -114,6 +118,7 @@ func _spawn_ghost() -> void:
 	ghost.global_rotation = rotation
 	if _is_lightsaber_bullet:
 		ghost.rotation += PI
+		ghost.rotation += _lightsaber_rotation_offset
 	ghost.z_index = z_index - 1
 	ghost.modulate = Color(0.45, 1.0, 0.65, 0.75)
 	scene_root.add_child(ghost)

@@ -14,10 +14,10 @@ script = ExtResource("1_57v1k")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=246562019]
 layout_mode = 0
-offset_left = 5.000002
+offset_left = -5.000001
 offset_top = -4.0
-offset_right = 2314.0
-offset_bottom = 1295.0
+offset_right = 2349.2727
+offset_bottom = 1323.76
 scale = Vector2(0.49569452, 0.5015967)
 texture = ExtResource("2_57v1k")
 
@@ -39,7 +39,6 @@ alignment = 1
 
 [node name="SummaryLabel" type="Label" parent="VBox" unique_id=152865664]
 layout_mode = 2
-text = ""
 horizontal_alignment = 1
 
 [node name="RetryBtn" type="Button" parent="VBox" unique_id=1878569532]
