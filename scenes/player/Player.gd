@@ -356,6 +356,7 @@ func _on_caught(_catcher_id: String) -> void:
 	ScreenFX.screen_shake(DEATH_SHAKE_INTENSITY, DEATH_SHAKE_DURATION)
 	ScreenFX.flash_screen(Color(1, 0.0, 0.1, 0.8), 0.9)
 	AudioManager.play_sfx("dragon-studio-cinematic-boom")
+	Music.stopsound()
 	_start_death_zoom_in()
 	_shatter_visible_enemies()
 	_spawn_death_binary_cataclysm()

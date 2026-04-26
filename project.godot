@@ -32,6 +32,7 @@ InputSetup="*res://autoloads/InputSetup.gd"
 RuleDefinitions="*res://autoloads/RuleDefinitions.gd"
 GunDatabase="*uid://xh567m8fany3"
 PlayerState="*uid://btw5ks6sbr1a6"
+Music="*uid://72fy0u6j220h"
 
 [display]
 
