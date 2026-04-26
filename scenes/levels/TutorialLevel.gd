@@ -70,6 +70,48 @@ func _setup_tutorial_ui() -> void:
 	_tutorial_canvas.add_child(bg)
 	_tutorial_canvas.add_child(_instr_label)
 	
+	# Morpheus UI: picture on the left, textbox on the right (anchored bottom)
+	var morpheus_tex := load("res://assets/addmorpheus.png")
+	var morpheus_container := HBoxContainer.new()
+	morpheus_container.name = "MorpheusContainer"
+	morpheus_container.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	morpheus_container.offset_left = 20
+	morpheus_container.offset_top = -140
+	morpheus_container.custom_minimum_size = Vector2(520, 96)
+	morpheus_container.z_index = 60
+	morpheus_container.visible = true
+
+	# Portrait on the left (Control node for consistent UI)
+	var morpheus_texrect := TextureRect.new()
+	morpheus_texrect.name = "MorpheusSprite"
+	if morpheus_tex != null:
+		morpheus_texrect.texture = morpheus_tex
+	morpheus_texrect.custom_minimum_size = Vector2(96, 96)
+	morpheus_texrect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	morpheus_container.add_child(morpheus_texrect)
+
+	# Text box panel to the right
+	var morpheus_box := PanelContainer.new()
+	morpheus_box.name = "MorpheusTextBox"
+	morpheus_box.custom_minimum_size = Vector2(420, 96)
+	morpheus_box.modulate = Color(0, 0, 0, 0.8)
+	morpheus_box.visible = true
+	morpheus_box.z_index = 65
+
+	var morpheus_label := RichTextLabel.new()
+	morpheus_label.name = "MorpheusLabel"
+	morpheus_label.custom_minimum_size = Vector2(400, 80)
+	morpheus_label.bbcode_enabled = false
+	morpheus_label.scroll_follow = RichTextLabel.SCROLL_FOLLOW_BOTTOM
+	morpheus_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+	morpheus_label.add_theme_font_size_override("font_size", 16)
+	morpheus_label.add_theme_color_override("default_color", Color(0.8, 1.0, 0.6))
+	morpheus_label.text = ""
+	morpheus_box.add_child(morpheus_label)
+
+	morpheus_container.add_child(morpheus_box)
+	_tutorial_canvas.add_child(morpheus_container)
+
 	var esc_hint = Label.new()
 	esc_hint.text = "[ESC] TO EXIT TO MAIN MENU"
 	esc_hint.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -98,13 +140,23 @@ func _start_stage(stage: Stage) -> void:
 			_stage_nodes.append(bug)
 
 		Stage.SNAKE_COMBAT:
-			_instr_label.text = "THREAT DETECTED: SNAKE (BULLET IMMUNE).\nUSE [SHIFT-DASH] AT HIGH SPEED TO DESTROY IT."
+			_instr_label.text = "Morpheus: THREAT DETECTED: SNAKE (BULLET IMMUNE).\nUSE [SHIFT-DASH] AT HIGH SPEED TO DESTROY IT."
+			# Ensure Morpheus portrait is visible
+			if _tutorial_canvas.has_node("MorpheusSprite"):
+				_tutorial_canvas.get_node("MorpheusSprite").visible = true
 			var snake = SNAKE_SCENE.instantiate()
-			snake.position = $Player.position + Vector2(250, 50)
+			# Place snake closer so a dash can reach it reliably in the tutorial
+			snake.position = $Player.position + Vector2(120, 0)
 			snake.set("entity_id", "tutorial_snake")
 			snake.set("segment_count", 6)
 			add_child(snake)
 			_stage_nodes.append(snake)
+			# Give the player super speed so the dash can kill the snake (matches real game requirement)
+			var players = get_tree().get_nodes_in_group("player")
+			if not players.is_empty():
+				var player = players[0]
+				if player != null and player.has_method("set_hacked_client_modes"):
+					player.call("set_hacked_client_modes", true, false, false, false, false, false)
 
 		Stage.HACK_MENU:
 			_instr_label.text = "SYSTEM ACCESS GRANTED.\nPRESS [TAB] TO OPEN HACKS. TRY ENABLING ONE."
@@ -115,6 +167,14 @@ func _start_stage(stage: Stage) -> void:
 		Stage.DONE:
 			_instr_label.text = "CERTIFICATION COMPLETE."
 			_show_advanced_completion_ui()
+
+	# Mirror the bottom instruction into the Morpheus textbox so the portrait "speaks"
+	if _tutorial_canvas.has_node("MorpheusContainer"):
+		var container = _tutorial_canvas.get_node("MorpheusContainer")
+		var label = container.get_node("MorpheusTextBox").get_node("MorpheusLabel")
+		container.visible = true
+		# Strip speaker prefix if present
+		label.text = _instr_label.text.replace("Morpheus: ", "")
 
 func _check_for_hack_trial() -> void:
 	var player = get_tree().get_first_node_in_group("player")

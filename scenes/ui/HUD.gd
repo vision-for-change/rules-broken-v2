@@ -722,7 +722,10 @@ func _on_enemy_defeated(_enemy_id: String) -> void:
 	_update_enemy_counter_display()
 	# If we've met the target and haven't yet notified, play the phone ring
 	var status := _get_enemy_kill_status()
-	if bool(status.get("met", false)) and not _telephone_alert_played:
+	var current_scene = get_tree().current_scene
+	var is_tutorial = current_scene != null and current_scene.name == "tutorial"
+	# Only play the telephone ring in normal levels (skip tutorial)
+	if bool(status.get("met", false)) and not _telephone_alert_played and not is_tutorial:
 		_telephone_alert_played = true
 		AudioManager.play_sfx("TelephoneRinging")
 
