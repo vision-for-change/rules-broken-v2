@@ -496,11 +496,9 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 	door.name = "SystemTelephone"
 	door.collision_layer = 2
 	door.collision_mask = 0
+	door.z_index = 5
 	door.position = _cell_to_world(_room_center(room))
 	door.set_script(FLOOR_DOOR_SCRIPT)
-	parent.add_child(door)
-	if door.has_signal("door_used"):
-		door.connect("door_used", Callable(self, "_on_floor_door_used"))
 
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
@@ -510,9 +508,15 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite2D"
+	sprite.scale = Vector2(2.5, 2.5) # Make it visible
 	door.add_child(sprite)
 	
-	# Initial check
+	parent.add_child(door)
+	
+	if door.has_signal("door_used"):
+		door.connect("door_used", Callable(self, "_on_floor_door_used"))
+	
+	# Force initial check
 	if door.has_method("_update_visuals"):
 		door.call("_update_visuals")
 	
