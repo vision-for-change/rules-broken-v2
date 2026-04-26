@@ -38,24 +38,27 @@ var _enemies_defeated := 0
 var _total_enemies := 0
 var _enemy_counter_label: Label = null
 var _invisible_toggle: CheckBox = null
+var _invincible_toggle: CheckBox = null
 var _boss_loadout_root: PanelContainer = null
 var _boss_loadout_slots: Array = []
+var _is_boss_encounter := false
 var _hack_key_map := {
 	"1": "super_speed",
 	"2": "faster_bullets",
 	"3": "super_vision",
-	"4": "slow_time",
-	"5": "noclip",
-	"6": "unlimited_bullets",
-	"7": "invisible"
+	"4": "unlimited_bullets",
+	"5": "invisible",
+	"6": "slow_time",
+	"7": "invincible"
 }
 var _hack_unlock_by_stage := {
 	"super_speed": 1,
 	"faster_bullets": 2,
 	"super_vision": 3,
-	"slow_time": 4,
 	"unlimited_bullets": 5,
-	"invisible": 5
+	"invisible": 5,
+	"slow_time": 4,
+	"invincible": 4
 }
 
 const HACK_PANEL_TIME_SCALE := 0.2
@@ -139,7 +142,24 @@ func _ensure_special_hud_controls() -> void:
 		_invisible_toggle.name = "InvisibleToggle"
 		_invisible_toggle.text = "GHOST SIGNAL"
 		$HackPanel/HackVBox.add_child(_invisible_toggle)
-		$HackPanel/HackVBox.move_child(_invisible_toggle, $HackPanel/HackVBox.get_child_count() - 1)
+	
+	if _invincible_toggle == null and has_node("HackPanel/HackVBox"):
+		_invincible_toggle = CheckBox.new()
+		_invincible_toggle.name = "InvincibleToggle"
+		_invincible_toggle.text = "INVINCIBILITY"
+		$HackPanel/HackVBox.add_child(_invincible_toggle)
+		_invincible_toggle.toggled.connect(func(enabled): _on_hack_toggled("invincible", enabled))
+
+	# REORDER: Put Level 4 hacks at the bottom
+	if has_node("HackPanel/HackVBox"):
+		var vbox = $HackPanel/HackVBox
+		# Higher level hacks first, Level 4 at the very bottom
+		# Actually, let's just move Level 4 ones to the end of the VBox
+		vbox.move_child(slow_time_toggle, vbox.get_child_count() - 1)
+		vbox.move_child(_invincible_toggle, vbox.get_child_count() - 1)
+		if is_instance_valid(hack_status):
+			vbox.move_child(hack_status, vbox.get_child_count() - 1)
+
 	if _boss_loadout_root != null:
 		return
 	_boss_loadout_root = PanelContainer.new()
@@ -353,7 +373,7 @@ func _style_hack_panel() -> void:
 	$HackPanel/HackVBox/HackHint.add_theme_color_override("font_color", Color(0.55, 0.95, 0.9))
 	hack_status.add_theme_font_size_override("font_size", 10)
 	hack_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.7))
-	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle, _invisible_toggle]:
+	for toggle in [super_speed_toggle, fast_bullets_toggle, super_vision_toggle, slow_time_toggle, noclip_toggle, unlimited_bullets_toggle, _invisible_toggle, _invincible_toggle]:
 		if toggle == null:
 			continue
 		toggle.add_theme_font_override("font", MINECRAFT_FONT)
@@ -366,12 +386,14 @@ func _set_hack_labels() -> void:
 	super_speed_toggle.text = "[1] SUPER SPEED"
 	fast_bullets_toggle.text = "[2] FASTER BULLETS"
 	super_vision_toggle.text = "[3] SUPER VISION"
-	slow_time_toggle.text = "[4] SLOW TIME"
-	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
-		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
+		unlimited_bullets_toggle.text = "[4] UNLIMITED AMMO"
 	if _invisible_toggle != null:
-		_invisible_toggle.text = "[7] GHOST SIGNAL"
+		_invisible_toggle.text = "[5] GHOST SIGNAL"
+	slow_time_toggle.text = "[6] SLOW TIME"
+	if _invincible_toggle != null:
+		_invincible_toggle.text = "[7] INVINCIBILITY"
+	noclip_toggle.text = "[X] NOCLIP"
 
 func _sync_minimap() -> void:
 	var level = get_tree().current_scene
@@ -420,6 +442,8 @@ func _sync_hacks_from_player() -> void:
 	unlimited_bullets_toggle.button_pressed = modes.get("unlimited_bullets", false) and _is_hack_unlocked("unlimited_bullets")
 	if _invisible_toggle != null:
 		_invisible_toggle.button_pressed = modes.get("invisible", false) and _is_hack_unlocked("invisible")
+	if _invincible_toggle != null:
+		_invincible_toggle.button_pressed = modes.get("invincible", false) and _is_hack_unlocked("invincible")
 	_syncing_hack_ui = false
 	_refresh_hack_availability()
 	_update_hack_status()
@@ -470,6 +494,9 @@ func _disable_hack(hack_name: String) -> void:
 		"invisible":
 			if _invisible_toggle != null:
 				_invisible_toggle.button_pressed = false
+		"invincible":
+			if _invincible_toggle != null:
+				_invincible_toggle.button_pressed = false
 	_syncing_hack_ui = false
 
 func _update_hack_status() -> void:
@@ -509,12 +536,14 @@ func _update_hack_display() -> void:
 	super_speed_toggle.text = "[1] SUPER SPEED"
 	fast_bullets_toggle.text = "[2] FASTER BULLETS"
 	super_vision_toggle.text = "[3] SUPER VISION"
-	slow_time_toggle.text = "[4] SLOW TIME"
-	noclip_toggle.text = "[5] NOCLIP"
 	if unlimited_bullets_toggle != null:
-		unlimited_bullets_toggle.text = "[6] UNLIMITED AMMO"
+		unlimited_bullets_toggle.text = "[4] UNLIMITED AMMO"
 	if _invisible_toggle != null:
-		_invisible_toggle.text = "[7] GHOST SIGNAL"
+		_invisible_toggle.text = "[5] GHOST SIGNAL"
+	slow_time_toggle.text = "[6] SLOW TIME"
+	if _invincible_toggle != null:
+		_invincible_toggle.text = "[7] INVINCIBILITY"
+	noclip_toggle.text = "[X] NOCLIP"
 
 func _toggle_hack_by_name(hack_name: String) -> void:
 	var toggle = _get_toggle_for_hack(hack_name)
@@ -537,14 +566,22 @@ func _get_toggle_for_hack(hack_name: String) -> BaseButton:
 			return unlimited_bullets_toggle
 		"invisible":
 			return _invisible_toggle
+		"invincible":
+			return _invincible_toggle
 	return null
+
+func set_boss_encounter_mode(active: bool) -> void:
+	_is_boss_encounter = active
+	if _boss_loadout_root != null:
+		_boss_loadout_root.visible = active and not _is_boss_encounter # Forces false if boss encounter
 
 func _update_boss_loadout_bar() -> void:
 	if _boss_loadout_root == null:
 		return
-	var is_boss_stage := false
-	_boss_loadout_root.visible = is_boss_stage
-	if not is_boss_stage:
+	# NO HOTBAR: Always keep hidden during boss encounter
+	var should_show := false 
+	_boss_loadout_root.visible = should_show
+	if not should_show:
 		return
 	var player = _get_player()
 	if player == null or not player.has_node("Inventory"):

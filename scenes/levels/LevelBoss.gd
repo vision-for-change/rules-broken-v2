@@ -4,7 +4,7 @@ const ROGUE_AI_SCENE := preload("res://scenes/enemy/RogueAI.tscn")
 const BOSS_INTERACTABLE_SCRIPT := preload("res://scenes/levels/BossInteractable.gd")
 const OVERRIDE_KEYS_PER_PHASE := 2
 const SHIELD_DOWN_TIME := 9.0
-const BOSS_LOADOUT: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
+const BOSS_LOADOUT_BASE: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
 
 var _welcome_banner: CanvasLayer
 var _boss: Node2D
@@ -16,18 +16,16 @@ var _keys_remaining := 0
 var _key_cycle_active := false
 
 func _ready() -> void:
-	_advance_requested = false
-	_queued_start_floor = 5
-	_floor_index = 5
-	level_number = 5
-	PlayerState.record_level_reached(5)
-	level_title_text = "FINAL SECTOR // CORE COLLAPSE"
+	# Note: _floor_index is static from Level2.gd
+	level_number = _floor_index
+	PlayerState.record_level_reached(_floor_index)
+	level_title_text = "FLOOR %d // CORE ANOMALY" % _floor_index
 	
 	super._ready()
 	_show_welcome_message()
 
 func get_stage_number() -> int:
-	return 5
+	return _floor_index
 
 func get_boss_objective_status() -> Dictionary:
 	var shielded := true
@@ -42,7 +40,7 @@ func get_boss_objective_status() -> Dictionary:
 func _build_wall_material() -> ShaderMaterial:
 	var mat = super._build_wall_material()
 	mat.set_shader_parameter("code_color", Color(1.0, 0.2, 0.2))
-	mat.set_shader_parameter("fall_speed", 4.5)
+	mat.set_shader_parameter("fall_speed", 4.5 + (float(_floor_index) * 0.5))
 	return mat
 
 func _show_welcome_message() -> void:
@@ -51,17 +49,19 @@ func _show_welcome_message() -> void:
 	add_child(_welcome_banner)
 	
 	var label = Label.new()
-	label.text = "FINAL BOSS ONLINE\n[1-4] SWITCH WEAPONS // AMMO UNLOCKED\n[7] GHOST SIGNAL // COLLECT OVERRIDE KEYS"
+	var tier = _floor_index / 5
+	label.text = "BOSS TIER %d DETECTED\nSYSTEM INTEGRITY CRITICAL\nCOLLECT OVERRIDE KEYS TO DROP SHIELD" % tier
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.set_anchors_preset(Control.PRESET_CENTER)
 	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+	label.add_theme_font_size_override("font_size", 26)
 	label.add_theme_color_override("font_color", Color(1, 0.1, 0.1))
 	label.add_theme_color_override("outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 4)
 	_welcome_banner.add_child(label)
 	
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(4.0).timeout
 	var t = create_tween()
 	t.tween_property(label, "modulate:a", 0.0, 0.5)
 	t.tween_callback(_welcome_banner.queue_free)
@@ -92,23 +92,29 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 func _configure_player_for_boss_fight(player: Node2D) -> void:
 	if player == null:
 		return
-	if player.has_method("set_hacked_client_modes"):
-		player.call("set_hacked_client_modes", false, false, false, false, false, true, false)
+	
+	# Full health refill for boss
 	if player.get("health") != null:
 		player.set("health", 100)
 		EventBus.player_health_changed.emit(100, 100)
+	
 	if player.has_node("Inventory"):
 		var inventory = player.get_node("Inventory")
 		if inventory != null:
 			if inventory.has_method("set_max_slots"):
 				inventory.call("set_max_slots", 4)
-			var equip_id := PlayerState.selected_gun_id if PlayerState.selected_gun_id in BOSS_LOADOUT else "ump"
+			# Give them AK47 and Lightsaber if they don't have it, or just use what they have
+			var current_selected = PlayerState.selected_gun_id
+			var loadout: Array[String] = [current_selected, "ump", "ak47", "lightsaber"]
 			if inventory.has_method("set_loadout"):
-				inventory.call("set_loadout", BOSS_LOADOUT, equip_id)
+				inventory.call("set_loadout", loadout, current_selected)
+	
 	var hud_node := get_node_or_null("HUD")
-	if is_instance_valid(hud_node) and hud_node.has_method("set_boss_mode_defaults"):
-		hud_node.call("set_boss_mode_defaults")
-	EventBus.log("BOSS LOADOUT ONLINE // [1-4] SWITCH WEAPONS // [7] GHOST SIGNAL", "exploit")
+	if is_instance_valid(hud_node):
+		if hud_node.has_method("set_boss_encounter_mode"):
+			hud_node.call("set_boss_encounter_mode", true)
+		
+	EventBus.log("BOSS ENCOUNTER // NO HOTBAR // ANALYZING PATTERNS", "error")
 
 func _spawn_boss(parent: Node2D) -> void:
 	var boss = ROGUE_AI_SCENE.instantiate()
@@ -117,6 +123,15 @@ func _spawn_boss(parent: Node2D) -> void:
 	parent.add_child(boss)
 	boss.global_position = _cell_to_world(_room_center(_boss_room))
 	_boss = boss
+
+	# Scaling based on level
+	var tier_mult := float(_floor_index) / 5.0
+	if boss.get("max_health") != null:
+		var new_hp = int(420.0 * (1.0 + (tier_mult - 1.0) * 0.8))
+		boss.set("max_health", new_hp)
+	if boss.get("move_speed") != null:
+		var new_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
+		boss.set("move_speed", new_speed)
 
 	if boss.has_signal("shield_disabled"):
 		boss.connect("shield_disabled", Callable(self, "_on_boss_shield_disabled"))
@@ -127,7 +142,7 @@ func _spawn_boss(parent: Node2D) -> void:
 
 	var hud_node := get_node_or_null("HUD")
 	if is_instance_valid(hud_node) and hud_node.has_method("bind_boss"):
-		hud_node.call("bind_boss", boss, "ROGUE AI")
+		hud_node.call("bind_boss", boss, "ROGUE AI // TIER %d" % int(tier_mult))
 
 func _start_override_key_phase(parent: Node2D) -> void:
 	if not is_instance_valid(_boss):
@@ -154,7 +169,7 @@ func _start_override_key_phase(parent: Node2D) -> void:
 			_active_override_keys.append(key)
 
 	_keys_remaining = _active_override_keys.size()
-	EventBus.log("OVERRIDE KEYS SPAWNED // COLLECT %d TO DROP SHIELD" % _keys_remaining, "warn")
+	EventBus.log("OVERRIDE KEYS SPAWNED // COLLECT %d" % _keys_remaining, "warn")
 
 func _spawn_override_key(cell: Vector2i, parent: Node2D, index: int) -> Node2D:
 	var key_obj := StaticBody2D.new()
@@ -167,28 +182,29 @@ func _spawn_override_key(cell: Vector2i, parent: Node2D, index: int) -> Node2D:
 	parent.add_child(key_obj)
 
 	var visual := ColorRect.new()
-	visual.size = Vector2(16, 16)
-	visual.position = Vector2(-8, -8)
+	visual.size = Vector2(20, 20)
+	visual.position = Vector2(-10, -10)
 	visual.color = Color(0.1, 0.95, 1.0)
 	key_obj.add_child(visual)
 
 	var core := ColorRect.new()
-	core.size = Vector2(8, 8)
-	core.position = Vector2(-4, -4)
+	core.size = Vector2(10, 10)
+	core.position = Vector2(-5, -5)
 	core.color = Color(1.0, 1.0, 1.0)
 	key_obj.add_child(core)
 
 	var label := Label.new()
-	label.text = "[E] OVERRIDE KEY"
-	label.offset_top = -28
+	label.text = "[E] OVERRIDE"
+	label.offset_top = -32
 	label.offset_left = -44
-	label.add_theme_font_size_override("font_size", 9)
+	label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+	label.add_theme_font_size_override("font_size", 10)
 	label.add_theme_color_override("font_color", Color(0.75, 1.0, 1.0))
 	key_obj.add_child(label)
 
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
-	circle.radius = 24.0
+	circle.radius = 32.0
 	shape.shape = circle
 	key_obj.add_child(shape)
 
@@ -204,7 +220,7 @@ func _on_override_key_collected(key_obj: Node2D) -> void:
 		_active_override_keys.erase(key_obj)
 	_keys_remaining = maxi(0, _active_override_keys.size())
 	AudioManager.play_sfx("level_complete")
-	EventBus.log("OVERRIDE KEY CAPTURED // %d REMAINING" % _keys_remaining, "warn")
+	EventBus.log("KEY CAPTURED // %d REMAINING" % _keys_remaining, "warn")
 	key_obj.queue_free()
 
 	if _keys_remaining > 0:
@@ -215,14 +231,14 @@ func _on_override_key_collected(key_obj: Node2D) -> void:
 
 func _on_boss_shield_disabled(duration: float) -> void:
 	_clear_override_keys()
-	EventBus.log("SHIELD DOWN // ROGUE AI VULNERABLE FOR %.1f SECONDS" % duration, "error")
+	EventBus.log("SHIELD DOWN // BOSS VULNERABLE", "error")
 	ScreenFX.flash_screen(Color(1.0, 0.25, 0.25, 0.2), 0.25)
 
 func _on_boss_shield_restored() -> void:
 	if _transitioning:
 		return
 	var interactable_root := _get_or_create_container("Interactables")
-	EventBus.log("SHIELD RESTORED // FIND NEW OVERRIDE KEYS", "warn")
+	EventBus.log("SHIELD RESTORED // SEARCH FOR KEYS", "warn")
 	_start_override_key_phase(interactable_root)
 
 func _clear_override_keys() -> void:
@@ -239,6 +255,11 @@ func _on_victory() -> void:
 	_transitioning = true
 	PlayerState.boss_defeated_this_run = true
 	PlayerState.endless_unlocked = true
-	PlayerState.record_level_reached(5)
+	PlayerState.record_level_reached(_floor_index)
 	AudioManager.play_sfx("level_complete")
-	ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")
+	
+	await _play_exit_transition()
+	
+	# After boss, continue to floor index + 1
+	_advance_requested = true
+	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")

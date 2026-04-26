@@ -732,18 +732,18 @@ func _on_floor_door_used() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
-	
-	if _floor_index == 4:
-		_advance_requested = false
-		_queued_start_floor = 1
-		await _play_exit_transition()
-		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
-		return
 
 	_advance_requested = true
-	await _play_exit_transition()
-	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+	var next_floor = _floor_index + 1
 
+	await _play_exit_transition()
+
+	if next_floor % 5 == 0:
+		# It's a boss floor
+		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
+	else:
+		# Regular floor
+		ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
 func _on_enemy_defeated_for_exit(_enemy_id: String) -> void:
 	if _floor_index >= 5:
 		return

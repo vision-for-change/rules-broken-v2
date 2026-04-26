@@ -37,10 +37,9 @@ func _ready() -> void:
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
 	_style_button($VBox/PlayBtn, 20)
 	
-	# Create debug floor buttons if they don't exist
-	_create_debug_buttons()
+	# Create debug buttons (Tutorial and Boss only)
+	_create_menu_buttons()
 	
-	_style_button($VBox/Floor5Btn, 18)
 	_style_button($VBox/QuitBtn, 20)
 	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
 
@@ -58,10 +57,11 @@ func _ready() -> void:
 	_connect_button_hover_sounds()
 	move_child($VBox, get_child_count() - 1)
 
-func _create_debug_buttons() -> void:
+func _create_menu_buttons() -> void:
 	var vbox = $VBox
-	var floor_5_idx = $VBox/Floor5Btn.get_index()
+	var quit_idx = $VBox/QuitBtn.get_index()
 	
+	# Tutorial Button
 	var tutorial_btn: Button
 	if has_node("VBox/TutorialBtn"):
 		tutorial_btn = get_node("VBox/TutorialBtn")
@@ -70,37 +70,32 @@ func _create_debug_buttons() -> void:
 		tutorial_btn.name = "TutorialBtn"
 		tutorial_btn.text = "PLAY TUTORIAL"
 		vbox.add_child(tutorial_btn)
-		vbox.move_child(tutorial_btn, floor_5_idx)
+		vbox.move_child(tutorial_btn, quit_idx)
 		
 	_style_button(tutorial_btn, 20, Color(0.4, 0.9, 1.0))
 	if not tutorial_btn.pressed.is_connected(_on_tutorial_pressed):
 		tutorial_btn.pressed.connect(_on_tutorial_pressed)
+
+	# Boss Debug (Floor 5)
+	var boss_btn: Button
+	if has_node("VBox/Floor5Btn"):
+		boss_btn = get_node("VBox/Floor5Btn")
+	else:
+		boss_btn = Button.new()
+		boss_btn.name = "Floor5Btn"
+		vbox.add_child(boss_btn)
+		vbox.move_child(boss_btn, quit_idx + 1)
+		
+	boss_btn.text = "BOSS: ROGUE AI"
+	_style_button(boss_btn, 18, Color(0.8, 0.2, 0.2))
+	if not boss_btn.pressed.is_connected(_on_floor_5_pressed):
+		boss_btn.pressed.connect(_on_floor_5_pressed)
 	
-	$VBox/Floor5Btn.text = "BOSS: ROGUE AI"
-	
+	# Ensure Floor 1-4 buttons are removed if they were created via script previously
 	for i in range(1, 5):
 		var btn_name = "Floor%dBtn" % i
-		var btn: Button
 		if has_node("VBox/" + btn_name):
-			btn = get_node("VBox/" + btn_name)
-		else:
-			btn = Button.new()
-			btn.name = btn_name
-			btn.text = "DEBUG: FLOOR %d" % i
-			vbox.add_child(btn)
-			vbox.move_child(btn, floor_5_idx + i - 1)
-			
-		_style_button(btn, 16, Color(0.8, 0.4, 0.2))
-		
-		# Clear existing connections if any
-		for sig in btn.pressed.get_connections():
-			btn.pressed.disconnect(sig.callable)
-			
-		match i:
-			1: btn.pressed.connect(_on_floor_1_pressed)
-			2: btn.pressed.connect(_on_floor_2_pressed)
-			3: btn.pressed.connect(_on_floor_3_pressed)
-			4: btn.pressed.connect(_on_floor_4_pressed)
+			get_node("VBox/" + btn_name).queue_free()
 
 func _connect_button_hover_sounds() -> void:
 	var buttons = []
@@ -237,30 +232,6 @@ func _on_tutorial_pressed() -> void:
 	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	ScreenFX.transition_to_scene_with_black_fade("res://tutorial.tscn", 0.6, 1.0, 0.6)
-
-func _on_floor_1_pressed() -> void:
-	AudioManager.stop_music()
-	PlayerState.reset_run_progression()
-	LEVEL2_SCRIPT.queue_start_floor(1)
-	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
-
-func _on_floor_2_pressed() -> void:
-	AudioManager.stop_music()
-	PlayerState.reset_run_progression()
-	LEVEL2_SCRIPT.queue_start_floor(2)
-	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
-
-func _on_floor_3_pressed() -> void:
-	AudioManager.stop_music()
-	PlayerState.reset_run_progression()
-	LEVEL2_SCRIPT.queue_start_floor(3)
-	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
-
-func _on_floor_4_pressed() -> void:
-	AudioManager.stop_music()
-	PlayerState.reset_run_progression()
-	LEVEL2_SCRIPT.queue_start_floor(4)
-	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:
 	AudioManager.stop_music()
