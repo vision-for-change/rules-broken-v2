@@ -42,6 +42,8 @@ func _ready() -> void:
 	# Listen for events
 	EventBus.action_approved.connect(_on_action_approved)
 	EventBus.enemy_defeated.connect(_on_enemy_defeated_tutorial)
+	# Listen for hack usage to finish tutorial
+	EventBus.action_exploited.connect(_on_hack_used)
 
 func get_stage_number() -> int:
 	return 5 # Unlock all hacks for trial
@@ -172,29 +174,18 @@ func _start_stage(stage: Stage) -> void:
 			var players = get_tree().get_nodes_in_group("player")
 			if not players.is_empty():
 				players[0].call("set_hacked_client_modes", false, false, false, false, false, false)
-			_check_for_hack_trial()
 
 		Stage.DONE:
 			_set_instruction("CERTIFICATION COMPLETE.")
 			_show_advanced_completion_ui()
 
-func _check_for_hack_trial() -> void:
-	var player = get_tree().get_first_node_in_group("player")
-	if player == null or _current_stage != Stage.HACK_MENU: return
-
-	var modes = player.call("get_hacked_client_modes")
-	var any_hack_active = false
-	for val in modes.values():
-		if val == true:
-			any_hack_active = true
-			break
-
-	if any_hack_active:
-		# Wait a small bit so they see the effect
-		await get_tree().create_timer(1.0).timeout
-		_start_stage(Stage.DONE)
-	else:
-		get_tree().create_timer(0.3).timeout.connect(_check_for_hack_trial)
+func _on_hack_used(_action_info, _loophole_desc) -> void:
+	if _current_stage == Stage.HACK_MENU:
+		# Small delay for dramatic effect
+		get_tree().create_timer(1.2).timeout.connect(func():
+			if _current_stage == Stage.HACK_MENU:
+				_start_stage(Stage.DONE)
+		)
 
 func _on_action_approved(action: Dictionary) -> void:
 	if _current_stage == Stage.MOVEMENT and action["type"] == ActionBus.MOVE:
