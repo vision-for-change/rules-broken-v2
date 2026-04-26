@@ -18,7 +18,6 @@ const SFX_EXTS := [".wav", ".ogg", ".mp3"]
 const SFX_ALIASES := {
 	"universfield-gunshot": "universfield-gunshot-352466",
 	"universfield-magic-teleport-whoosh": "universfield-magic-teleport-whoosh-352764",
-	"feesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
 	"freesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
 	"dragon-studio-cinematic-boom": "dragon-studio-cinematic-boom-454254",
 	"whoosh": "dragon-studio-simple-whoosh-382724",

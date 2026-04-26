@@ -39,3 +39,5 @@ res://scenes/objects/Exit.gd
 res://scenes/enemy/bugs.tscn
 res://scenes/levels/TutorialLevel.gd
 res://scenes/ui/GameOver.tscn
+res://scenes/enemy/RogueAI.tscn
+res://scenes/player/Bullet.tscn
