@@ -62,6 +62,22 @@ func _create_debug_buttons() -> void:
 	var vbox = $VBox
 	var floor_5_idx = $VBox/Floor5Btn.get_index()
 	
+	var tutorial_btn: Button
+	if has_node("VBox/TutorialBtn"):
+		tutorial_btn = get_node("VBox/TutorialBtn")
+	else:
+		tutorial_btn = Button.new()
+		tutorial_btn.name = "TutorialBtn"
+		tutorial_btn.text = "PLAY TUTORIAL"
+		vbox.add_child(tutorial_btn)
+		vbox.move_child(tutorial_btn, floor_5_idx)
+		
+	_style_button(tutorial_btn, 20, Color(0.4, 0.9, 1.0))
+	if not tutorial_btn.pressed.is_connected(_on_tutorial_pressed):
+		tutorial_btn.pressed.connect(_on_tutorial_pressed)
+	
+	$VBox/Floor5Btn.text = "BOSS: ROGUE AI"
+	
 	for i in range(1, 5):
 		var btn_name = "Floor%dBtn" % i
 		var btn: Button
@@ -217,6 +233,11 @@ func _on_play_pressed() -> void:
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
+func _on_tutorial_pressed() -> void:
+	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
+	ScreenFX.transition_to_scene_with_black_fade("res://tutorial.tscn", 0.6, 1.0, 0.6)
+
 func _on_floor_1_pressed() -> void:
 	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
@@ -245,7 +266,7 @@ func _on_floor_5_pressed() -> void:
 	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.queue_start_floor(5)
-	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/LevelBoss.tscn", 0.6, 1.0, 0.6)
 
 func _on_select_weapon_pressed() -> void:
 	ScreenFX.transition_to_scene("res://scenes/ui/GunSelectScreen.tscn")

@@ -49,6 +49,7 @@ var _hack_slow_time := false
 var _hack_noclip := false
 var _hack_unlimited_bullets := false
 var _hack_invisible := false
+var _hack_invincible := false
 var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
@@ -251,7 +252,7 @@ func _on_interact_exit(body: Node) -> void:
 		hint_label.visible = false
 
 func take_damage(amount: int) -> void:
-	if not is_alive:
+	if not is_alive or _hack_invincible:
 		return
 	health -= amount
 	EventBus.player_health_changed.emit(health, 100)
@@ -635,7 +636,8 @@ func set_hacked_client_modes(
 	slow_time_enabled: bool = false,
 	noclip_enabled: bool = false,
 	unlimited_bullets_enabled: bool = false,
-	invisible_enabled: bool = false
+	invisible_enabled: bool = false,
+	invincible_enabled: bool = false
 ) -> void:
 	_hack_super_speed = super_speed_enabled
 	_hack_faster_bullets = faster_bullets_enabled
@@ -644,6 +646,7 @@ func set_hacked_client_modes(
 	_hack_noclip = noclip_enabled
 	_hack_unlimited_bullets = unlimited_bullets_enabled
 	_hack_invisible = invisible_enabled
+	_hack_invincible = invincible_enabled
 	_apply_noclip_mode()
 	_apply_camera_modes()
 
@@ -655,7 +658,8 @@ func get_hacked_client_modes() -> Dictionary:
 		"slow_time": _hack_slow_time,
 		"noclip": _hack_noclip,
 		"unlimited_bullets": _hack_unlimited_bullets,
-		"invisible": _hack_invisible
+		"invisible": _hack_invisible,
+		"invincible": _hack_invincible
 	}
 
 func _apply_noclip_mode() -> void:

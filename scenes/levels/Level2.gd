@@ -808,6 +808,9 @@ func _play_level_intro() -> void:
 		4:
 			intro_text = "INTENSITY INCREASED"
 			intro_subtext = "SYSTEM STABILITY: COMPROMISED"
+		5:
+			intro_text = "FINAL BOSS: ROGUE AI"
+			intro_subtext = "THREAT LEVEL: OMEGA // SYSTEM CRITICAL"
 		_:
 			return
 
