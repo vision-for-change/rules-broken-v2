@@ -84,7 +84,7 @@ func _start_stage(stage: Stage) -> void:
 			EventBus.log("SYSTEM: Awaiting movement signature...", "info")
 			
 		Stage.BUG_COMBAT:
-			_instr_label.text = "THIS IS A BUG. YOU WILL SEE THESE OFTEN.\nAIM WITH [MOUSE] AND [LEFT-CLICK] TO SHOOT.\nYOU SHOOT IT, IT DIES."
+			_instr_label.text = "THIS IS A BUG. YOU WILL SEE THESE OFTEN.\nAIM WITH [MOUSE] AND [LEFT-CLICK] TO SHOOT.\nELIMINATE THE TARGET."
 			var bug = BUG_SCENE.instantiate()
 			bug.position = $Player.position + Vector2(250, 0)
 			bug.set("entity_id", "tutorial_bug")

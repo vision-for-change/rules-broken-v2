@@ -5,7 +5,7 @@ extends CharacterBody2D
 @export var shoot_cooldown := 0.4
 @export var laser_spawn_distance := 12.0
 @export var entity_id := "bug_01"
-@export var max_health := 10
+@export var max_health := 40
 @export var hit_flash_duration := 0.1
 @export var hit_flash_color := Color(1.0, 0.3, 0.3, 1.0)
 const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
