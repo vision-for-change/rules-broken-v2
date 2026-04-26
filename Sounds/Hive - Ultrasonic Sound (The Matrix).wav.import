@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://372ygf5l4ltx"
+path="res://.godot/imported/Hive - Ultrasonic Sound (The Matrix).wav-caad7085cb6923017afa43652cdccda7.sample"
+
+[deps]
+
+source_file="res://Sounds/Hive - Ultrasonic Sound (The Matrix).wav"
+dest_files=["res://.godot/imported/Hive - Ultrasonic Sound (The Matrix).wav-caad7085cb6923017afa43652cdccda7.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

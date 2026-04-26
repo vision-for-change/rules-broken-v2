@@ -63,7 +63,11 @@ func _ready() -> void:
 		floor_idx = level_script._floor_index
 	
 	var tier_mult := float(floor_idx) / 5.0
-	max_health = int(420.0 * (1.0 + (tier_mult - 1.0) * 0.8))
+	if _is_clone:
+		# Clones have 40 health per tier level
+		max_health = 40 * floor_idx
+	else:
+		max_health = int(1500.0 * tier_mult)
 	move_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
 	
 	_health = max_health
@@ -231,13 +235,9 @@ func restore_shield() -> void:
 func take_damage(amount: int) -> bool:
 	if not _combat_active:
 		return false
-	if _is_clone:
-		_health = 0
-		_defeat()
-		return true
 	if _defeated:
 		return false
-	if _shielded:
+	if not _is_clone and _shielded:
 		_flash_blocked_hit()
 		return false
 	
@@ -248,7 +248,7 @@ func take_damage(amount: int) -> bool:
 	# Hit effect
 	var tween := create_tween()
 	sprite.modulate = Color.RED
-	tween.tween_property(sprite, "modulate", VULNERABLE_COLOR, 0.1)
+	tween.tween_property(sprite, "modulate", VULNERABLE_COLOR if not _is_clone else Color(1.0, 0.6, 0.6, 1.0), 0.1)
 	
 	if _health > 0:
 		return false
@@ -313,7 +313,13 @@ func _defeat() -> void:
 	ScreenFX.screen_shake(20.0, 0.45)
 	ScreenFX.flash_screen(Color(1.0, 0.08, 0.08, 0.72), 0.5)
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.45, 0.45), 0.7)
-	AudioManager.play_sfx("dragon-studio-cinematic-boom")
+	
+	if _is_clone:
+		# Play explosive glass shattering sound for duplicates
+		AudioManager.play_sfx("explosive-glass-shatter")
+	else:
+		AudioManager.play_sfx("dragon-studio-cinematic-boom")
+	
 	_spawn_death_binary_cataclysm()
 	_shatter_sprite()
 

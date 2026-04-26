@@ -135,7 +135,7 @@ func _spawn_boss(parent: Node2D) -> void:
 	# Scaling based on level
 	var tier_mult := float(_floor_index) / 5.0
 	if boss.get("max_health") != null:
-		var new_hp = int(420.0 * (1.0 + (tier_mult - 1.0) * 0.8))
+		var new_hp = int(1500.0 * tier_mult)
 		boss.set("max_health", new_hp)
 	if boss.get("move_speed") != null:
 		var new_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
@@ -234,7 +234,7 @@ func _begin_boss_fight() -> void:
 	EventBus.log("ROGUE AI ONLINE // FIGHT BEGIN", "error")
 
 func _start_boss_music() -> void:
-	Music.playglobalsound("res://Sounds/Hive - Ultrasonic Sound (The Matrix).mp3", -10)
+	Music.playglobalsound("res://Sounds/Hive - Ultrasonic Sound (The Matrix).wav", -5)
 
 func _start_override_key_phase(parent: Node2D) -> void:
 	if not is_instance_valid(_boss):

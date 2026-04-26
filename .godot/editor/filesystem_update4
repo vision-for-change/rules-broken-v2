@@ -12,3 +12,4 @@ res://autoloads/ScreenFX.gd
 res://scenes/ui/IntroSplash.tscn
 res://scenes/ui/IntroSplash.gd
 res://scenes/ui/MainMenu.tscn
+res://scenes/enemy/RogueAI.gd
