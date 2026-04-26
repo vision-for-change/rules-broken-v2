@@ -180,7 +180,13 @@ func _update_facing_to_mouse() -> void:
 	if aim_dir.length_squared() < 0.001:
 		return
 	if is_instance_valid(gun_sprite):
-		gun_sprite.rotation = aim_dir.angle()
+		var angle: float = aim_dir.angle()
+		if abs(angle) > PI / 2:
+			gun_sprite.flip_h = true
+			gun_sprite.rotation = angle - sign(angle) * PI
+		else:
+			gun_sprite.flip_h = false
+			gun_sprite.rotation = angle
 		var gun_distance: float = 30.0
 		gun_sprite.position = aim_dir.normalized() * gun_distance
 	hint_label.rotation = -aim_dir.angle()
