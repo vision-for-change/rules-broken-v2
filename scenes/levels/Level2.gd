@@ -358,11 +358,11 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		door_room = _pick_farthest_room(main_room, rooms)
 		_door_room = door_room
 		_interactable_root_ref = interactable_root
-		_exit_spawned = false
 		_current_kill_requirement = int(get_enemy_kill_requirement())
-		if _current_kill_requirement <= 0:
-			_spawn_floor_door(interactable_root, door_room)
-			_exit_spawned = true
+		
+		# ALWAYS SPAWN TELEPHONE AT START
+		_spawn_floor_door(interactable_root, door_room)
+		_exit_spawned = true
 	else:
 		_current_kill_requirement = 0
 		_door_room = Rect2i()
@@ -493,7 +493,7 @@ func _pick_farthest_room(main_room: Rect2i, rooms: Array[Rect2i]) -> Rect2i:
 
 func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 	var door := StaticBody2D.new()
-	door.name = "FloorKey"
+	door.name = "SystemTelephone"
 	door.collision_layer = 2
 	door.collision_mask = 0
 	door.position = _cell_to_world(_room_center(room))
@@ -504,30 +504,19 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(14.0, 22.0)
+	rect.size = Vector2(24.0, 32.0)
 	shape.shape = rect
 	door.add_child(shape)
 
-	var plate := ColorRect.new()
-	plate.offset_left = -7.0
-	plate.offset_top = -11.0
-	plate.offset_right = 7.0
-	plate.offset_bottom = 11.0
-	plate.color = Color(0.08, 0.16, 0.2, 1.0)
-	door.add_child(plate)
-
-	var mark := Label.new()
-	mark.text = "KEY"
-	mark.offset_left = -12
-	mark.offset_top = -10
-	mark.offset_right = 12
-	mark.offset_bottom = 8
-	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mark.add_theme_font_size_override("font_size", 8)
-	mark.add_theme_color_override("font_color", Color(0.5, 1.0, 0.95))
-	door.add_child(mark)
-	EventBus.log("ACCESS KEY SPAWNED // EXIT TO LEVEL %d" % (_floor_index + 1), "exploit")
+	var sprite := Sprite2D.new()
+	sprite.name = "Sprite2D"
+	door.add_child(sprite)
+	
+	# Initial check
+	if door.has_method("_update_visuals"):
+		door.call("_update_visuals")
+	
+	EventBus.log("SYSTEM TELEPHONE LOCATED // CLEAR TARGETS TO ANSWER", "info")
 
 func _spawn_room_obstacles(parent: Node2D, room: Rect2i) -> void:
 	var obstacle_count := _rng.randi_range(MIN_OBSTACLES_PER_ROOM, MAX_OBSTACLES_PER_ROOM)
@@ -749,20 +738,8 @@ func _on_floor_door_used() -> void:
 func _on_enemy_defeated_for_exit(_enemy_id: String) -> void:
 	if _floor_index >= 5:
 		return
-	if _exit_spawned:
-		return
-	if _current_kill_requirement <= 0:
-		return
-	var hud_node := get_node_or_null("HUD")
-	if hud_node == null or not hud_node.has_method("_get_enemy_kill_status"):
-		return
-	var status: Dictionary = hud_node.call("_get_enemy_kill_status")
-	if not bool(status.get("met", false)):
-		return
-	if _interactable_root_ref == null or not is_instance_valid(_interactable_root_ref):
-		return
-	_spawn_floor_door(_interactable_root_ref, _door_room)
-	_exit_spawned = true
+	# Redundant door spawning removed as SystemTelephone is now present from start.
+	pass
 
 func _on_chatgpt_death() -> void:
 	if _transitioning:

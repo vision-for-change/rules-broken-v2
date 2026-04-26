@@ -6,12 +6,14 @@ icon.svg::CompressedTexture2D::5192295678797677150::1776623917::1776636805::1:::
 Minecraft.ttf::FontFile::1951120682375246533::1777152293::1777169551::1::::<><><>0<>0<>12b29368983de045e457d4d33bd3a112<>res://.godot/imported/Minecraft.ttf-b4cc597ac42d1410cc55dc192f0c0e34.fontdata::
 README.md::TextFile::-1::1776738548::0::1::::<><><>0<>0<><>::
 tutorial.tscn::PackedScene::5740289120019967396::1777173137::0::1::::<><><>0<>0<><>::uid://bd35lq7i486sx::::res://Dungeon_Tileset.png<>uid://hud002::::res://scenes/ui/HUD.tscn<>uid://player001::::res://scenes/player/Player.tscn<>res://scenes/levels/TerrainPainter.gd
-::res://assets/::1777217295
+::res://assets/::1777222636
 bullet.webp::CompressedTexture2D::8561439898735283185::1776718642::1776738556::1::::<><><>0<>0<>f84cfa6460ac8a4887df6c41be120ec0<>res://.godot/imported/bullet.webp-b60c1397b07773253e6a330feb966c2e.ctex::
 chatgpt.png::CompressedTexture2D::4512064113252704705::1776964111::1776964120::1::::<><><>0<>0<>7fa689c7126e582bca25ee87e1009836<>res://.godot/imported/chatgpt.png-b977c5ddcc41099a8ab83d50941e7ceb.ctex::
 lightsaber.webp::CompressedTexture2D::147036809537782911::1777072154::1777072164::1::::<><><>0<>0<>6cf0898c6564d84dc7b62a28da710600<>res://.godot/imported/lightsaber.webp-874b536f37af6bbd349fafc3c54652d3.ctex::
 matrix_ak.webp::CompressedTexture2D::5868212879590024874::1776964111::1776964120::1::::<><><>0<>0<>d84f31a9fa4437086e2bf6c3dfb4ed1c<>res://.godot/imported/matrix_ak.webp-117ea192819662206b000328d357e039.ctex::
 matrix_gun.webp::CompressedTexture2D::2145338967321586748::1776718642::1776738556::1::::<><><>0<>0<>de377b8f8478e54ffb449b766eccab33<>res://.godot/imported/matrix_gun.webp-c501e2300faa4795a2f93a882b21b2a8.ctex::
+Telephonedown.webp::CompressedTexture2D::4961904668923005925::1777222616::1777222646::1::::<><><>0<>0<>07c6324e6df4e65724280349105b8052<>res://.godot/imported/Telephonedown.webp-1e86b0df724d240530bc5f14a2c43134.ctex::
+TelephoneUp.webp::CompressedTexture2D::4242728648179670248::1777222637::1777222646::1::::<><><>0<>0<>76c3622cd842174b7a7d283971c07cfa<>res://.godot/imported/TelephoneUp.webp-ce7c057110856dd9ee2805132480ba8f.ctex::
 trojan_horse.webp::CompressedTexture2D::8504329212033190589::1777074745::1777074746::1::::<><><>0<>0<>3665287945ab705655334fc9a5692c8e<>res://.godot/imported/trojan_horse.webp-b3fe0188f920ea22f2df551ae53958ee.ctex::
 UMP.webp::CompressedTexture2D::3902296875884929521::1777085106::1777085109::1::::<><><>0<>0<>323575dbd83ca3a40debd7b668c4a15f<>res://.godot/imported/UMP.webp-c14badaf868d73edf0ac7a3ac982176e.ctex::
 Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png::CompressedTexture2D::1612181789121899957::1777217261::1777217295::1::::<><><>0<>0<>802f1b3503f226699033197582a28363<>res://.godot/imported/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png-60478e552eb8a881e419b40f32914bea.ctex::
@@ -33,7 +35,7 @@ system_breach.webp::CompressedTexture2D::5062427785461709038::1777054665::177707
 USP.jpg::CompressedTexture2D::9185243717968667606::1776867326::1776867352::1::::<><><>0<>0<>30b99e9b17812a95495ee84087fb1c37<>res://.godot/imported/USP.jpg-6044899e2d43b1bff86c64603a1f7a2c.ctex::
 ::res://autoloads/::1777217357
 ActionBus.gd::GDScript::5511848218225349285::1776623917::0::1::::<>Node<><>0<>0<><>::
-AudioManager.gd::GDScript::8761143838600416605::1777217357::0::1::::<>Node<><>0<>0<><>::
+AudioManager.gd::GDScript::8761143838600416605::1777222196::0::1::::<>Node<><>0<>0<><>::
 EntityRegistry.gd::GDScript::5579581290131691289::1776624105::0::1::::<>Node<><>0<>0<><>::
 EventBus.gd::GDScript::4756298897421493578::1777075990::0::1::::<>Node<><>0<>0<><>::
 GunDatabase.gd::GDScript::1630672618138133104::1777169524::0::1::::<>Node<><>0<>0<><>::
@@ -51,10 +53,10 @@ chatgpt.tscn::PackedScene::1529695930530629416::1776995249::0::1::::<><><>0<>0<>
 EnemyLaser.gd::GDScript::8390610287867762802::1777088049::0::1::::<>Area2D<><>0<>0<><>::
 EnemyLaser.tscn::PackedScene::1243795217775936088::1777077966::0::1::::<><><>0<>0<><>::uid://drsqeje6ij8nm::::res://scenes/enemy/EnemyLaser.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
 RogueAI.gd::GDScript::6447157350650578166::1777217357::0::1::::<>CharacterBody2D<><>0<>0<><>::
-RogueAI.tscn::PackedScene::1057536209973520::1777217357::0::1::::<><><>0<>0<><>::res://scenes/enemy/RogueAI.gd<>res://assets/chatgpt.png
+RogueAI.tscn::PackedScene::1057536209973520::1777217357::0::1::::<><><>0<>0<><>::uid://cx4b0faf3efr7::::res://scenes/enemy/RogueAI.gd<>uid://b5jxbipohggeb::::res://assets/chatgpt.png
 Snake.gd::GDScript::1371790092041211308::1777217357::0::1::::<>CharacterBody2D<><>0<>0<><>::
 Snake.tscn::PackedScene::965516310352::1777075629::0::1::::<><><>0<>0<><>::uid://tsrgg333vbng::::res://scenes/enemy/Snake.gd<>uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
-TrojanHorse.gd::GDScript::540566633676242220::1777172425::0::1::::<>CharacterBody2D<><>0<>0<><>::
+TrojanHorse.gd::GDScript::540566633676242220::1777222253::0::1::::<>CharacterBody2D<><>0<>0<><>::
 TrojanHorse.tscn::PackedScene::34845017866840::1777087801::0::1::::<><><>0<>0<><>::res://scenes/enemy/TrojanHorse.gd<>uid://dtftca6p5bcuf::::res://assets/trojan_horse.webp
 worm.gd::GDScript::3041239432624138156::1777171064::0::1::::<>CharacterBody2D<><>0<>0<><>::
 worm.tscn::PackedScene::7063425510668276734::1777054665::0::1::::<><><>0<>0<><>::uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
@@ -83,9 +85,9 @@ Bullet.tscn::PackedScene::2853759667912::1777217357::0::1::::<><><>0<>0<><>::uid
 Inventory.gd::GDScript::7107585837491994424::1777090419::0::1::::<>Node<><>0<>0<><>::
 Player.gd::GDScript::2752255572433044543::1777217357::0::1::::<>CharacterBody2D<><>0<>0<><>::
 Player.tscn::PackedScene::27365761918488::1777169524::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://5thoi1jvta6w::::res://assets/matrix_gun.webp<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp
-::res://scenes/ui/::1777217358
+::res://scenes/ui/::1777222279
 GameOver.gd::GDScript::2710332240927150708::1777169524::0::1::::<>Control<><>0<>0<><>::
-GameOver.tscn::PackedScene::8598048::1777217319::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
+GameOver.tscn::PackedScene::8598048::1777222279::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
 GunSelectScreen.gd::GDScript::2219271801746007615::1777169524::0::1::::<>Control<><>0<>0<><>::
 GunSelectScreen.tscn::PackedScene::6590246207249658088::1776952283::0::1::::<><><>0<>0<><>::uid://6vbc2gdlwsjf::::res://scenes/ui/GunSelectScreen.gd
 HUD.gd::GDScript::6494486643168512901::1777217357::0::1::::<>CanvasLayer<><>0<>0<><>::
@@ -97,7 +99,7 @@ MainMenu.tscn::PackedScene::16537456::1777217357::0::1::::<><><>0<>0<><>::uid://
 WeaponDisplay.gd::GDScript::3703560238313736494::1777152557::0::1::::<>Control<><>0<>0<><>::
 WinScreen.gd::GDScript::5275217465158032268::1777217358::0::1::::<>Control<><>0<>0<><>::
 WinScreen.tscn::PackedScene::30136640::1777216995::0::1::::<><><>0<>0<><>::uid://chfmcco467uqm::::res://scenes/ui/WinScreen.gd
-::res://Sounds/::1777217357
+::res://Sounds/::1777217398
 daviddumaisaudio-explosive-glass-shattering-09-190267.mp3::AudioStreamMP3::3216878900216825068::1777070454::1777070721::1::::<><><>0<>0<>3db6d978da2735af6828ee13b3de5a15<>res://.godot/imported/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3-282eb26f359c626b580b7ccf6a734875.mp3str::
 dragon-studio-cinematic-boom-454254.mp3::AudioStreamMP3::3576778643801580521::1776952283::1776952283::1::::<><><>0<>0<>95514746dacef3d77c4aa50700fe5a27<>res://.godot/imported/dragon-studio-cinematic-boom-454254.mp3-ac03a14a5af2c0deff3ab081f08a9a8d.mp3str::
 dragon-studio-simple-whoosh-382724.mp3::AudioStreamMP3::5581939247794425725::1777070454::1777070721::1::::<><><>0<>0<>01ed09a86c60ba24eee2e5907fb3b41c<>res://.godot/imported/dragon-studio-simple-whoosh-382724.mp3-c621b6f6d00772a76d1accbcd3b5ca37.mp3str::
