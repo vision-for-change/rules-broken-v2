@@ -152,7 +152,6 @@ func _scanline_flash() -> void:
 	t.tween_callback(r.queue_free)
 
 func transition_to_scene(scene_path: String, fade_in_time: float = -1.0, fade_out_time: float = -1.0) -> void:
-	Music.stopsound()
 	if _scene_transitioning:
 		return
 	var in_time = fade_in_time if fade_in_time >= 0 else TRANSITION_FADE_IN
