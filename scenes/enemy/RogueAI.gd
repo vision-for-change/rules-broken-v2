@@ -38,18 +38,27 @@ var _attack_phase := 0
 func _ready() -> void:
 	add_to_group("enemy")
 	add_to_group("boss")
+	
+	# FORCE COLLISION LAYER TO 2 (Same as Bugs/Snakes)
+	# This ensures player bullets (mask 3) will hit the boss
+	collision_layer = 2
+	collision_mask = 3
+	
 	_player_ref = get_tree().get_first_node_in_group("player") as Node2D
-	_health = maxi(1, max_health)
+	
+	# Scaling based on level (accessing static var from Level2)
+	var floor_idx = 5
+	var level_script = load("res://scenes/levels/Level2.gd")
+	if level_script:
+		floor_idx = level_script._floor_index
+	
+	var tier_mult := float(floor_idx) / 5.0
+	max_health = int(420.0 * (1.0 + (tier_mult - 1.0) * 0.8))
+	move_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
+	
+	_health = max_health
 	
 	scale = Vector2.ONE * (0.62 if not _is_clone else 0.5)
-	
-	if _is_clone:
-		ui.hide()
-		_shielded = false
-		fire_rate *= 1.5 # Clones fire slower
-	else:
-		pressure_bar.max_value = 25
-		_update_status_visuals()
 
 func _physics_process(delta: float) -> void:
 	if _defeated:
@@ -227,7 +236,9 @@ func take_damage(amount: int) -> bool:
 		_flash_blocked_hit()
 		return false
 	
-	_health = maxi(0, _health - maxi(1, amount))
+	# Set damage to exactly 15 per hit as requested
+	var damage_to_deal = 15
+	_health = maxi(0, _health - damage_to_deal)
 	
 	# Hit effect
 	var tween := create_tween()

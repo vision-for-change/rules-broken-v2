@@ -260,6 +260,5 @@ func _on_victory() -> void:
 	
 	await _play_exit_transition()
 	
-	# After boss, continue to floor index + 1
-	_advance_requested = true
-	ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+	# After boss, go to Win Screen
+	ScreenFX.transition_to_scene("res://scenes/ui/WinScreen.tscn")
