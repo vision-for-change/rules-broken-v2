@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var move_speed := 100.0
+@export var move_speed := 120.0
 @export var entity_id := "trojan_01"
 
 const BUG_SCENE := preload("res://scenes/enemy/bugs.tscn")
@@ -22,6 +22,9 @@ func _ready() -> void:
 		["trojan", "mobile"],
 		{"integrity_contribution": -0.05}
 	)
+	
+	# No rotation - keep it "straight" as per the sprite
+	rotation = 0
 
 func take_damage(_amount: int) -> bool:
 	if _defeated:
@@ -50,12 +53,22 @@ func _physics_process(delta: float) -> void:
 		_player_ref = get_tree().get_first_node_in_group("player") as CharacterBody2D
 		return
 
-	var to_player = (_player_ref.global_position - global_position).normalized()
-	velocity = to_player * move_speed
+	# ALWAYS STRAIGHT: No going right or left
+	# Only tracks and moves on the Y axis (Vertical)
+	var to_player_y = _player_ref.global_position.y - global_position.y
+	
+	if abs(to_player_y) > 5.0:
+		velocity.y = sign(to_player_y) * move_speed
+	else:
+		velocity.y = 0
+		
+	# Force X velocity to zero
+	velocity.x = 0
+	
 	move_and_slide()
 	
-	if velocity.length() > 0:
-		rotation = lerp_angle(rotation, velocity.angle(), 5.0 * delta)
+	# Keep sprite orientation fixed (always straight)
+	rotation = 0
 
 func _exit_tree() -> void:
 	EntityRegistry.unregister(entity_id)

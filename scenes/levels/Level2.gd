@@ -81,6 +81,7 @@ func _ready() -> void:
 	_wall_material = _build_wall_material()
 	_generate_dungeon()
 	super._ready()
+	_play_level_intro()
 
 func _generate_dungeon() -> void:
 	if _floor_index == 5:
@@ -789,3 +790,69 @@ func _on_chatgpt_shatter() -> void:
 	var zoom_out_tween := create_tween()
 	zoom_out_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	zoom_out_tween.tween_property(camera, "zoom", Vector2(0.3, 0.3), 1.2)
+
+func _play_level_intro() -> void:
+	var intro_text := ""
+	var intro_subtext := ""
+	
+	match _floor_index:
+		1:
+			intro_text = "NEW ENEMY: WORM"
+			intro_subtext = "TACTICAL ADVICE: ELIMINATE WITH BULLETS"
+		2:
+			intro_text = "NEW ENEMY: SNAKE"
+			intro_subtext = "TACTICAL ADVICE: USE SPEED // STRIKE THE TAIL"
+		3:
+			intro_text = "NEW ENEMY: TROJAN HORSE"
+			intro_subtext = "TACTICAL ADVICE: FIND OUT YOURSELF"
+		4:
+			intro_text = "INTENSITY INCREASED"
+			intro_subtext = "SYSTEM STABILITY: COMPROMISED"
+		_:
+			return
+
+	# Create a temporary UI for intro
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(center)
+	
+	var vbox := VBoxContainer.new()
+	center.add_child(vbox)
+	
+	var main_label := Label.new()
+	main_label.text = intro_text
+	main_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+	main_label.add_theme_font_size_override("font_size", 32)
+	main_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5))
+	main_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(main_label)
+	
+	var sub_label := Label.new()
+	sub_label.text = intro_subtext
+	sub_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+	sub_label.add_theme_font_size_override("font_size", 18)
+	sub_label.add_theme_color_override("font_color", Color(0.4, 0.8, 0.6))
+	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(sub_label)
+	
+	# Animation
+	main_label.modulate.a = 0.0
+	sub_label.modulate.a = 0.0
+	center.scale = Vector2(0.8, 0.8)
+	center.pivot_offset = get_viewport_rect().size / 2.0
+	
+	var intro_tween := create_tween()
+	intro_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) # Play even if paused
+	intro_tween.tween_interval(2.5) # Wait for player teleport animation
+	intro_tween.tween_property(main_label, "modulate:a", 1.0, 0.5)
+	intro_tween.parallel().tween_property(center, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	intro_tween.tween_property(sub_label, "modulate:a", 1.0, 0.5)
+	intro_tween.tween_interval(2.0)
+	intro_tween.tween_property(vbox, "modulate:a", 0.0, 0.8)
+	intro_tween.tween_callback(layer.queue_free)
+	
+	AudioManager.play_sfx("dragon-studio-simple-whoosh")

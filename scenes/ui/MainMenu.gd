@@ -29,13 +29,17 @@ func _ready() -> void:
 	$VBox.anchor_right = 0.5
 	$VBox.anchor_bottom = 0.5
 	$VBox.offset_left = -300
-	$VBox.offset_top = -100
+	$VBox.offset_top = -180
 	$VBox.offset_right = 300
 	$VBox.offset_bottom = 300
 	$VBox.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	_style_label($VBox/SubLabel, 18, Color(0.4, 0.6, 0.5, 1))
 	_style_button($VBox/PlayBtn, 20)
+	
+	# Create debug floor buttons if they don't exist
+	_create_debug_buttons()
+	
 	_style_button($VBox/Floor5Btn, 18)
 	_style_button($VBox/QuitBtn, 20)
 	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
@@ -48,25 +52,45 @@ func _ready() -> void:
 		_style_label($InstructionsPanel/VBox/Content, 14, Color(0.9, 0.9, 0.9))
 		_style_button($InstructionsPanel/VBox/CloseInstructionsBtn, 16)
 
-	# ✅ YOUR CHANGE
 	if has_node("VBox/SelectWeaponBtn"):
 		_style_button($VBox/SelectWeaponBtn, 20)
 
 	_connect_button_hover_sounds()
 	move_child($VBox, get_child_count() - 1)
 
+func _create_debug_buttons() -> void:
+	var vbox = $VBox
+	var floor_5_idx = $VBox/Floor5Btn.get_index()
+	
+	for i in range(1, 5):
+		var btn_name = "Floor%dBtn" % i
+		var btn: Button
+		if has_node("VBox/" + btn_name):
+			btn = get_node("VBox/" + btn_name)
+		else:
+			btn = Button.new()
+			btn.name = btn_name
+			btn.text = "DEBUG: FLOOR %d" % i
+			vbox.add_child(btn)
+			vbox.move_child(btn, floor_5_idx + i - 1)
+			
+		_style_button(btn, 16, Color(0.8, 0.4, 0.2))
+		
+		# Clear existing connections if any
+		for sig in btn.pressed.get_connections():
+			btn.pressed.disconnect(sig.callable)
+			
+		match i:
+			1: btn.pressed.connect(_on_floor_1_pressed)
+			2: btn.pressed.connect(_on_floor_2_pressed)
+			3: btn.pressed.connect(_on_floor_3_pressed)
+			4: btn.pressed.connect(_on_floor_4_pressed)
+
 func _connect_button_hover_sounds() -> void:
-	var buttons = [
-		$VBox/PlayBtn,
-		$VBox/Floor5Btn,
-		$VBox/QuitBtn,
-	]
-	
-	if has_node("VBox/InstructionsBtn"):
-		buttons.append($VBox/InstructionsBtn)
-	
-	if has_node("VBox/SelectWeaponBtn"):
-		buttons.append($VBox/SelectWeaponBtn)
+	var buttons = []
+	for child in $VBox.get_children():
+		if child is Button:
+			buttons.append(child)
 	
 	if has_node("InstructionsPanel/VBox/CloseInstructionsBtn"):
 		buttons.append($InstructionsPanel/VBox/CloseInstructionsBtn)
@@ -178,12 +202,43 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 	var pressed_box = stylebox.duplicate()
 	pressed_box.bg_color = Color(0.02, 0.06, 0.03, 1.0)
 	btn.add_theme_stylebox_override("pressed", pressed_box)
-	btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
+	# Check if already connected to avoid duplicate sounds
+	var is_connected = false
+	for connection in btn.pressed.get_connections():
+		if connection.callable.get_object() == AudioManager:
+			is_connected = true
+			break
+	if not is_connected:
+		btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
 func _on_play_pressed() -> void:
 	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+
+func _on_floor_1_pressed() -> void:
+	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
+	LEVEL2_SCRIPT.queue_start_floor(1)
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+
+func _on_floor_2_pressed() -> void:
+	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
+	LEVEL2_SCRIPT.queue_start_floor(2)
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+
+func _on_floor_3_pressed() -> void:
+	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
+	LEVEL2_SCRIPT.queue_start_floor(3)
+	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
+
+func _on_floor_4_pressed() -> void:
+	AudioManager.stop_music()
+	PlayerState.reset_run_progression()
+	LEVEL2_SCRIPT.queue_start_floor(4)
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:

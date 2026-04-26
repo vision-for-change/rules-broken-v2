@@ -262,8 +262,9 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	if not is_alive:
 		return
-	health = mini(health + amount, 100)
+	health = mini(100, health + amount)
 	EventBus.player_health_changed.emit(health, 100)
+	ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.15)
 
 func _start_teleport_in_effect() -> void:
 	if is_instance_valid(player_sprite):

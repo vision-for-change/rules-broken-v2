@@ -3,7 +3,10 @@ extends CharacterBody2D
 @export var move_speed := 80.0
 @export var entity_id := "worm_01"
 @export var max_health := 1
+@export var shoot_range := 250.0
+@export var shoot_cooldown := 1.5
 
+const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
 const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.2)
 const SHARD_COUNT := 8
 const SHATTER_DURATION := 0.22
@@ -12,6 +15,7 @@ var _player_ref: CharacterBody2D = null
 var _defeated := false
 var _health := 0
 var _contact_area: Area2D = null
+var _shoot_cd := 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -57,10 +61,10 @@ func _on_contact_body_entered(body: Node2D) -> void:
 		if is_dashing and has_super_speed:
 			return
 			
-		# Deal damage to both systems
-		body.take_damage(10)
+		# Deal reduced damage on contact
+		body.take_damage(5)
 		if RuleManager.has_method("apply_integrity_damage"):
-			RuleManager.apply_integrity_damage(0.5)
+			RuleManager.apply_integrity_damage(0.2)
 			
 		shatter()
 
@@ -68,38 +72,25 @@ func take_damage(amount: int) -> bool:
 	if _defeated:
 		return false
 	
-	var player = get_tree().get_first_node_in_group("player")
-	
-	if amount >= 9999:
-		if player != null and player.has_method("get_hacked_client_modes") and player.has_method("is_dashing"):
-			var modes = player.get_hacked_client_modes()
-			var is_dashing = player.is_dashing()
-			if modes.get("super_speed", false) and is_dashing:
-				_health = 0
-				shatter()
-				return true
-		return false
+	# Worm is weak to bullets
+	if amount > 0:
+		shatter()
+		return true
 	
 	return false
 
 func check_dash_collision(player_node: Node) -> bool:
-	print("DEBUG: Worm check_dash_collision called")
 	if _defeated or player_node == null:
-		print("DEBUG: Worm defeated or player null")
 		return false
 	
 	if not player_node.has_method("is_dashing") or not player_node.has_method("get_hacked_client_modes"):
-		print("DEBUG: Player missing methods")
 		return false
 	
 	var is_dashing = player_node.is_dashing()
 	var modes = player_node.get_hacked_client_modes()
 	var has_super_speed = modes.get("super_speed", false)
 	
-	print("DEBUG: is_dashing=%s, has_super_speed=%s" % [is_dashing, has_super_speed])
-	
 	if is_dashing and has_super_speed:
-		print("DEBUG: Worm shattering!")
 		_health = 0
 		ScreenFX.slow_motion_pulse(0.2, 1.0)
 		shatter()
@@ -120,6 +111,30 @@ func _physics_process(delta: float) -> void:
 	
 	if velocity.length() > 0:
 		rotation = lerp_angle(rotation, velocity.angle(), 10.0 * delta)
+		
+	_shoot_cd = maxf(0.0, _shoot_cd - delta)
+	var distance_to_player := global_position.distance_to(_player_ref.global_position)
+	if distance_to_player <= shoot_range and _shoot_cd <= 0.0:
+		_fire_laser()
+
+func _fire_laser() -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var laser := LASER_SCENE.instantiate()
+	if laser == null:
+		return
+	
+	var to_player = (_player_ref.global_position - global_position).normalized()
+	scene_root.add_child(laser)
+	laser.global_position = global_position + to_player * 15.0
+	if laser.has_method("setup"):
+		laser.setup(self, to_player)
+	
+	# Set damage to 5 for worm bullets
+	laser.set("_player_damage", 5)
+	
+	_shoot_cd = shoot_cooldown
 
 func shatter() -> void:
 	if _defeated: return
