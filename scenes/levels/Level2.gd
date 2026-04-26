@@ -845,4 +845,4 @@ func _play_level_intro() -> void:
 
 func _setup_level_music() -> void:
 	if _floor_index % 5 != 0:
-		AudioManager.play_music_by_file("prime audio soup")
+		Music.playglobalsound("res://Sounds/Prime Audio Soup.mp3")

@@ -122,6 +122,13 @@ func stop_music() -> void:
 		_current_track = ""
 	)
 
+func stop_music_immediate() -> void:
+	if _fade_tween:
+		_fade_tween.kill()
+		_fade_tween = null
+	_music.stop()
+	_current_track = ""
+
 func play_sfx(name: String) -> void:
 	var resolved_name: String = name
 	if SFX_ALIASES.has(name):

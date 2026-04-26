@@ -1,3 +1,5 @@
+AudioStreamPlayer
+AudioStreamPlayer2D
 AnimatedSprite2D
 Sprite2D
 TextureRect
@@ -10,6 +12,3 @@ HBoxContainer
 ColorRect
 CollisionShape2D
 CharacterBody2D
-TileMapLayer
-CanvasLayer
-VBoxContainer
