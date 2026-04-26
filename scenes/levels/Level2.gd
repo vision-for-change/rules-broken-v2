@@ -508,10 +508,11 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite2D"
-	sprite.scale = Vector2(2.5, 2.5) # Make it visible
+	sprite.scale = Vector2(2.0, 2.0) # Make it smaller
 	door.add_child(sprite)
-	
+
 	parent.add_child(door)
+
 	
 	if door.has_signal("door_used"):
 		door.connect("door_used", Callable(self, "_on_floor_door_used"))
