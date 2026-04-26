@@ -62,6 +62,8 @@ func _on_body_entered(body: Node) -> void:
 				body.queue_free()
 				_try_spawn_health_pickup(body)
 		queue_free()
+	elif body.is_in_group("obstacle"):
+		queue_free()
 	elif not body is PhysicsBody2D:
 		# Static collision or wall
 		queue_free()

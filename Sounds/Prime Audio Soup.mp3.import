@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bf3gy00qxye2w"
+path="res://.godot/imported/Prime Audio Soup.mp3-94e85aca8e4e685b1886784fa6daec69.mp3str"
+
+[deps]
+
+source_file="res://Sounds/Prime Audio Soup.mp3"
+dest_files=["res://.godot/imported/Prime Audio Soup.mp3-94e85aca8e4e685b1886784fa6daec69.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

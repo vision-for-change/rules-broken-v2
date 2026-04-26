@@ -23,12 +23,14 @@ func _ready() -> void:
 	level_title_text = "INITIALIZATION // TUTORIAL"
 	super._ready()
 	
-	# Make player invincible for tutorial
+	# Initialize player hack modes for tutorial
 	var players = get_tree().get_nodes_in_group("player")
 	if not players.is_empty():
-		players[0].call("set_hacked_client_modes", false, false, false, false, false, false, false, true)
+		var player = players[0]
+		player.call("set_invincible", true)
+		player.call("set_hacked_client_modes", false, false, false, false, false, false)
 		# Give player full loadout for practice
-		var inv = players[0].get_node_or_null("Inventory")
+		var inv = player.get_node_or_null("Inventory")
 		if inv:
 			inv.call("set_max_slots", 4)
 			var gun_ids: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
@@ -100,6 +102,7 @@ func _start_stage(stage: Stage) -> void:
 			var snake = SNAKE_SCENE.instantiate()
 			snake.position = $Player.position + Vector2(250, 50)
 			snake.set("entity_id", "tutorial_snake")
+			snake.set("segment_count", 6)
 			add_child(snake)
 			_stage_nodes.append(snake)
 
@@ -120,7 +123,7 @@ func _check_for_hack_trial() -> void:
 	var modes = player.call("get_hacked_client_modes")
 	var any_hack_active = false
 	for val in modes.values():
-		if val == true and val != modes.get("invincible", false): # Ignore invincibility
+		if val == true:
 			any_hack_active = true
 			break
 			

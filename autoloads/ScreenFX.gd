@@ -71,6 +71,7 @@ func slow_motion_pulse(scale: float = 0.3, duration: float = 0.22) -> void:
 	var now_ms := Time.get_ticks_msec()
 	var duration_ms := int(maxf(duration, 0.01) * 1000.0)
 	_slowmo_end_ms = max(_slowmo_end_ms, now_ms) + duration_ms
+	AudioManager.play_sfx("freesound_community-matrix-jump")
 
 func set_time_scale_override(scale: float) -> void:
 	_timescale_override_active = true

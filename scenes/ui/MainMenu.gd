@@ -41,16 +41,6 @@ func _ready() -> void:
 	_create_menu_buttons()
 	
 	_style_button($VBox/QuitBtn, 20)
-	_style_label($VBox/InfoLabel, 13, Color(0.35, 0.35, 0.45, 1))
-
-	if has_node("VBox/InstructionsBtn"):
-		_style_button($VBox/InstructionsBtn, 18, Color(1.0, 1.0, 0.3))
-
-	if has_node("InstructionsPanel"):
-		_style_label($InstructionsPanel/VBox/Title, 24, Color(0.2, 1.0, 0.8))
-		_style_label($InstructionsPanel/VBox/Content, 14, Color(0.9, 0.9, 0.9))
-		_style_button($InstructionsPanel/VBox/CloseInstructionsBtn, 16)
-
 	if has_node("VBox/SelectWeaponBtn"):
 		_style_button($VBox/SelectWeaponBtn, 20)
 
@@ -102,9 +92,6 @@ func _connect_button_hover_sounds() -> void:
 	for child in $VBox.get_children():
 		if child is Button:
 			buttons.append(child)
-	
-	if has_node("InstructionsPanel/VBox/CloseInstructionsBtn"):
-		buttons.append($InstructionsPanel/VBox/CloseInstructionsBtn)
 	
 	for btn in buttons:
 		if is_instance_valid(btn) and btn is Button:
@@ -223,34 +210,21 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 		btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
 func _on_play_pressed() -> void:
-	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
 func _on_tutorial_pressed() -> void:
-	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	ScreenFX.transition_to_scene_with_black_fade("res://tutorial.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:
-	AudioManager.stop_music()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.queue_start_floor(5)
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/LevelBoss.tscn", 0.6, 1.0, 0.6)
 
 func _on_select_weapon_pressed() -> void:
 	ScreenFX.transition_to_scene("res://scenes/ui/GunSelectScreen.tscn")
-
-func _on_instructions_pressed() -> void:
-	if has_node("InstructionsPanel"):
-		$InstructionsPanel.visible = true
-		$VBox.visible = false
-
-func _on_close_instructions_pressed() -> void:
-	if has_node("InstructionsPanel"):
-		$InstructionsPanel.visible = false
-		$VBox.visible = true
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
