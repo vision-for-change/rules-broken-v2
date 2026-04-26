@@ -11,7 +11,7 @@ const MATRIX_BASE_COLOR := Color(0.1, 0.8, 0.4, 0.5)
 const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
-	AudioManager.play_music_by_file("freesound_community-matrix-redux-78819")
+	Music.playglobalsound("res://Sounds/freesound_community-matrix-redux-78819.mp3")
 	randomize()
 
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -210,15 +210,18 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 		btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
 func _on_play_pressed() -> void:
+	Music.stopsound()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/Level2.tscn", 0.6, 1.0, 0.6)
 
 func _on_tutorial_pressed() -> void:
+	Music.stopsound()
 	PlayerState.reset_run_progression()
 	ScreenFX.transition_to_scene_with_black_fade("res://tutorial.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:
+	Music.stopsound()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.queue_start_floor(5)
 	ScreenFX.transition_to_scene_with_black_fade("res://scenes/levels/LevelBoss.tscn", 0.6, 1.0, 0.6)

@@ -44,8 +44,6 @@ func _ready() -> void:
 	_canvas_layer.add_child(_demo_container)
 
 	_setup_demo()
-
-	AudioManager.play_music_by_file(INTRO_MUSIC)
 	_play_intro_sequence()
 
 func _input(event: InputEvent) -> void:
