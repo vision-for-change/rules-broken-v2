@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmkl6ubtc332i"
-valid=false
+path="res://.godot/imported/morpheus.webp-aaf8af22ecb34f4dfc5776c8a628f4a1.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/morpheus.webp"
+dest_files=["res://.godot/imported/morpheus.webp-aaf8af22ecb34f4dfc5776c8a628f4a1.ctex"]
 
 [params]
 

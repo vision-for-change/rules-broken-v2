@@ -781,20 +781,20 @@ func _play_level_intro() -> void:
 	
 	match _floor_index:
 		1:
-			intro_text = "NEW ENEMY: WORM"
+			intro_text = "NEW ENEMY: BUG"
 			intro_subtext = "TACTICAL ADVICE: ELIMINATE WITH BULLETS"
 		2:
 			intro_text = "NEW ENEMY: SNAKE"
-			intro_subtext = "TACTICAL ADVICE: USE SPEED // STRIKE THE TAIL"
+			intro_subtext = "TACTICAL ADVICE: USE SUPER SPEED AND DASH"
 		3:
 			intro_text = "NEW ENEMY: TROJAN HORSE"
-			intro_subtext = "TACTICAL ADVICE: FIND OUT YOURSELF"
+			intro_subtext = "TACTICAL ADVICE: USE FASTER BULLETS"
 		4:
 			intro_text = "INTENSITY INCREASED"
 			intro_subtext = "SYSTEM STABILITY: COMPROMISED"
 		5:
 			intro_text = "FINAL BOSS: ROGUE AI"
-			intro_subtext = "THREAT LEVEL: OMEGA // SYSTEM CRITICAL"
+			intro_subtext = "STAY ALIVE"
 		_:
 			return
 

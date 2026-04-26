@@ -1,20 +1,18 @@
 [gd_scene format=3 uid="uid://trojan001"]
 
-[ext_resource type="Script" path="res://scenes/enemy/TrojanHorse.gd" id="1"]
+[ext_resource type="Script" uid="uid://hx4b2260k525" path="res://scenes/enemy/TrojanHorse.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://dtftca6p5bcuf" path="res://assets/trojan_horse.webp" id="2"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(32, 32)
 
-[node name="TrojanHorse" type="CharacterBody2D"]
+[node name="TrojanHorse" type="CharacterBody2D" unique_id=959206726]
 collision_layer = 2
 script = ExtResource("1")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=228191555]
 shape = SubResource("1")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0.8, 0.4, 1, 1)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1907577236]
 scale = Vector2(2, 2)
 texture = ExtResource("2")
-hframes = 2

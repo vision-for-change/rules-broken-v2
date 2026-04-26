@@ -1,22 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://cwy2l3xoqxs2t"]
+[gd_scene format=3 uid="uid://cwy2l3xoqxs2t"]
 
-[ext_resource type="Script" path="res://scenes/levels/TutorialLevel.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cmdq0wupyhvlw" path="res://scenes/levels/TutorialLevel.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="2_ehuit"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="3_5mrt3"]
 
-[node name="tutorial" type="Node2D"]
+[node name="tutorial" type="Node2D" unique_id=414355170]
+texture_filter = 1
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1721786081]
 offset_left = -1000.0
 offset_top = -1000.0
 offset_right = 2000.0
 offset_bottom = 2000.0
 color = Color(0.04, 0.05, 0.08, 1)
 
-[node name="HUD" parent="." instance=ExtResource("2_ehuit")]
+[node name="HUD" parent="." unique_id=646125669 instance=ExtResource("2_ehuit")]
 
-[node name="Player" parent="." instance=ExtResource("3_5mrt3")]
+[node name="Player" parent="." unique_id=1638574784 instance=ExtResource("3_5mrt3")]
 position = Vector2(100, 100)
 
-[node name="Walls" type="Node2D" parent="."]
+[node name="Walls" type="Node2D" parent="." unique_id=1661736344]

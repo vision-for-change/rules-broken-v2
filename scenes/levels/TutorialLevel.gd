@@ -1,4 +1,4 @@
-﻿## TutorialLevel.gd
+## TutorialLevel.gd
 ## Interactive tutorial for movement, combat, hacks, and system rules.
 extends "res://scenes/levels/BaseLevel.gd"
 
@@ -168,7 +168,7 @@ func _start_stage(stage: Stage) -> void:
 				player.call("set_hacked_client_modes", true, false, false, false, false, false)
 
 		Stage.HACK_MENU:
-			_set_instruction("Use tabs for hack, try one of the hack and see how it is used.")
+			_set_instruction("Use the numbers to start hacks in the hacked client to break the matrix, They help for defeating harder enemies")
 			EventBus.log("HACKING INTERFACE ONLINE", "exploit")
 			# Reset hacks so they have to try one
 			var players = get_tree().get_nodes_in_group("player")
@@ -178,7 +178,7 @@ func _start_stage(stage: Stage) -> void:
 			_check_for_hack_activation()
 
 		Stage.DONE:
-			_set_instruction("CERTIFICATION COMPLETE.")
+			_set_instruction("You are ready to go!")
 			_show_advanced_completion_ui()
 
 func _check_for_hack_activation() -> void:

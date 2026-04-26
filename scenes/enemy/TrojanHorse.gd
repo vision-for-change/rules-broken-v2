@@ -52,11 +52,22 @@ func shatter() -> void:
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.5, 0.3), 0.15)
 	_spawn_shards()
 	
-	# Spawn the "Hidden" Bug
-	var bug = BUG_SCENE.instantiate()
-	get_parent().add_child(bug)
-	bug.global_position = global_position
-	bug.set("entity_id", "bug_from_trojan_" + str(Time.get_ticks_msec()))
+	# Check for faster bullets hack
+	var is_faster_bullets_on = false
+	if _player_ref and _player_ref.has_method("get_hacked_client_modes"):
+		var modes = _player_ref.get_hacked_client_modes()
+		is_faster_bullets_on = modes.get("faster_bullets", false)
+	
+	# If faster bullets hack is NOT on, spawn multiple bugs
+	if not is_faster_bullets_on:
+		var bug_count = randi_range(3, 5)
+		for i in range(bug_count):
+			var bug = BUG_SCENE.instantiate()
+			bug.set("entity_id", "bug_from_trojan_" + str(Time.get_ticks_msec()) + "_" + str(i))
+			get_parent().add_child(bug)
+			# Randomize position slightly
+			var offset = Vector2(randf_range(-20, 20), randf_range(-20, 20))
+			bug.global_position = global_position + offset
 	
 	# Hide the horse
 	visible = false
