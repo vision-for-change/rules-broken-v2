@@ -61,6 +61,8 @@ func _on_body_entered(body: Node) -> void:
 			else:
 				body.queue_free()
 				_try_spawn_health_pickup(body)
+		# Spawn a small hit flash at the enemy position for feedback
+		ScreenFX.spawn_hit_flash((body.global_position if body is Node2D else global_position), Color(1.0, 1.0, 0.6, 1.0), 14.0, 0.12)
 		queue_free()
 	elif body.is_in_group("obstacle"):
 		queue_free()

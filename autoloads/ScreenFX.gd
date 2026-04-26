@@ -151,6 +151,25 @@ func _scanline_flash() -> void:
 	t.tween_property(r, "modulate:a", 0.0, 0.15)
 	t.tween_callback(r.queue_free)
 
+func spawn_hit_flash(global_pos: Vector2, color: Color = Color(1, 1, 1, 1), size: float = 18.0, duration: float = 0.12) -> void:
+	# Spawn a quick flash sprite at the world position for impact feedback.
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var s := Sprite2D.new()
+	var tex := load("res://assets/bullet.webp")
+	if tex != null:
+		s.texture = tex
+	s.global_position = global_pos
+	s.z_index = 150
+	s.modulate = color
+	s.scale = Vector2.ONE * (size / 8.0)
+	scene_root.add_child(s)
+	var t = s.create_tween()
+	t.tween_property(s, "modulate:a", 0.0, duration)
+	t.parallel().tween_property(s, "scale", s.scale * 1.6, duration)
+	t.tween_callback(s.queue_free)
+
 func transition_to_scene(scene_path: String, fade_in_time: float = -1.0, fade_out_time: float = -1.0) -> void:
 	if _scene_transitioning:
 		return

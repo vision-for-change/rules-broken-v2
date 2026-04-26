@@ -66,6 +66,8 @@ func _on_contact_body_entered(body: Node2D) -> void:
 		if RuleManager.has_method("apply_integrity_damage"):
 			RuleManager.apply_integrity_damage(0.2)
 			
+		# Flash particles at the contact point for visual feedback
+		ScreenFX.spawn_hit_flash(global_position, Color(1.0, 0.6, 0.2, 1.0), 16.0, 0.14)
 		shatter()
 
 func take_damage(amount: int) -> bool:

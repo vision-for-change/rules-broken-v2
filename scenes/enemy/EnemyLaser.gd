@@ -53,6 +53,7 @@ func _on_body_entered(body: Node) -> void:
 		# Feedback for hitting player
 		ScreenFX.flash_screen(Color(1.0, 0.1, 0.1, 0.4), 0.25)
 		ScreenFX.screen_shake(3.0, 0.15)
+		ScreenFX.spawn_hit_flash(global_position, Color(1.0, 0.4, 0.2, 1.0), 18.0, 0.18)
 		
 		# Deal damage to both systems
 		if RuleManager.has_method("apply_integrity_damage"):
