@@ -234,7 +234,7 @@ func _begin_boss_fight() -> void:
 	EventBus.log("ROGUE AI ONLINE // FIGHT BEGIN", "error")
 
 func _start_boss_music() -> void:
-	Music.playglobalsound("res://Sounds/Hive - Ultrasonic Sound (The Matrix).mp3")
+	Music.playglobalsound("res://Sounds/Hive - Ultrasonic Sound (The Matrix).mp3", -10)
 
 func _start_override_key_phase(parent: Node2D) -> void:
 	if not is_instance_valid(_boss):

@@ -7,3 +7,8 @@ res://scenes/levels/LevelBoss.gd
 res://scenes/player/Player.tscn
 res://scenes/player/Player.gd
 res://autoloads/AudioManager.gd
+res://scenes/ui/MainMenu.gd
+res://autoloads/ScreenFX.gd
+res://scenes/ui/IntroSplash.tscn
+res://scenes/ui/IntroSplash.gd
+res://scenes/ui/MainMenu.tscn
