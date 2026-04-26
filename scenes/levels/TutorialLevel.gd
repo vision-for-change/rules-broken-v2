@@ -42,8 +42,8 @@ func _ready() -> void:
 	# Listen for events
 	EventBus.action_approved.connect(_on_action_approved)
 	EventBus.enemy_defeated.connect(_on_enemy_defeated_tutorial)
-	# Listen for hack usage to finish tutorial
-	EventBus.action_exploited.connect(_on_hack_used)
+	# Backup: Listen for hack usage to finish tutorial
+	EventBus.action_exploited.connect(_on_hack_used_signal)
 
 func get_stage_number() -> int:
 	return 5 # Unlock all hacks for trial
@@ -174,23 +174,53 @@ func _start_stage(stage: Stage) -> void:
 			var players = get_tree().get_nodes_in_group("player")
 			if not players.is_empty():
 				players[0].call("set_hacked_client_modes", false, false, false, false, false, false)
+			# Start robust polling
+			_check_for_hack_activation()
 
 		Stage.DONE:
 			_set_instruction("CERTIFICATION COMPLETE.")
 			_show_advanced_completion_ui()
 
-func _on_hack_used(_action_info, _loophole_desc) -> void:
+func _check_for_hack_activation() -> void:
+	if _current_stage != Stage.HACK_MENU:
+		return
+		
+	var player = get_tree().get_first_node_in_group("player")
+	if is_instance_valid(player):
+		var modes = player.call("get_hacked_client_modes")
+		var any_active = false
+		for m in modes.values():
+			if m == true:
+				any_active = true
+				break
+		
+		if any_active:
+			_complete_hack_stage()
+			return
+			
+	# Keep checking every 0.3s
+	get_tree().create_timer(0.3).timeout.connect(_check_for_hack_activation)
+
+func _on_hack_used_signal(_info, _desc) -> void:
 	if _current_stage == Stage.HACK_MENU:
-		# Small delay for dramatic effect
-		get_tree().create_timer(1.2).timeout.connect(func():
-			if _current_stage == Stage.HACK_MENU:
-				_start_stage(Stage.DONE)
-		)
+		_complete_hack_stage()
+
+func _complete_hack_stage() -> void:
+	if _current_stage != Stage.HACK_MENU: return
+	
+	# Mark as done so we don't trigger twice
+	_current_stage = Stage.DONE
+	EventBus.log("TUTORIAL: Hack trial successful!", "exploit")
+	
+	# Small delay for dramatic effect
+	get_tree().create_timer(1.0).timeout.connect(func():
+		_start_stage(Stage.DONE)
+	)
 
 func _on_action_approved(action: Dictionary) -> void:
 	if _current_stage == Stage.MOVEMENT and action["type"] == ActionBus.MOVE:
 		# Short delay after first move
-		get_tree().create_timer(1.5).timeout.connect(func():
+		get_tree().create_timer(1.0).timeout.connect(func():
 			if _current_stage == Stage.MOVEMENT: _start_stage(Stage.BUG_COMBAT)
 		)
 
@@ -218,13 +248,17 @@ func _show_advanced_completion_ui() -> void:
 
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0, 0.1, 0.05, 0.95)
-	style.border_width_all = 3
+	# FIX: set_border_width_all instead of property border_width_all
+	style.set_border_width_all(3)
 	style.border_color = Color(0.2, 1.0, 0.5)
 	style.set_corner_radius_all(10)
 	_completion_popup.add_theme_stylebox_override("panel", style)
 
 	var margin = MarginContainer.new()
-	margin.add_theme_constant_override("margin_all", 30)
+	margin.add_theme_constant_override("margin_left", 30)
+	margin.add_theme_constant_override("margin_top", 30)
+	margin.add_theme_constant_override("margin_right", 30)
+	margin.add_theme_constant_override("margin_bottom", 30)
 	_completion_popup.add_child(margin)
 
 	var vbox = VBoxContainer.new()
