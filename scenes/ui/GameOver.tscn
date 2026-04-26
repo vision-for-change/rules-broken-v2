@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://go001"]
 
 [ext_resource type="Script" uid="uid://beu51nc3iecrk" path="res://scenes/ui/GameOver.gd" id="1_57v1k"]
-[ext_resource type="Texture2D" uid="uid://c51nasp5prfdc" path="res://assets/sprites/EndScreen.jpg" id="2_57v1k"]
+[ext_resource type="Texture2D" uid="uid://w77nsxue3whp" path="res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png" id="2_57v1k"]
 
 [node name="GameOver" type="Control" unique_id=1484924869]
 layout_mode = 3
