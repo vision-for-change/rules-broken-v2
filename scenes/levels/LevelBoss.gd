@@ -5,6 +5,10 @@ const BOSS_INTERACTABLE_SCRIPT := preload("res://scenes/levels/BossInteractable.
 const OVERRIDE_KEYS_PER_PHASE := 2
 const SHIELD_DOWN_TIME := 9.0
 const BOSS_LOADOUT_BASE: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
+const INTRO_REVEAL_ZOOM := Vector2(0.6, 0.6)
+const INTRO_REVEAL_DURATION := 1.0
+const INTRO_RETURN_DURATION := 0.8
+const INTRO_HOLD_TIME := 0.45
 
 var _welcome_banner: CanvasLayer
 var _boss: Node2D
@@ -14,6 +18,8 @@ var _boss_room: Rect2i
 var _active_override_keys: Array[Node2D] = []
 var _keys_remaining := 0
 var _key_cycle_active := false
+var _boss_intro_started := false
+var _boss_intro_finished := false
 
 func _ready() -> void:
 	# Note: _floor_index is static from Level2.gd
@@ -73,6 +79,8 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	_active_override_keys.clear()
 	_keys_remaining = 0
 	_key_cycle_active = false
+	_boss_intro_started = false
+	_boss_intro_finished = false
 
 	var enemy_root := _get_or_create_container("Enemies")
 	var obstacle_root := _get_or_create_container("Obstacles")
@@ -87,7 +95,7 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		_configure_player_for_boss_fight(player)
 
 	_spawn_boss(enemy_root)
-	_start_override_key_phase(interactable_root)
+	_spawn_boss_intro_trigger(interactable_root)
 
 func _configure_player_for_boss_fight(player: Node2D) -> void:
 	if player == null:
@@ -132,6 +140,8 @@ func _spawn_boss(parent: Node2D) -> void:
 	if boss.get("move_speed") != null:
 		var new_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
 		boss.set("move_speed", new_speed)
+	if boss.has_method("set_combat_active"):
+		boss.call("set_combat_active", false)
 
 	if boss.has_signal("shield_disabled"):
 		boss.connect("shield_disabled", Callable(self, "_on_boss_shield_disabled"))
@@ -143,6 +153,88 @@ func _spawn_boss(parent: Node2D) -> void:
 	var hud_node := get_node_or_null("HUD")
 	if is_instance_valid(hud_node) and hud_node.has_method("bind_boss"):
 		hud_node.call("bind_boss", boss, "ROGUE AI // TIER %d" % int(tier_mult))
+
+func _spawn_boss_intro_trigger(parent: Node2D) -> void:
+	var trigger := Area2D.new()
+	trigger.name = "BossIntroTrigger"
+	trigger.collision_layer = 0
+	trigger.collision_mask = 1
+	trigger.monitoring = true
+	parent.add_child(trigger)
+	trigger.global_position = _cell_to_world(_room_center(_boss_room))
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(float(_boss_room.size.x) * TILE_SIZE, float(_boss_room.size.y) * TILE_SIZE)
+	shape.shape = rect
+	trigger.add_child(shape)
+
+	trigger.body_entered.connect(func(body: Node) -> void:
+		if _boss_intro_started:
+			return
+		if not body.is_in_group("player"):
+			return
+		_boss_intro_started = true
+		trigger.monitoring = false
+		_play_boss_intro_cutscene(body as Node2D)
+	)
+
+func _play_boss_intro_cutscene(player: Node2D) -> void:
+	if player == null or not is_instance_valid(_boss):
+		_begin_boss_fight()
+		return
+	var camera := player.get_node_or_null("Camera2D") as Camera2D
+	if camera == null:
+		_begin_boss_fight()
+		return
+
+	var original_smoothing := camera.position_smoothing_enabled
+	var default_zoom := camera.zoom
+	var can_restore_player_physics := player.has_method("set_physics_process")
+	var focus := (player.global_position + _boss.global_position) * 0.5
+
+	if player is CharacterBody2D:
+		(player as CharacterBody2D).velocity = Vector2.ZERO
+	if can_restore_player_physics:
+		player.set_physics_process(false)
+
+	camera.position_smoothing_enabled = false
+	camera.reparent(self, true)
+
+	var reveal_tween := create_tween()
+	reveal_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	reveal_tween.tween_property(camera, "global_position", focus, INTRO_REVEAL_DURATION)
+	reveal_tween.parallel().tween_property(camera, "zoom", INTRO_REVEAL_ZOOM, INTRO_REVEAL_DURATION)
+	await reveal_tween.finished
+	await get_tree().create_timer(INTRO_HOLD_TIME).timeout
+
+	var return_tween := create_tween()
+	return_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return_tween.tween_property(camera, "global_position", player.global_position, INTRO_RETURN_DURATION)
+	return_tween.parallel().tween_property(camera, "zoom", default_zoom, INTRO_RETURN_DURATION)
+	await return_tween.finished
+
+	camera.reparent(player, true)
+	camera.position = Vector2.ZERO
+	camera.position_smoothing_enabled = original_smoothing
+	if can_restore_player_physics:
+		player.set_physics_process(true)
+
+	_begin_boss_fight()
+
+func _begin_boss_fight() -> void:
+	if _boss_intro_finished:
+		return
+	_boss_intro_finished = true
+	if is_instance_valid(_boss) and _boss.has_method("set_combat_active"):
+		_boss.call("set_combat_active", true)
+	_start_boss_music()
+	var interactable_root := _get_or_create_container("Interactables")
+	_start_override_key_phase(interactable_root)
+	EventBus.log("ROGUE AI ONLINE // FIGHT BEGIN", "error")
+
+func _start_boss_music() -> void:
+	AudioManager.play_music_by_file("Hive - Ultrasonic Sound (The Matrix)")
 
 func _start_override_key_phase(parent: Node2D) -> void:
 	if not is_instance_valid(_boss):
@@ -236,6 +328,8 @@ func _on_boss_shield_disabled(duration: float) -> void:
 
 func _on_boss_shield_restored() -> void:
 	if _transitioning:
+		return
+	if not _boss_intro_finished:
 		return
 	var interactable_root := _get_or_create_container("Interactables")
 	EventBus.log("SHIELD RESTORED // SEARCH FOR KEYS", "warn")

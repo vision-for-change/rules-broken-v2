@@ -15,6 +15,15 @@ const MAX_CLONES := 5
 const SIGNAL_LOST_COLOR := Color(1.0, 0.92, 0.35, 1.0)
 const VULNERABLE_COLOR := Color(1.25, 0.8, 0.8, 1.0)
 const SHIELDED_COLOR := Color(0.75, 0.95, 1.2, 1.0)
+const DEATH_SHAKE_INTENSITY := 20.0
+const DEATH_SHAKE_DURATION := 0.45
+const DEATH_DIGIT_COUNT := 260
+const DEATH_EXPLOSION_COUNT := 120
+const DEATH_DIGIT_EFFECT_TIME := 1.8
+const SHATTER_ROWS := 6
+const SHATTER_COLS := 6
+const SHATTER_DURATION := 2.2
+const SHATTER_FORCE := 260.0
 
 var _player_ref: Node2D = null
 var _fire_timer := 0.0
@@ -29,6 +38,7 @@ var _dash_cooldown := 0.0
 var _dash_timer := 0.0
 var _dash_dir := Vector2.ZERO
 var _attack_phase := 0
+var _combat_active := true
 
 @onready var sprite := $Sprite2D
 @onready var ui := $UI
@@ -64,20 +74,13 @@ func _physics_process(delta: float) -> void:
 	if _defeated:
 		velocity = Vector2.ZERO
 		return
-	if _player_ref == null or not is_instance_valid(_player_ref):
-		_player_ref = get_tree().get_first_node_in_group("player") as Node2D
-		return
-
-	var player_hidden := _player_has_invisibility_hack()
-	if player_hidden:
-		velocity = velocity.move_toward(Vector2.ZERO, move_speed * delta * 3.0)
-		move_and_slide()
-		sprite.rotation = lerp_angle(sprite.rotation, sprite.rotation + 0.25, 2.0 * delta)
+	if not _combat_active:
+		velocity = Vector2.ZERO
 		if not _is_clone:
 			ui.global_position = global_position
-			if is_instance_valid(status_label):
-				status_label.text = "ROGUE AI // SIGNAL LOST"
-				status_label.add_theme_color_override("font_color", SIGNAL_LOST_COLOR)
+		return
+	if _player_ref == null or not is_instance_valid(_player_ref):
+		_player_ref = get_tree().get_first_node_in_group("player") as Node2D
 		return
 
 	if not _is_clone and not _shielded:
@@ -226,6 +229,8 @@ func restore_shield() -> void:
 	shield_restored.emit()
 
 func take_damage(amount: int) -> bool:
+	if not _combat_active:
+		return false
 	if _is_clone:
 		_health = 0
 		_defeat()
@@ -259,6 +264,16 @@ func get_max_health() -> int:
 func is_shielded() -> bool:
 	return _shielded
 
+func set_combat_active(active: bool) -> void:
+	if _defeated:
+		return
+	_combat_active = active
+	if not _combat_active:
+		velocity = Vector2.ZERO
+
+func is_combat_active() -> bool:
+	return _combat_active
+
 func _flash_blocked_hit() -> void:
 	var tween := create_tween()
 	sprite.modulate = Color(0.3, 1.0, 1.4)
@@ -278,30 +293,139 @@ func _update_status_visuals() -> void:
 		status_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.66, 1.0))
 		sprite.modulate = VULNERABLE_COLOR
 
-func _player_has_invisibility_hack() -> bool:
-	if _player_ref == null or not is_instance_valid(_player_ref):
-		return false
-	if not _player_ref.has_method("get_hacked_client_modes"):
-		return false
-	var modes: Dictionary = _player_ref.get_hacked_client_modes()
-	return bool(modes.get("invisible", false))
-
 func _defeat() -> void:
 	if _defeated:
 		return
 	_defeated = true
 	velocity = Vector2.ZERO
 	set_physics_process(false)
+	collision_layer = 0
+	collision_mask = 0
+	for child in get_children():
+		if child is CollisionShape2D:
+			(child as CollisionShape2D).disabled = true
 	
 	if not _is_clone:
 		for clone in get_tree().get_nodes_in_group("boss_clone"):
 			if is_instance_valid(clone):
 				clone.queue_free()
-		defeated.emit()
-		AudioManager.play_sfx("freesound_community-glass-shatter")
-		ScreenFX.slow_motion_pulse(0.1, 2.0)
 	
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 0.0, 0.35)
-	tween.tween_callback(queue_free)
+	ScreenFX.screen_shake(20.0, 0.45)
+	ScreenFX.flash_screen(Color(1.0, 0.08, 0.08, 0.72), 0.5)
+	ScreenFX.flash_screen(Color(0.2, 1.0, 0.45, 0.45), 0.7)
+	AudioManager.play_sfx("dragon-studio-cinematic-boom")
+	_spawn_death_binary_cataclysm()
+	_shatter_sprite()
+
+func _shatter_sprite() -> void:
+	if not is_instance_valid(sprite) or sprite.texture == null:
+		_finish_death_sequence()
+		return
+	_spawn_shatter_from_sprite(sprite, SHATTER_ROWS, SHATTER_COLS, SHATTER_DURATION, SHATTER_FORCE)
+	sprite.visible = false
+	var timer := get_tree().create_timer(SHATTER_DURATION + 0.12, false)
+	timer.timeout.connect(_finish_death_sequence)
+
+func _finish_death_sequence() -> void:
+	if not _is_clone:
+		defeated.emit()
+	queue_free()
+
+func _spawn_shatter_from_sprite(source_sprite: Sprite2D, rows: int, cols: int, duration: float, force: float) -> void:
+	if source_sprite == null or source_sprite.texture == null:
+		return
+	var texture_size := source_sprite.texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+		return
+	var piece_size := texture_size / Vector2(float(cols), float(rows))
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+
+	for y in rows:
+		for x in cols:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = source_sprite.texture
+			atlas.region = Rect2(Vector2(x, y) * piece_size, piece_size)
+			var shard := Sprite2D.new()
+			shard.texture = atlas
+			shard.centered = true
+			shard.scale = source_sprite.global_scale
+			shard.global_rotation = source_sprite.global_rotation
+			shard.modulate = source_sprite.modulate
+			var cell_center := (Vector2(float(x), float(y)) + Vector2(0.5, 0.5)) * piece_size
+			var offset := cell_center - texture_size * 0.5
+			var rotated_offset := (offset * source_sprite.global_scale).rotated(source_sprite.global_rotation)
+			shard.global_position = source_sprite.global_position + rotated_offset
+			var outward_dir := offset.normalized()
+			if outward_dir.length_squared() < 0.001:
+				outward_dir = Vector2.RIGHT.rotated(randf_range(0.0, TAU))
+			var random_spread := Vector2(randf_range(-0.28, 0.28), randf_range(-0.28, 0.28))
+			var travel := (outward_dir + random_spread).normalized() * randf_range(force * 0.6, force)
+			var target_pos := shard.global_position + travel
+			var target_rot := shard.rotation + randf_range(-3.1, 3.1)
+			scene_root.add_child(shard)
+			var tween := shard.create_tween()
+			tween.set_parallel(true)
+			tween.tween_property(shard, "global_position", target_pos, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.tween_property(shard, "rotation", target_rot, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tween.tween_property(shard, "modulate:a", 0.0, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+			tween.set_parallel(false)
+			tween.tween_callback(shard.queue_free)
+
+func _spawn_death_binary_cataclysm() -> void:
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		return
+	var viewport := get_viewport()
+	if viewport == null:
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 320
+	scene_root.add_child(layer)
+	var bounds := viewport.get_visible_rect().size
+
+	for i in DEATH_DIGIT_COUNT:
+		var digit := Label.new()
+		digit.text = "1" if randi() % 2 == 0 else "O"
+		digit.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y))
+		digit.rotation = randf_range(-0.45, 0.45)
+		digit.modulate.a = 0.0
+		digit.add_theme_font_override("font", preload("res://Minecraft.ttf"))
+		digit.add_theme_font_size_override("font_size", randi_range(11, 28))
+		digit.add_theme_color_override("font_color", Color(0.2, 1.0, 0.45, 0.95))
+		digit.add_theme_color_override("outline_color", Color(0.0, 0.18, 0.07, 0.95))
+		digit.add_theme_constant_override("outline_size", 1)
+		layer.add_child(digit)
+		var digit_tween := digit.create_tween()
+		digit_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		var start_delay := randf_range(0.0, maxf(0.0, SHATTER_DURATION - (DEATH_DIGIT_EFFECT_TIME + 0.2)))
+		var drift := Vector2(randf_range(-200.0, 200.0), randf_range(-240.0, 240.0))
+		digit_tween.tween_interval(start_delay)
+		digit_tween.tween_property(digit, "modulate:a", 1.0, 0.05)
+		digit_tween.parallel().tween_property(digit, "position", digit.position + drift, DEATH_DIGIT_EFFECT_TIME)
+		digit_tween.parallel().tween_property(digit, "rotation", digit.rotation + randf_range(-2.3, 2.3), DEATH_DIGIT_EFFECT_TIME)
+		digit_tween.tween_property(digit, "modulate:a", 0.0, 0.3)
+		digit_tween.tween_callback(digit.queue_free)
+
+	for i in DEATH_EXPLOSION_COUNT:
+		var blast := ColorRect.new()
+		blast.color = Color(0.1, 1.0, 0.35, randf_range(0.2, 0.46))
+		blast.size = Vector2.ONE * randf_range(9.0, 24.0)
+		blast.position = Vector2(randf_range(0.0, bounds.x), randf_range(0.0, bounds.y)) - blast.size * 0.5
+		blast.pivot_offset = blast.size * 0.5
+		blast.modulate.a = 0.0
+		layer.add_child(blast)
+		var blast_tween := blast.create_tween()
+		blast_tween.tween_interval(randf_range(0.0, maxf(0.0, SHATTER_DURATION - 0.35)))
+		blast_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		blast_tween.tween_property(blast, "modulate:a", randf_range(0.35, 0.62), 0.08)
+		blast_tween.tween_property(blast, "scale", Vector2(randf_range(3.4, 9.2), randf_range(3.4, 9.2)), 0.3)
+		blast_tween.parallel().tween_property(blast, "modulate:a", 0.0, 0.3)
+		blast_tween.tween_callback(blast.queue_free)
+
+	var cleanup_timer := get_tree().create_timer(SHATTER_DURATION + 0.3, false)
+	cleanup_timer.timeout.connect(func() -> void:
+		if is_instance_valid(layer):
+			layer.queue_free()
+	)

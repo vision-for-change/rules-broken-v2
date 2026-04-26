@@ -134,8 +134,6 @@ func get_integrity_ratio() -> float:
 func apply_integrity_damage(amount: float) -> void:
 	if amount <= 0.0:
 		return
-	if _is_player_invincible():
-		return
 	_adjust_integrity(-amount)
 
 func apply_integrity_heal(amount: float) -> void:
@@ -214,8 +212,6 @@ var _death_triggered := false
 func _adjust_integrity(delta: float) -> void:
 	if _death_triggered:
 		return
-	if delta < 0.0 and _is_player_invincible():
-		return
 
 	var old = system_integrity
 	system_integrity = clampf(system_integrity + delta, 0.0, MAX_SYSTEM_INTEGRITY)
@@ -262,17 +258,3 @@ func _count_active_player_hacks() -> int:
 		if bool(enabled):
 			count += 1
 	return count
-
-func _is_player_invincible() -> bool:
-	var players = get_tree().get_nodes_in_group("player")
-	if players.is_empty():
-		return false
-	var player = players[0]
-	if player == null:
-		return false
-	if player.has_method("is_hack_invincible"):
-		return bool(player.call("is_hack_invincible"))
-	if player.has_method("get_hacked_client_modes"):
-		var modes: Dictionary = player.get_hacked_client_modes()
-		return bool(modes.get("invincible", false))
-	return false

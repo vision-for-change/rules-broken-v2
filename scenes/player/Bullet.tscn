@@ -4,11 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://dt8hwt6i3p842" path="res://assets/bullet.webp" id="2"]
 
 [sub_resource type="CircleShape2D" id="1"]
-radius = 2.5
+radius = 6.0
 
 [node name="Bullet" type="Area2D" unique_id=838723870]
 z_index = 5
-collision_layer = 0
+collision_layer = 4
 collision_mask = 3
 script = ExtResource("1")
 

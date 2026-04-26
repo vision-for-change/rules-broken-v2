@@ -48,7 +48,7 @@ func _setup_segments() -> void:
 		var s = Sprite2D.new()
 		s.texture = tex
 		s.scale = Vector2.ONE * (1.0 - (float(i) / segment_count) * 0.4)
-		s.z_index = z_index - 1
+		s.z_index = z_index + 1
 		add_child(s)
 		_segments.append(s)
 		# Initialize history
@@ -81,8 +81,8 @@ func check_dash_collision(player_node: Node) -> bool:
 	var modes = player_node.get_hacked_client_modes() if player_node.has_method("get_hacked_client_modes") else {}
 	var has_super_speed = modes.get("super_speed", false)
 
-	# The snake can only be killed if the player is dashing or has super speed
-	if is_dashing or has_super_speed:
+	# The snake can only be killed if the player is dashing AND has super speed
+	if is_dashing and has_super_speed:
 		_health = 0
 		ScreenFX.slow_motion_pulse(0.2, 1.0)
 		shatter()

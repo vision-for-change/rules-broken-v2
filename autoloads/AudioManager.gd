@@ -6,10 +6,10 @@ var _sfx_pool: Array[AudioStreamPlayer] = []
 var _fade_tween: Tween
 var _current_track := ""
 
-const POOL_SIZE   = 8
 const MUSIC_VOL   = -10.0
 const MUSIC_VOL_MENU = -3.0
 const FADE_TIME   = 1.0
+const INITIAL_POOL_SIZE = 16
 const SFX_DIRS := [
 	"res://assets/audio/sfx",
 	"res://Sounds",
@@ -17,6 +17,7 @@ const SFX_DIRS := [
 const SFX_EXTS := [".wav", ".ogg", ".mp3"]
 const SFX_ALIASES := {
 	"universfield-gunshot": "universfield-gunshot-352466",
+	"universfield-magic-teleport-whoosh": "universfield-magic-teleport-whoosh-352764",
 	"feesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
 	"freesound_community-glass-shatter": "freesound_community-glass-shatter-3-100155",
 	"dragon-studio-cinematic-boom": "dragon-studio-cinematic-boom-454254",
@@ -39,7 +40,7 @@ func _ready() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = "Music"
 	add_child(_music)
-	for i in POOL_SIZE:
+	for i in INITIAL_POOL_SIZE:
 		var p = AudioStreamPlayer.new()
 		p.bus = "SFX"
 		add_child(p)
@@ -52,10 +53,17 @@ func _ready() -> void:
 	EventBus.watchdog_alert.connect(func(_a, _b, _c): switch_music("alert"))
 
 func _process(_delta: float) -> void:
-	# Update SFX pitch to match current time scale
+	# Update pitch to match current time scale
 	var pitch = Engine.time_scale
+	if _music:
+		_music.pitch_scale = pitch
+		# Safeguard: restart music if it stopped unexpectedly
+		if _current_track != "" and not _music.playing:
+			_music.play()
+	
 	for p in _sfx_pool:
-		p.pitch_scale = pitch
+		if is_instance_valid(p):
+			p.pitch_scale = pitch
 
 func play_music(state: String) -> void:
 	var track = STATE_TRACKS.get(state, "music_stable")
@@ -66,19 +74,23 @@ func play_music(state: String) -> void:
 	if not ResourceLoader.exists(path):
 		return
 	_music.stream = load(path)
+	if _music.stream:
+		_music.stream.set_loop(true)
 	_music.volume_db = MUSIC_VOL
 	_music.play()
 
 func play_music_by_file(file_name: String) -> void:
 	if _current_track == file_name and _music.playing:
 		return
-	_current_track = file_name
 	for dir_path in SFX_DIRS:
 		for ext in SFX_EXTS:
 			var p = "%s/%s%s" % [dir_path, file_name, ext]
 			if ResourceLoader.exists(p):
+				_current_track = file_name
 				_music.stream = load(p)
-				_music.volume_db = MUSIC_VOL_MENU
+				if _music.stream:
+					_music.stream.set_loop(true)
+				_music.volume_db = MUSIC_VOL
 				_music.play()
 				return
 
@@ -184,7 +196,24 @@ func play_sfx_with_options(name: String, volume_db: float = 0.0, pitch_min: floa
 					return
 
 func _free_sfx() -> AudioStreamPlayer:
+	# Try to find a free player in the pool
 	for p in _sfx_pool:
 		if not p.playing:
 			return p
-	return _sfx_pool[0]
+	
+	# If no free players, create a new one
+	var p = AudioStreamPlayer.new()
+	p.bus = "SFX"
+	p.pitch_scale = Engine.time_scale
+	add_child(p)
+	_sfx_pool.append(p)
+	
+	# Auto-cleanup: queue free after a reasonable max duration
+	var cleanup_timer = get_tree().create_timer(10.0, false)
+	cleanup_timer.timeout.connect(func():
+		if is_instance_valid(p):
+			p.queue_free()
+			_sfx_pool.erase(p)
+	)
+	
+	return p

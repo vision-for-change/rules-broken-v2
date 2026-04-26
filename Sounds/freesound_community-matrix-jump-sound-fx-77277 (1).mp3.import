@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cj4g3mix23jrq"
+path="res://.godot/imported/freesound_community-matrix-jump-sound-fx-77277 (1).mp3-4e2a355d2eecebc2fe8a41a005945655.mp3str"
+
+[deps]
+
+source_file="res://Sounds/freesound_community-matrix-jump-sound-fx-77277 (1).mp3"
+dest_files=["res://.godot/imported/freesound_community-matrix-jump-sound-fx-77277 (1).mp3-4e2a355d2eecebc2fe8a41a005945655.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

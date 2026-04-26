@@ -48,8 +48,6 @@ var _hack_super_vision := false
 var _hack_slow_time := false
 var _hack_noclip := false
 var _hack_unlimited_bullets := false
-var _hack_invisible := false
-var _hack_invincible := false
 var _ghost_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cd := 0.0
@@ -64,6 +62,7 @@ var damage := 10
 var max_ammo := 12
 var fire_rate := 0.3
 var health := 100
+var _invincible := false
 
 
 @onready var body_rect: ColorRect  = $BodyRect
@@ -252,7 +251,7 @@ func _on_interact_exit(body: Node) -> void:
 		hint_label.visible = false
 
 func take_damage(amount: int) -> void:
-	if not is_alive or _hack_invincible:
+	if not is_alive or _invincible:
 		return
 	health -= amount
 	EventBus.player_health_changed.emit(health, 100)
@@ -267,6 +266,9 @@ func heal(amount: int) -> void:
 	EventBus.player_health_changed.emit(health, 100)
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.15)
 
+func set_invincible(invincible: bool) -> void:
+	_invincible = invincible
+
 func _start_teleport_in_effect() -> void:
 	if is_instance_valid(player_sprite):
 		player_sprite.visible = false
@@ -280,6 +282,8 @@ func _play_teleport_in_effect() -> void:
 	var scene_root: Node = get_tree().current_scene
 	if scene_root == null:
 		return
+	
+	AudioManager.play_sfx("universfield-magic-teleport-whoosh")
 	
 	const TELEPORT_DIGIT_COUNT := 70
 	const TELEPORT_DURATION := 1.2
@@ -635,9 +639,7 @@ func set_hacked_client_modes(
 	super_vision_enabled: bool = false,
 	slow_time_enabled: bool = false,
 	noclip_enabled: bool = false,
-	unlimited_bullets_enabled: bool = false,
-	invisible_enabled: bool = false,
-	invincible_enabled: bool = false
+	unlimited_bullets_enabled: bool = false
 ) -> void:
 	_hack_super_speed = super_speed_enabled
 	_hack_faster_bullets = faster_bullets_enabled
@@ -645,8 +647,6 @@ func set_hacked_client_modes(
 	_hack_slow_time = slow_time_enabled
 	_hack_noclip = noclip_enabled
 	_hack_unlimited_bullets = unlimited_bullets_enabled
-	_hack_invisible = invisible_enabled
-	_hack_invincible = invincible_enabled
 	_apply_noclip_mode()
 	_apply_camera_modes()
 
@@ -657,9 +657,7 @@ func get_hacked_client_modes() -> Dictionary:
 		"super_vision": _hack_super_vision,
 		"slow_time": _hack_slow_time,
 		"noclip": _hack_noclip,
-		"unlimited_bullets": _hack_unlimited_bullets,
-		"invisible": _hack_invisible,
-		"invincible": _hack_invincible
+		"unlimited_bullets": _hack_unlimited_bullets
 	}
 
 func _apply_noclip_mode() -> void:

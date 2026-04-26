@@ -7,7 +7,7 @@ const LEVEL2_SCRIPT := preload("res://scenes/levels/Level2.gd")
 const MATRIX_COL_SPACING := 26.0
 const MATRIX_ROW_SPACING := 21.0
 const MATRIX_FONT_SIZE := 16
-const MATRIX_COLOR := Color(0.42, 1.0, 0.76, 0.62)
+const MATRIX_COLOR := Color(1.0, 1.0, 0.2, 0.62)
 const MINECRAFT_FONT := preload("res://Minecraft.ttf")
 
 func _ready() -> void:
@@ -57,6 +57,7 @@ func _create_matrix_background() -> void:
 		for row in range(rows):
 			var lbl = Label.new()
 			lbl.text = str(randi() % 2)
+			lbl.add_theme_font_override("font", MINECRAFT_FONT)
 			lbl.add_theme_font_size_override("font_size", MATRIX_FONT_SIZE)
 			lbl.add_theme_color_override("font_color", MATRIX_COLOR)
 			lbl.position = Vector2(x_pos, row * MATRIX_ROW_SPACING + randf_range(-6.0, 6.0))

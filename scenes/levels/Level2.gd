@@ -82,6 +82,7 @@ func _ready() -> void:
 	_generate_dungeon()
 	super._ready()
 	_play_level_intro()
+	_setup_level_music()
 
 func _generate_dungeon() -> void:
 	if _floor_index == 5:
@@ -552,7 +553,8 @@ func _spawn_obstacle(parent: Node2D, obstacle_cells: Rect2i) -> void:
 		(float(obstacle_cells.position.y) + float(obstacle_cells.size.y) * 0.5) * TILE_SIZE
 	)
 	body.collision_layer = 1
-	body.collision_mask = 0
+	body.collision_mask = 4
+	body.add_to_group("obstacle")
 	parent.add_child(body)
 
 	var shape := CollisionShape2D.new()
@@ -859,3 +861,7 @@ func _play_level_intro() -> void:
 	intro_tween.tween_callback(layer.queue_free)
 	
 	AudioManager.play_sfx("dragon-studio-simple-whoosh")
+
+func _setup_level_music() -> void:
+	if _floor_index % 5 != 0:
+		AudioManager.play_music_by_file("prime audio soup")
