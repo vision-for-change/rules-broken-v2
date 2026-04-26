@@ -110,10 +110,11 @@ func _configure_player_for_boss_fight(player: Node2D) -> void:
 		var inventory = player.get_node("Inventory")
 		if inventory != null:
 			if inventory.has_method("set_max_slots"):
-				inventory.call("set_max_slots", 4)
-			# Give them AK47 and Lightsaber if they don't have it, or just use what they have
+				# Restrict player to only the selected gun for the boss fight (no random guns)
+				inventory.call("set_max_slots", 1)
+			# Use only the currently selected gun as the boss fight loadout
 			var current_selected = PlayerState.selected_gun_id
-			var loadout: Array[String] = [current_selected, "ump", "ak47", "lightsaber"]
+			var loadout: Array[String] = [current_selected]
 			if inventory.has_method("set_loadout"):
 				inventory.call("set_loadout", loadout, current_selected)
 	
