@@ -45,14 +45,14 @@ InputSetup.gd::GDScript::5491190574897606774::1776976715::0::1::::<>Node<><>0<>0
 PlayerState.gd::GDScript::3767265385256186015::1777089832::0::1::::<>Node<><>0<>0<><>::
 RuleDefinitions.gd::GDScript::2604223371126349401::1776623917::0::1::::<>Node<><>0<>0<><>::
 RuleManager.gd::GDScript::8708556405985986970::1777217357::0::1::::<>Node<><>0<>0<><>::
-ScreenFX.gd::GDScript::1273802142910077051::1777237499::0::1::::<>Node<><>0<>0<><>::
+ScreenFX.gd::GDScript::1273802142910077051::1777237719::0::1::::<>Node<><>0<>0<><>::
 ::res://scenes/::1776718642
 ::res://scenes/enemy/::1777236641
 bugs.gd::GDScript::7785072835121590431::1777237326::0::1::::<>CharacterBody2D<><>0<>0<><>::
 bugs.tscn::PackedScene::45450356689119872::1777169524::0::1::::<><><>0<>0<><>::uid://di6faoc1am880::::res://scenes/enemy/bugs.gd<>uid://cf2lbhws1a23w::::res://assets/sprites/bug.webp
 chatgpt.gd::GDScript::5455526401810255034::1777152891::0::1::::<>CharacterBody2D<><>0<>0<><>::
 chatgpt.tscn::PackedScene::1529695930530629416::1776995249::0::1::::<><><>0<>0<><>::uid://b5jxbipohggeb::::res://assets/chatgpt.png<>uid://cjyxytr73hxe5::::res://scenes/enemy/chatgpt.gd
-EnemyLaser.gd::GDScript::8390610287867762802::1777088049::0::1::::<>Area2D<><>0<>0<><>::
+EnemyLaser.gd::GDScript::8390610287867762802::1777237733::0::1::::<>Area2D<><>0<>0<><>::
 EnemyLaser.tscn::PackedScene::1243795217775936088::1777077966::0::1::::<><><>0<>0<><>::uid://drsqeje6ij8nm::::res://scenes/enemy/EnemyLaser.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
 RogueAI.gd::GDScript::6447157350650578166::1777237318::0::1::::<>CharacterBody2D<><>0<>0<><>::
 RogueAI.tscn::PackedScene::1057536209973520::1777217357::0::1::::<><><>0<>0<><>::uid://cx4b0faf3efr7::::res://scenes/enemy/RogueAI.gd<>uid://b5jxbipohggeb::::res://assets/chatgpt.png
@@ -60,7 +60,7 @@ Snake.gd::GDScript::1371790092041211308::1777217357::0::1::::<>CharacterBody2D<>
 Snake.tscn::PackedScene::965516310352::1777075629::0::1::::<><><>0<>0<><>::uid://tsrgg333vbng::::res://scenes/enemy/Snake.gd<>uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
 TrojanHorse.gd::GDScript::540566633676242220::1777222253::0::1::::<>CharacterBody2D<><>0<>0<><>::
 TrojanHorse.tscn::PackedScene::34845017866840::1777087801::0::1::::<><><>0<>0<><>::res://scenes/enemy/TrojanHorse.gd<>uid://dtftca6p5bcuf::::res://assets/trojan_horse.webp
-worm.gd::GDScript::3041239432624138156::1777171064::0::1::::<>CharacterBody2D<><>0<>0<><>::
+worm.gd::GDScript::3041239432624138156::1777237749::0::1::::<>CharacterBody2D<><>0<>0<><>::
 worm.tscn::PackedScene::7063425510668276734::1777054665::0::1::::<><><>0<>0<><>::uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
 ::res://scenes/levels/::1777236641
 BaseLevel.gd::GDScript::8642037785361387650::1777169524::0::1::::<>Node2D<><>0<>0<><>::
@@ -68,7 +68,7 @@ BossInteractable.gd::GDScript::1961293717532816798::1776982172::0::1::::<>Static
 FloorDoor.gd::GDScript::5246231945155492596::1777222764::0::1::::<>StaticBody2D<><>0<>0<><>::
 Level2.gd::GDScript::7607752747024112223::1777229422::0::1::::<>Node2D<><>0<>0<><>::
 Level2.tscn::PackedScene::5445090935181075138::1777144697::0::1::::<><><>0<>0<><>::uid://dgnitueod5hgx::::res://scenes/levels/Level2.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://hud002::::res://scenes/ui/HUD.tscn
-LevelBoss.gd::GDScript::5291460112400036155::1777236641::0::1::::<>Node2D<><>0<>0<><>::
+LevelBoss.gd::GDScript::5291460112400036155::1777237996::0::1::::<>Node2D<><>0<>0<><>::
 LevelBoss.tscn::PackedScene::2190936384168707225::1777176003::0::1::::<><><>0<>0<><>::uid://chnhtswgyo7lv::::res://scenes/levels/LevelBoss.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://hud002::::res://scenes/ui/HUD.tscn
 TerrainPainter.gd::GDScript::-1::1776637101::0::1::::<>TileMapLayer<><>0<>1<><>::
 TutorialLevel.gd::GDScript::5622317928160350584::1777217357::0::1::::<>Node2D<><>0<>0<><>::
@@ -82,14 +82,14 @@ RuleSign.tscn::PackedScene::36328643679221529::1776623918::0::1::::<><><>0<>0<><
 Terminal.gd::GDScript::6477316491288515538::1776961429::0::1::::<>StaticBody2D<><>0<>0<><>::
 Terminal.tscn::PackedScene::39497047024344520::1776623918::0::1::::<><><>0<>0<><>::res://scenes/objects/Terminal.gd
 ::res://scenes/player/::1777227264
-Bullet.gd::GDScript::304173446287126993::1777217357::0::1::::<>Area2D<><>0<>0<><>::
+Bullet.gd::GDScript::304173446287126993::1777237743::0::1::::<>Area2D<><>0<>0<><>::
 Bullet.tscn::PackedScene::2853759667912::1777217357::0::1::::<><><>0<>0<><>::uid://ellxshattwdl::::res://scenes/player/Bullet.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
 Inventory.gd::GDScript::7107585837491994424::1777090419::0::1::::<>Node<><>0<>0<><>::
 Player.gd::GDScript::2752255572433044543::1777237297::0::1::::<>CharacterBody2D<><>0<>0<><>::
 Player.tscn::PackedScene::27365761918488::1777169524::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://5thoi1jvta6w::::res://assets/matrix_gun.webp<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp
-::res://scenes/ui/::1777237446
+::res://scenes/ui/::1777238075
 GameOver.gd::GDScript::2710332240927150708::1777169524::0::1::::<>Control<><>0<>0<><>::
-GameOver.tscn::PackedScene::8598048::1777237446::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
+GameOver.tscn::PackedScene::8598048::1777238075::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
 GunSelectScreen.gd::GDScript::2219271801746007615::1777169524::0::1::::<>Control<><>0<>0<><>::
 GunSelectScreen.tscn::PackedScene::6590246207249658088::1776952283::0::1::::<><><>0<>0<><>::uid://6vbc2gdlwsjf::::res://scenes/ui/GunSelectScreen.gd
 HUD.gd::GDScript::6494486643168512901::1777217357::0::1::::<>CanvasLayer<><>0<>0<><>::
@@ -101,7 +101,7 @@ MainMenu.tscn::PackedScene::16537456::1777217357::0::1::::<><><>0<>0<><>::uid://
 WeaponDisplay.gd::GDScript::3703560238313736494::1777152557::0::1::::<>Control<><>0<>0<><>::
 WinScreen.gd::GDScript::5275217465158032268::1777217358::0::1::::<>Control<><>0<>0<><>::
 WinScreen.tscn::PackedScene::30136640::1777216995::0::1::::<><><>0<>0<><>::uid://chfmcco467uqm::::res://scenes/ui/WinScreen.gd
-::res://Sounds/::1777237499
+::res://Sounds/::1777238272
 daviddumaisaudio-explosive-glass-shattering-09-190267.mp3::AudioStreamMP3::3216878900216825068::1777070454::1777070721::1::::<><><>0<>0<>3db6d978da2735af6828ee13b3de5a15<>res://.godot/imported/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3-282eb26f359c626b580b7ccf6a734875.mp3str::
 dragon-studio-cinematic-boom-454254.mp3::AudioStreamMP3::3576778643801580521::1776952283::1776952283::1::::<><><>0<>0<>95514746dacef3d77c4aa50700fe5a27<>res://.godot/imported/dragon-studio-cinematic-boom-454254.mp3-ac03a14a5af2c0deff3ab081f08a9a8d.mp3str::
 dragon-studio-simple-whoosh-382724.mp3::AudioStreamMP3::5581939247794425725::1777070454::1777070721::1::::<><><>0<>0<>01ed09a86c60ba24eee2e5907fb3b41c<>res://.godot/imported/dragon-studio-simple-whoosh-382724.mp3-c621b6f6d00772a76d1accbcd3b5ca37.mp3str::
@@ -113,6 +113,7 @@ Hive - Ultrasonic Sound (The Matrix).wav::AudioStreamWAV::2033030252096270177::1
 miraclei-sample_hover_subtle02_kofi_by_miraclei-364170.mp3::AudioStreamMP3::7218461726393214537::1777070454::1777070721::1::::<><><>0<>0<>88c1cfbd1044404debbe067c3f9b8c84<>res://.godot/imported/miraclei-sample_hover_subtle02_kofi_by_miraclei-364170.mp3-e34628c6339bca494765646171130331.mp3str::
 miraclei-sample_hover_subtle04_kofi_by_miraclei-364171.mp3::AudioStreamMP3::7473192517678795951::1777070454::1777070721::1::::<><><>0<>0<>b215d1290999ad83248a0e49591477f2<>res://.godot/imported/miraclei-sample_hover_subtle04_kofi_by_miraclei-364171.mp3-b775543e23113403f7990fb040196076.mp3str::
 Prime Audio Soup.mp3::AudioStreamMP3::2795575992469768364::1777217357::1777217398::1::::<><><>0<>0<>21951ea931ff4d531b5fee7963efb7cc<>res://.godot/imported/Prime Audio Soup.mp3-94e85aca8e4e685b1886784fa6daec69.mp3str::
+TelephoneRinging.mp3::AudioStreamMP3::284486980900242831::1777238247::1777238295::1::::<><><>0<>0<>c011a5e230aa24aeb00b395cac5af99a<>res://.godot/imported/TelephoneRinging.mp3-f3afbd57e92044bde8c8508f559bd4cd.mp3str::
 universfield-gunshot-352466.mp3::AudioStreamMP3::3187677771842417873::1776952283::1776952283::1::::<><><>0<>0<>0c7c2ceb0659490dfffa98ade2814dda<>res://.godot/imported/universfield-gunshot-352466.mp3-53d8233b23b286923acbc1df71531269.mp3str::
 universfield-magic-teleport-whoosh-352764.mp3::AudioStreamMP3::1971185606324251151::1777217357::1777217398::1::::<><><>0<>0<>2a8edb59416487b76aad05f6f2f17de7<>res://.godot/imported/universfield-magic-teleport-whoosh-352764.mp3-0cbed16a38cd7092aef88c3c991317b6.mp3str::
 ::res://themes/::1777152303

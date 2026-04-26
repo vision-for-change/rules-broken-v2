@@ -40,6 +40,7 @@ var _enemy_counter_label: Label = null
 var _boss_loadout_root: PanelContainer = null
 var _boss_loadout_slots: Array = []
 var _is_boss_encounter := false
+var _telephone_alert_played := false
 var _hack_key_map := {
 	"1": "super_speed",
 	"2": "faster_bullets",
@@ -700,6 +701,7 @@ func _count_total_enemies() -> void:
 		_total_enemies = enemies.size()
 
 func _count_and_create_enemy_counter() -> void:
+	_telephone_alert_played = false
 	await _count_total_enemies()
 	_create_enemy_counter_label()
 
@@ -718,6 +720,11 @@ func _create_enemy_counter_label() -> void:
 func _on_enemy_defeated(_enemy_id: String) -> void:
 	_enemies_defeated += 1
 	_update_enemy_counter_display()
+	# If we've met the target and haven't yet notified, play the phone ring
+	var status := _get_enemy_kill_status()
+	if bool(status.get("met", false)) and not _telephone_alert_played:
+		_telephone_alert_played = true
+		AudioManager.play_sfx("TelephoneRinging")
 
 func _update_enemy_counter_display() -> void:
 	if _enemy_counter_label != null:
