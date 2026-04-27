@@ -10,7 +10,7 @@ extends CharacterBody2D
 @export var hit_flash_color := Color(1.0, 0.3, 0.3, 1.0)
 const LASER_SCENE := preload("res://scenes/enemy/EnemyLaser.tscn")
 const GHOST_INTERVAL := 0.045
-const GHOST_LIFETIME := 0.16
+const GHOST_LIFETIME := 0.4
 const GHOST_COLOR := Color(0.45, 1.0, 0.65, 0.32)
 const SHARD_COUNT := 8
 const SHATTER_DURATION := 0.22
@@ -39,11 +39,18 @@ func _ready() -> void:
 		{"integrity_contribution": -0.03}
 	)
 
+func trigger_particles():
+	var p = $GPUParticles2D.duplicate()
+	add_child(p)
+	p.global_position = $GPUParticles2D.global_position
+	p.emitting = true
+	p.restart()
+	await get_tree().create_timer(p.lifetime).timeout
+	p.queue_free()
+
 func take_damage(amount: int) -> bool:
 	$AudioStreamPlayer2D.play()
 	$AnimationPlayer.play("hit")
-	$GPUParticles2D.restart()
-	$GPUParticles2D.emitting = true
 	if _defeated:
 		return false
 	var final_damage: int = maxi(1, amount)
@@ -51,6 +58,7 @@ func take_damage(amount: int) -> bool:
 	_update_health_bar()
 	_play_hit_flash()
 	if _health > 0:
+		trigger_particles()
 		return false
 	AudioManager.play_sfx_with_volume("freesound_community-glass-shatter", 0)
 	shatter()

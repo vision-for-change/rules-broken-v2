@@ -241,8 +241,14 @@ func _shoot() -> void:
 		bullet.set_damage(damage)
 	AudioManager.play_sfx("universfield-gunshot")
 	$AnimationPlayer.play("shoot")
-	$Sprite2D/GPUParticles2D.restart()
-	$Sprite2D/GPUParticles2D.emitting = true
+	var p = $Sprite2D/GPUParticles2D.duplicate()
+	$Sprite2D.add_child(p)
+	p.global_position = $Sprite2D/GPUParticles2D.global_position
+	p.emitting = true
+	p.restart()
+	await get_tree().create_timer(p.lifetime).timeout
+	p.queue_free()
+	
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
 
 func _do_interact() -> void:

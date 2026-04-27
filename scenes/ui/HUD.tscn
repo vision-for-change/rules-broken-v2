@@ -303,7 +303,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_panel")
 
 [node name="Accent" type="ColorRect" parent="WeaponDisplay/Panel" unique_id=420524691]
 layout_mode = 2
-color = Color(0.17029431, 0.733232, 0, 1)
+color = Color(0.101960786, 0.9490196, 0.34901962, 1)
 
 [node name="Margin" type="MarginContainer" parent="WeaponDisplay/Panel" unique_id=345884376]
 layout_mode = 2

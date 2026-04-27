@@ -3,6 +3,9 @@
 [ext_resource type="Script" uid="uid://cmdq0wupyhvlw" path="res://scenes/levels/TutorialLevel.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="2_ehuit"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="3_5mrt3"]
+[ext_resource type="Texture2D" uid="uid://bmkl6ubtc332i" path="res://assets/morpheus.webp" id="4_rwowx"]
+[ext_resource type="Theme" path="res://themes/default_theme.tres" id="5_hu44a"]
+[ext_resource type="FontFile" uid="uid://22ew4q7c4l5v" path="res://Minecraft.ttf" id="6_hu44a"]
 
 [node name="tutorial" type="Node2D" unique_id=414355170]
 texture_filter = 1
@@ -21,3 +24,120 @@ color = Color(0.04, 0.05, 0.08, 1)
 position = Vector2(100, 100)
 
 [node name="Walls" type="Node2D" parent="." unique_id=1661736344]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=760848308]
+layer = 100
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer" unique_id=1073452036]
+position = Vector2(863.37506, 540.59375)
+scale = Vector2(4.34961, 4.2685547)
+texture = ExtResource("4_rwowx")
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=1791407797]
+visible = false
+anchors_preset = -1
+anchor_right = 0.3012153
+anchor_bottom = 0.06944445
+offset_left = 782.0
+offset_top = 484.0
+offset_right = 782.0
+offset_bottom = 484.0
+theme = ExtResource("5_hu44a")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+text = "Use WASD or Arrow Keys to move"
+metadata/_edit_use_anchors_ = true
+
+[node name="Label2" type="Label" parent="CanvasLayer" unique_id=1563921922]
+visible = false
+anchors_preset = -1
+anchor_right = 0.2925347
+anchor_bottom = 0.06944445
+offset_left = 782.0
+offset_top = 484.0
+offset_right = 782.0
+offset_bottom = 484.0
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("6_hu44a")
+text = "Point and shoot using mouse button to kill the bug"
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="Label3" type="Label" parent="CanvasLayer" unique_id=2005236092]
+visible = false
+anchors_preset = -1
+anchor_right = 0.2925347
+anchor_bottom = 0.06944445
+offset_left = 782.0
+offset_top = 484.0
+offset_right = 782.0
+offset_bottom = 484.0
+theme = ExtResource("5_hu44a")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("6_hu44a")
+text = "Use the hacked client to activate \"Super Speed\" and dash into the worm to kill it"
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="Label4" type="Label" parent="CanvasLayer" unique_id=240037118]
+visible = false
+anchors_preset = -1
+anchor_right = 0.2925347
+anchor_bottom = 0.06944445
+offset_left = 782.0
+offset_top = 484.0
+offset_right = 782.0
+offset_bottom = 484.0
+theme = ExtResource("5_hu44a")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("6_hu44a")
+text = "Try out the rest of the hacks to see what they do"
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="Label5" type="Label" parent="CanvasLayer" unique_id=1905233253]
+visible = false
+anchors_preset = -1
+anchor_right = 0.2925347
+anchor_bottom = 0.06944445
+offset_left = 782.0
+offset_top = 484.0
+offset_right = 782.0
+offset_bottom = 484.0
+theme = ExtResource("5_hu44a")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("6_hu44a")
+text = "You are ready to go"
+autowrap_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="Label6" type="Label" parent="CanvasLayer" unique_id=1353729510]
+anchors_preset = -1
+anchor_right = 0.07899305
+anchor_bottom = 0.030864198
+offset_left = 623.0
+offset_top = 599.0
+offset_right = 623.0
+offset_bottom = 599.0
+theme = ExtResource("5_hu44a")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0.101960786, 0.9490196, 0.34901962, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("6_hu44a")
+text = "Morpheus"
+metadata/_edit_use_anchors_ = true
