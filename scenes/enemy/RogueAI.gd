@@ -5,8 +5,8 @@ signal shield_restored
 signal defeated
 
 @export var move_speed := 50.0
-@export var duplication_rate := 6.0
-@export var fire_rate := 1.05
+@export var duplication_rate := 4.0
+@export var fire_rate := 0.9
 @export var max_health := 420
 @export var vulnerable_duration := 8.5
 
@@ -64,7 +64,7 @@ func _ready() -> void:
 	
 	var tier_mult := float(floor_idx) / 5.0
 	if _is_clone:
-		max_health = 40
+		max_health = int(200.0 * tier_mult)
 	else:
 		max_health = int(1500.0 * tier_mult)
 	move_speed = 50.0
