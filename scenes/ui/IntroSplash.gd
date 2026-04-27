@@ -189,12 +189,12 @@ func _play_intro_sequence() -> void:
 	)
 	_intro_tween.tween_interval(0.4)
 	_intro_tween.tween_callback(func():
-		_subtitle.text = "BOOT SEQUENCE // BREACH LINK ESTABLISHED"
+		_subtitle.text = "Coding done by George and Nimansh"
 		_subtitle.modulate.a = 1.0
 	)
 	_intro_tween.tween_interval(1.6)
 	_intro_tween.tween_callback(func():
-		_status.text = "SYNCING INTERFACE"
+		_status.text = "Art done by Bryan and Delisha"
 		_status.modulate.a = 1.0
 		_start_scanline_sweep()
 		# start the player/enemy demo shortly after sync, slower

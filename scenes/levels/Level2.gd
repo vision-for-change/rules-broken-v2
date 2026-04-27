@@ -146,7 +146,7 @@ func _make_filled_grid() -> Array:
 	for y in range(GRID_H):
 		var row: Array = []
 		row.resize(GRID_W)
-		row.fill(true) # true = wall, false = floor
+		row.fill(true)
 		grid.append(row)
 	return grid
 
@@ -159,13 +159,13 @@ func _make_candidate_room(anchor: Rect2i) -> Rect2i:
 	var ny := center.y - int(room_h / 2)
 
 	match _rng.randi_range(0, 3):
-		0: # Right
+		0:
 			nx = anchor.position.x + anchor.size.x + corridor
-		1: # Left
+		1:
 			nx = anchor.position.x - corridor - room_w
-		2: # Down
+		2:
 			ny = anchor.position.y + anchor.size.y + corridor
-		3: # Up
+		3:
 			ny = anchor.position.y - corridor - room_h
 
 	return Rect2i(nx, ny, room_w, room_h)
@@ -229,6 +229,26 @@ func _add_extra_corridors(grid: Array, rooms: Array[Rect2i]) -> void:
 			continue
 		_carve_corridor(grid, _room_center(rooms[a_idx]), _room_center(rooms[b_idx]))
 
+# ─── Light Occluder Helper ───────────────────────────────────────────────────
+
+func _add_light_occluder(parent: Node2D, width: float, height: float) -> void:
+	var occluder_node := LightOccluder2D.new()
+	var polygon := OccluderPolygon2D.new()
+	var hw := width * 0.5
+	var hh := height * 0.5
+	polygon.polygon = PackedVector2Array([
+		Vector2(-hw, -hh),
+		Vector2( hw, -hh),
+		Vector2( hw,  hh),
+		Vector2(-hw,  hh)
+	])
+	polygon.closed = true
+	occluder_node.occluder = polygon
+	occluder_node.occluder_light_mask = 1
+	parent.add_child(occluder_node)
+
+# ─── Wall Building ───────────────────────────────────────────────────────────
+
 func _build_walls(grid: Array) -> void:
 	var walls := $Walls
 	for c in walls.get_children():
@@ -272,6 +292,8 @@ func _spawn_wall_span(parent: Node, start_x: int, end_x: int, cell_y: int) -> vo
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
 
+	_add_light_occluder(body, span_w, TILE_SIZE)
+
 func _spawn_vertical_wall_span(parent: Node, cell_x: int, start_y: int, end_y: int) -> void:
 	var tile_count := end_y - start_y + 1
 	var span_h := float(tile_count) * TILE_SIZE
@@ -297,13 +319,14 @@ func _spawn_vertical_wall_span(parent: Node, cell_x: int, start_y: int, end_y: i
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
 
+	_add_light_occluder(body, TILE_SIZE, span_h)
+
 func _spawn_outer_boundary_walls(parent: Node) -> void:
-	# Add thick outer walls so camera space outside the dungeon still shows map walls.
 	var t := OUTER_WALL_THICKNESS_TILES
-	_spawn_outer_wall_band(parent, Rect2i(-t, -t, GRID_W + t * 2, t)) # top
-	_spawn_outer_wall_band(parent, Rect2i(-t, GRID_H, GRID_W + t * 2, t)) # bottom
-	_spawn_outer_wall_band(parent, Rect2i(-t, 0, t, GRID_H)) # left
-	_spawn_outer_wall_band(parent, Rect2i(GRID_W, 0, t, GRID_H)) # right
+	_spawn_outer_wall_band(parent, Rect2i(-t, -t, GRID_W + t * 2, t))
+	_spawn_outer_wall_band(parent, Rect2i(-t, GRID_H, GRID_W + t * 2, t))
+	_spawn_outer_wall_band(parent, Rect2i(-t, 0, t, GRID_H))
+	_spawn_outer_wall_band(parent, Rect2i(GRID_W, 0, t, GRID_H))
 
 func _spawn_outer_wall_band(parent: Node, cells: Rect2i) -> void:
 	var body := StaticBody2D.new()
@@ -333,12 +356,16 @@ func _spawn_outer_wall_band(parent: Node, cells: Rect2i) -> void:
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
 
+	_add_light_occluder(body, w, h)
+
 func _resize_background() -> void:
 	var bg := get_node_or_null("Background") as ColorRect
 	if bg == null:
 		return
 	bg.offset_right = GRID_W * TILE_SIZE
 	bg.offset_bottom = GRID_H * TILE_SIZE
+
+# ─── Floor Population ────────────────────────────────────────────────────────
 
 func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	var enemy_root := _get_or_create_container("Enemies")
@@ -359,8 +386,6 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		_door_room = door_room
 		_interactable_root_ref = interactable_root
 		_current_kill_requirement = int(get_enemy_kill_requirement())
-		
-		# ALWAYS SPAWN TELEPHONE AT START
 		_spawn_floor_door(interactable_root, door_room)
 		_exit_spawned = true
 	else:
@@ -370,22 +395,18 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 		_exit_spawned = false
 
 	for room in rooms:
-		# Keep both the spawn room and floor door room clear.
 		if not is_floor_five and room != main_room and room != door_room:
 			_spawn_room_obstacles(obstacle_root, room)
 		if not is_floor_five and room != main_room:
 			match _floor_index:
 				1:
-					# Level 1: Only bugs
 					_spawn_room_bugs(enemy_root, room)
 				2:
-					# Level 2: Bugs + Snakes
 					if _rng.randf() > 0.4:
 						_spawn_room_bugs(enemy_root, room)
 					else:
 						_spawn_room_snakes(enemy_root, room)
 				3:
-					# Level 3: Bugs + Snakes + Trojans
 					var r := _rng.randf()
 					if r > 0.6:
 						_spawn_room_bugs(enemy_root, room)
@@ -394,14 +415,13 @@ func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 					else:
 						_spawn_room_trojans(enemy_root, room)
 				4:
-					# Level 4: Level 3 + higher intensity
 					var r := _rng.randf()
 					if r > 0.6:
-						_spawn_room_bugs(enemy_root, room, 2.5) # 2.5x more bugs
+						_spawn_room_bugs(enemy_root, room, 2.5)
 					elif r > 0.3:
-						_spawn_room_snakes(enemy_root, room, 2.0) # 2x more snakes
+						_spawn_room_snakes(enemy_root, room, 2.0)
 					else:
-						_spawn_room_trojans(enemy_root, room, 2.0) # 2x more trojans
+						_spawn_room_trojans(enemy_root, room, 2.0)
 				_:
 					var endless_mult := _get_endless_enemy_multiplier()
 					var r := _rng.randf()
@@ -491,6 +511,8 @@ func _pick_farthest_room(main_room: Rect2i, rooms: Array[Rect2i]) -> Rect2i:
 			farthest = room
 	return farthest
 
+# ─── Interactables ───────────────────────────────────────────────────────────
+
 func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 	var door := StaticBody2D.new()
 	door.name = "SystemTelephone"
@@ -508,20 +530,20 @@ func _spawn_floor_door(parent: Node2D, room: Rect2i) -> void:
 
 	var sprite := Sprite2D.new()
 	sprite.name = "Sprite2D"
-	sprite.scale = Vector2(2.0, 2.0) # Make it smaller
+	sprite.scale = Vector2(2.0, 2.0)
 	door.add_child(sprite)
 
 	parent.add_child(door)
 
-	
 	if door.has_signal("door_used"):
 		door.connect("door_used", Callable(self, "_on_floor_door_used"))
-	
-	# Force initial check
+
 	if door.has_method("_update_visuals"):
 		door.call("_update_visuals")
-	
+
 	EventBus.log("SYSTEM TELEPHONE LOCATED // CLEAR TARGETS TO ANSWER", "info")
+
+# ─── Obstacles ───────────────────────────────────────────────────────────────
 
 func _spawn_room_obstacles(parent: Node2D, room: Rect2i) -> void:
 	var obstacle_count := _rng.randi_range(MIN_OBSTACLES_PER_ROOM, MAX_OBSTACLES_PER_ROOM)
@@ -567,6 +589,10 @@ func _spawn_obstacle(parent: Node2D, obstacle_cells: Rect2i) -> void:
 	block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	body.add_child(block)
 
+	_add_light_occluder(body, w, h)
+
+# ─── Enemy Spawning ──────────────────────────────────────────────────────────
+
 func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
 	var base_count := _rng.randi_range(MIN_BUGS_PER_ROOM, MAX_BUGS_PER_ROOM)
 	var bug_count := int(base_count * count_mult)
@@ -577,7 +603,6 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> 
 		_bug_spawn_index += 1
 		bug.set("entity_id", "bug_floor_%d_%d" % [_floor_index, _bug_spawn_index])
 		bug.position = _cell_to_world(_random_cell_in_room(room, 3))
-		# Higher floors increase speed.
 		if _floor_index >= 4:
 			var current_speed = bug.get("move_speed")
 			if current_speed == null: current_speed = 140.0
@@ -586,7 +611,7 @@ func _spawn_room_bugs(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> 
 
 func _spawn_room_snakes(parent: Node2D, room: Rect2i, count_mult: float = 1.0) -> void:
 	var base_count := _rng.randi_range(1, 2)
-	var count := int(base_count * count_mult) 
+	var count := int(base_count * count_mult)
 	for i in range(count):
 		var snake := SNAKE_SCENE.instantiate()
 		if snake == null:
@@ -640,6 +665,8 @@ func _random_cell_in_room(room: Rect2i, margin: int = 1) -> Vector2i:
 		min_y = room.position.y
 		max_y = room.end.y - 1
 	return Vector2i(_rng.randi_range(min_x, max_x), _rng.randi_range(min_y, max_y))
+
+# ─── Floor Five ──────────────────────────────────────────────────────────────
 
 func _spawn_floor_five_boss(parent: Node2D, big_room: Rect2i) -> void:
 	var boss := CHATGPT_BOSS_SCENE.instantiate() as Node2D
@@ -720,30 +747,27 @@ func _play_floor_five_boss_cutscene(player: Node2D) -> void:
 	camera.position_smoothing_enabled = original_smoothing
 	if can_restore_player_physics:
 		player.set_physics_process(true)
-	
+
 	_camera_at_player = camera
 	_player_for_death_cam = player
+
+# ─── Transitions & Events ────────────────────────────────────────────────────
 
 func _on_floor_door_used() -> void:
 	if _transitioning:
 		return
 	_transitioning = true
-
 	_advance_requested = true
 	var next_floor = _floor_index + 1
-
 	await _play_exit_transition()
-
 	if next_floor % 5 == 0:
-		# It's a boss floor
 		ScreenFX.transition_to_scene("res://scenes/levels/LevelBoss.tscn")
 	else:
-		# Regular floor
 		ScreenFX.transition_to_scene("res://scenes/levels/Level2.tscn")
+
 func _on_enemy_defeated_for_exit(_enemy_id: String) -> void:
 	if _floor_index >= 5:
 		return
-	# Redundant door spawning removed as SystemTelephone is now present from start.
 	pass
 
 func _on_chatgpt_death() -> void:
@@ -756,29 +780,31 @@ func _on_chatgpt_death() -> void:
 func _on_chatgpt_shatter() -> void:
 	if _player_for_death_cam == null or _camera_at_player == null:
 		return
-	
+
 	var camera := _camera_at_player
 	var boss_focus := _floor_five_boss.global_position if is_instance_valid(_floor_five_boss) else _player_for_death_cam.global_position
-	
+
 	camera.position_smoothing_enabled = false
 	camera.reparent(self, true)
-	
+
 	var zoom_in_tween := create_tween()
 	zoom_in_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	zoom_in_tween.tween_property(camera, "global_position", boss_focus, 0.5)
 	zoom_in_tween.parallel().tween_property(camera, "zoom", Vector2(0.6, 0.6), 0.5)
 	await zoom_in_tween.finished
-	
+
 	await get_tree().create_timer(0.3).timeout
-	
+
 	var zoom_out_tween := create_tween()
 	zoom_out_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	zoom_out_tween.tween_property(camera, "zoom", Vector2(0.3, 0.3), 1.2)
 
+# ─── UI ──────────────────────────────────────────────────────────────────────
+
 func _play_level_intro() -> void:
 	var intro_text := ""
 	var intro_subtext := ""
-	
+
 	match _floor_index:
 		1:
 			intro_text = "NEW ENEMY: BUG"
@@ -798,18 +824,17 @@ func _play_level_intro() -> void:
 		_:
 			return
 
-	# Create a temporary UI for intro
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	add_child(layer)
-	
+
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(center)
-	
+
 	var vbox := VBoxContainer.new()
 	center.add_child(vbox)
-	
+
 	var main_label := Label.new()
 	main_label.text = intro_text
 	main_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
@@ -817,7 +842,7 @@ func _play_level_intro() -> void:
 	main_label.add_theme_color_override("font_color", Color(0.2, 1.0, 0.5))
 	main_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(main_label)
-	
+
 	var sub_label := Label.new()
 	sub_label.text = intro_subtext
 	sub_label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
@@ -825,23 +850,22 @@ func _play_level_intro() -> void:
 	sub_label.add_theme_color_override("font_color", Color(0.4, 0.8, 0.6))
 	sub_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(sub_label)
-	
-	# Animation
+
 	main_label.modulate.a = 0.0
 	sub_label.modulate.a = 0.0
 	center.scale = Vector2(0.8, 0.8)
 	center.pivot_offset = get_viewport_rect().size / 2.0
-	
+
 	var intro_tween := create_tween()
-	intro_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) # Play even if paused
-	intro_tween.tween_interval(2.5) # Wait for player teleport animation
+	intro_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	intro_tween.tween_interval(2.5)
 	intro_tween.tween_property(main_label, "modulate:a", 1.0, 0.5)
 	intro_tween.parallel().tween_property(center, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	intro_tween.tween_property(sub_label, "modulate:a", 1.0, 0.5)
 	intro_tween.tween_interval(2.0)
 	intro_tween.tween_property(vbox, "modulate:a", 0.0, 0.8)
 	intro_tween.tween_callback(layer.queue_free)
-	
+
 	AudioManager.play_sfx("dragon-studio-simple-whoosh")
 
 func _setup_level_music() -> void:

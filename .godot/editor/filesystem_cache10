@@ -1,13 +1,13 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1777246261
-default_bus_layout.tres::AudioBusLayout::-1::1776630741::0::1::::<><><>0<>0<><>::
+::res://::1777255206
+default_bus_layout.tres::AudioBusLayout::4282516437312426729::1777255206::0::1::::<><><>0<>0<><>::
 Dungeon_Tileset.png::CompressedTexture2D::2656631835447733967::1776635794::1776635795::1::::<><><>0<>0<>1a3bd291b5ebfdd008ca87fc3263330e<>res://.godot/imported/Dungeon_Tileset.png-5bddb36c069ab266c123a680ead86ce1.ctex::
 icon.svg::CompressedTexture2D::5192295678797677150::1776630741::1776649449::1::::<><><>0<>0<>95d930c2143d9845d8b048fb7618f878<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 Minecraft.ttf::FontFile::1951120682375246533::1777150997::1777150998::1::::<><><>0<>0<>12b29368983de045e457d4d33bd3a112<>res://.godot/imported/Minecraft.ttf-b4cc597ac42d1410cc55dc192f0c0e34.fontdata::
 music.gd::GDScript::1279461210233692128::1777228841::0::1::::<>Node2D<><>0<>0<><>::
 music.tscn::PackedScene::2302128985195660429::1777227960::0::1::::<><><>0<>0<><>::uid://sh1slk0uyudk::::res://music.gd
 README.md::TextFile::-1::1776707592::0::1::::<><><>0<>0<><>::
-tutorial.tscn::PackedScene::6368201502900706217::1777246261::0::1::::<><><>0<>0<><>::uid://cmdq0wupyhvlw::::res://scenes/levels/TutorialLevel.gd<>uid://hud002::::res://scenes/ui/HUD.tscn<>uid://player001::::res://scenes/player/Player.tscn
+tutorial.tscn::PackedScene::6368201502900706217::1777254374::0::1::::<><><>0<>0<><>::uid://cmdq0wupyhvlw::::res://scenes/levels/TutorialLevel.gd<>uid://hud002::::res://scenes/ui/HUD.tscn<>uid://player001::::res://scenes/player/Player.tscn
 ::res://assets/::1777244491
 addmorpheus.png::CompressedTexture2D::1095267565280434868::1777244443::1777244491::1::::<><><>0<>0<>4af3841e8e6143c47391b1f00f45c8d4<>res://.godot/imported/addmorpheus.png-09dc466db97cfcf126d3c15c89ebd641.ctex::
 bullet.webp::CompressedTexture2D::8561439898735283185::1776698154::1776698154::1::::<><><>0<>0<>f84cfa6460ac8a4887df6c41be120ec0<>res://.godot/imported/bullet.webp-b60c1397b07773253e6a330feb966c2e.ctex::
@@ -21,9 +21,11 @@ TelephoneUp.webp::CompressedTexture2D::4242728648179670248::1777225890::17772259
 trojan_horse.webp::CompressedTexture2D::8504329212033190589::1777076051::1777076055::1::::<><><>0<>0<>3665287945ab705655334fc9a5692c8e<>res://.godot/imported/trojan_horse.webp-b3fe0188f920ea22f2df551ae53958ee.ctex::
 UMP.webp::CompressedTexture2D::3902296875884929521::1777126503::1777126529::1::::<><><>0<>0<>323575dbd83ca3a40debd7b668c4a15f<>res://.godot/imported/UMP.webp-c14badaf868d73edf0ac7a3ac982176e.ctex::
 Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png::CompressedTexture2D::1612181789121899957::1777225890::1777225914::1::::<><><>0<>0<>802f1b3503f226699033197582a28363<>res://.godot/imported/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png-60478e552eb8a881e419b40f32914bea.ctex::
-::res://assets/sprites/::1777152941
+::res://assets/sprites/::1777256011
+65bd3cd054af5c81b917a77e_Green Gradient Image (1).png::CompressedTexture2D::4470294031886174710::1777254117::1777254117::1::::<><><>0<>0<>178c8823a5ce9602756a489a97f2d8ba<>res://.godot/imported/65bd3cd054af5c81b917a77e_Green Gradient Image (1).png-efa958edb7745d5d7b0b2102e98ad9c7.ctex::
 Assault rifle.png::CompressedTexture2D::6179233912457772487::1776874205::1776874246::1::::<><><>0<>0<>af82cf6e05313386966c652f350933d6<>res://.godot/imported/Assault rifle.png-b4a618c726c21f54bdbc4b4e9a6d5e89.ctex::
 bug.webp::CompressedTexture2D::5180193860152076698::1776720696::1776720690::1::::<><><>0<>0<>bd2e95bb3a53b06e4e950e93ffbafcb1<>res://.godot/imported/bug.webp-880176d2de63e747bc2a45214865fd3f.ctex::
+costume3.svg::CompressedTexture2D::6985241193449548396::1777256010::1777256011::1::::<><><>0<>0<>edce7d5cd99400a5b85242cc7837b745<>res://.godot/imported/costume3.svg-f8a749e4ec4efb437e1aa9975887fb2e.ctex::
 EndScreen.jpg::CompressedTexture2D::6932970789014842484::1776963842::1776963875::1::::<><><>0<>0<>1e09426792d4cf3bd63c7b43f13bd025<>res://.godot/imported/EndScreen.jpg-45076807601e99a5b0b7b9b1483e62b4.ctex::
 gettyimages-1328389388.jpg::CompressedTexture2D::6278864996453259840::1776894942::1776894943::1::::<><><>0<>0<>6112a6cba3c97274ddc1b06f0d531f73<>res://.godot/imported/gettyimages-1328389388.jpg-cec4c13a9b89901ce274c338e7cf3609.ctex::
 image-removebg-preview.png::CompressedTexture2D::4933761959929705014::1776874205::1776874246::1::::<><><>0<>0<>3e502378ad4fb65957a1e272ed7b9a7d<>res://.godot/imported/image-removebg-preview.png-c451706255ef9ab5bf8d6d39aa837cb8.ctex::
@@ -33,6 +35,7 @@ Pistol-removebg-preview (1).png::CompressedTexture2D::2067981405200506215::17768
 pixilart-sprite.webp::CompressedTexture2D::864569804124181081::1777068168::1777068168::1::::<><><>0<>0<>98ba20280412b81d89c900191f3e7352<>res://.godot/imported/pixilart-sprite.webp-1f2d59ad04ee9acd0b582c5057e3685e.ctex::
 Player.webp::CompressedTexture2D::1528239566783033741::1776874205::1776874246::1::::<><><>0<>0<>ba50dc1be5733de556ec39ef3451340b<>res://.godot/imported/Player.webp-4511bab7b16b9afdfd029020df6458a3.ctex::
 PUT_KENNEY_SPRITES_HERE.txt::TextFile::-1::1776630741::0::1::::<><><>0<>0<><>::
+R (1).jpg::CompressedTexture2D::1261604743325566203::1777253293::1777253293::1::::<><><>0<>0<>6746f385ca12f36021fec4c1251e5d95<>res://.godot/imported/R (1).jpg-e5d42a110f982c30537ad6dd8d874f51.ctex::
 slash.webp::CompressedTexture2D::2154085675200736670::1777152941::1777152941::1::::<><><>0<>0<>fc89cfa0c6346a2bc88fd3e9059a1a47<>res://.godot/imported/slash.webp-aae4499e59f956464564c5f75b6e17b3.ctex::
 snake_segment.webp::CompressedTexture2D::4503152989202493278::1776964869::1776964870::1::::<><><>0<>0<>23f6dd8b91e3f3dac2abcc389ad2d15f<>res://.godot/imported/snake_segment.webp-a2fb2a6c13de94a50f7fb9d77649adf1.ctex::
 system_breach.webp::CompressedTexture2D::5062427785461709038::1777053966::1777053967::1::::<><><>0<>0<>6fda37fa018b74b039497de9454a720e<>res://.godot/imported/system_breach.webp-fa0c7db927d24156a8efaf27a4ea19fd.ctex::
@@ -49,9 +52,9 @@ RuleDefinitions.gd::GDScript::2604223371126349401::1776630741::0::1::::<>Node<><
 RuleManager.gd::GDScript::8708556405985986970::1777210515::0::1::::<>Node<><>0<>0<><>::
 ScreenFX.gd::GDScript::1273802142910077051::1777237886::0::1::::<>Node<><>0<>0<><>::
 ::res://scenes/::1776630741
-::res://scenes/enemy/::1777246880
-bugs.gd::GDScript::7785072835121590431::1777208943::0::1::::<>CharacterBody2D<><>0<>0<><>::
-bugs.tscn::PackedScene::45450356689119872::1777166699::0::1::::<><><>0<>0<><>::uid://di6faoc1am880::::res://scenes/enemy/bugs.gd<>uid://cf2lbhws1a23w::::res://assets/sprites/bug.webp
+::res://scenes/enemy/::1777257389
+bugs.gd::GDScript::7785072835121590431::1777257389::0::1::::<>CharacterBody2D<><>0<>0<><>::
+bugs.tscn::PackedScene::45450356689119872::1777256527::0::1::::<><><>0<>0<><>::uid://di6faoc1am880::::res://scenes/enemy/bugs.gd<>uid://c6rx5wui55fw3::::res://assets/sprites/costume3.svg<>uid://cf2lbhws1a23w::::res://assets/sprites/bug.webp
 chatgpt.gd::GDScript::5455526401810255034::1777153489::0::1::::<>CharacterBody2D<><>0<>0<><>::
 chatgpt.tscn::PackedScene::1529695930530629416::1777042362::0::1::::<><><>0<>0<><>::uid://b5jxbipohggeb::::res://assets/chatgpt.png<>uid://cjyxytr73hxe5::::res://scenes/enemy/chatgpt.gd
 EnemyLaser.gd::GDScript::8390610287867762802::1777237886::0::1::::<>Area2D<><>0<>0<><>::
@@ -59,17 +62,17 @@ EnemyLaser.tscn::PackedScene::1243795217775936088::1777077570::0::1::::<><><>0<>
 RogueAI.gd::GDScript::6447157350650578166::1777229651::0::1::::<>CharacterBody2D<><>0<>0<><>::
 RogueAI.tscn::PackedScene::1057536209973520::1777210578::0::1::::<><><>0<>0<><>::uid://cx4b0faf3efr7::::res://scenes/enemy/RogueAI.gd<>uid://b5jxbipohggeb::::res://assets/chatgpt.png
 Snake.gd::GDScript::1371790092041211308::1777212755::0::1::::<>CharacterBody2D<><>0<>0<><>::
-Snake.tscn::PackedScene::965516310352::1777075271::0::1::::<><><>0<>0<><>::uid://tsrgg333vbng::::res://scenes/enemy/Snake.gd<>uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
+Snake.tscn::PackedScene::965516310352::1777254370::0::1::::<><><>0<>0<><>::uid://tsrgg333vbng::::res://scenes/enemy/Snake.gd<>uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
 TrojanHorse.gd::GDScript::540566633676242220::1777245321::0::1::::<>CharacterBody2D<><>0<>0<><>::
-TrojanHorse.tscn::PackedScene::34845017866840::1777246880::0::1::::<><><>0<>0<><>::uid://hx4b2260k525::::res://scenes/enemy/TrojanHorse.gd<>uid://dtftca6p5bcuf::::res://assets/trojan_horse.webp
+TrojanHorse.tscn::PackedScene::34845017866840::1777254356::0::1::::<><><>0<>0<><>::uid://hx4b2260k525::::res://scenes/enemy/TrojanHorse.gd<>uid://dtftca6p5bcuf::::res://assets/trojan_horse.webp
 worm.gd::GDScript::3041239432624138156::1777237886::0::1::::<>CharacterBody2D<><>0<>0<><>::
 worm.tscn::PackedScene::7063425510668276734::1777043051::0::1::::<><><>0<>0<><>::uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp<>res://scenes/enemy/worm.gd
-::res://scenes/levels/::1777246884
+::res://scenes/levels/::1777254929
 BaseLevel.gd::GDScript::8642037785361387650::1777168387::0::1::::<>Node2D<><>0<>0<><>::
 BossInteractable.gd::GDScript::1961293717532816798::1776992109::0::1::::<>StaticBody2D<><>0<>0<><>::
 FloorDoor.gd::GDScript::5246231945155492596::1777225890::0::1::::<>StaticBody2D<><>0<>0<><>::
-Level2.gd::GDScript::7607752747024112223::1777245143::0::1::::<>Node2D<><>0<>0<><>::
-Level2.tscn::PackedScene::5445090935181075138::1777246884::0::1::::<><><>0<>0<><>::uid://dgnitueod5hgx::::res://scenes/levels/Level2.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://22ew4q7c4l5v::::res://Minecraft.ttf<>uid://hud002::::res://scenes/ui/HUD.tscn
+Level2.gd::GDScript::7607752747024112223::1777254906::0::1::::<>Node2D<><>0<>0<><>::
+Level2.tscn::PackedScene::5445090935181075138::1777254929::0::1::::<><><>0<>0<><>::uid://dgnitueod5hgx::::res://scenes/levels/Level2.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://22ew4q7c4l5v::::res://Minecraft.ttf<>uid://hud002::::res://scenes/ui/HUD.tscn
 LevelBoss.gd::GDScript::5291460112400036155::1777246111::0::1::::<>Node2D<><>0<>0<><>::
 LevelBoss.tscn::PackedScene::2190936384168707225::1777226563::0::1::::<><><>0<>0<><>::uid://chnhtswgyo7lv::::res://scenes/levels/LevelBoss.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://hud002::::res://scenes/ui/HUD.tscn
 TerrainPainter.gd::GDScript::2811713657254189848::1776636615::0::1::::<>TileMapLayer<><>0<>1<><>::
@@ -83,12 +86,12 @@ RuleSign.gd::GDScript::1754312901263274047::1776630741::0::1::::<>StaticBody2D<>
 RuleSign.tscn::PackedScene::36328643679221529::1776630741::0::1::::<><><>0<>0<><>::res://scenes/objects/RuleSign.gd
 Terminal.gd::GDScript::6477316491288515538::1776960964::0::1::::<>StaticBody2D<><>0<>0<><>::
 Terminal.tscn::PackedScene::39497047024344520::1776630741::0::1::::<><><>0<>0<><>::res://scenes/objects/Terminal.gd
-::res://scenes/player/::1777247408
+::res://scenes/player/::1777258077
 Bullet.gd::GDScript::304173446287126993::1777237886::0::1::::<>Area2D<><>0<>0<><>::
 Bullet.tscn::PackedScene::2853759667912::1777216037::0::1::::<><><>0<>0<><>::uid://ellxshattwdl::::res://scenes/player/Bullet.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
 Inventory.gd::GDScript::7107585837491994424::1777247408::0::1::::<>Node<><>0<>0<><>::
-Player.gd::GDScript::2752255572433044543::1777226625::0::1::::<>CharacterBody2D<><>0<>0<><>::
-Player.tscn::PackedScene::27365761918488::1777247408::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://5thoi1jvta6w::::res://assets/matrix_gun.webp<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp
+Player.gd::GDScript::2752255572433044543::1777258069::0::1::::<>CharacterBody2D<><>0<>0<><>::
+Player.tscn::PackedScene::27365761918488::1777258077::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://5thoi1jvta6w::::res://assets/matrix_gun.webp<>uid://b4xpdbtem356a::::res://assets/sprites/65bd3cd054af5c81b917a77e_Green Gradient Image (1).png<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp<>uid://c6rx5wui55fw3::::res://assets/sprites/costume3.svg
 ::res://scenes/ui/::1777247644
 GameOver.gd::GDScript::2710332240927150708::1777167248::0::1::::<>Control<><>0<>0<><>::
 GameOver.tscn::PackedScene::8598048::1777225890::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
@@ -103,7 +106,7 @@ MainMenu.tscn::PackedScene::16537456::1777228333::0::1::::<><><>0<>0<><>::uid://
 WeaponDisplay.gd::GDScript::3703560238313736494::1777151961::0::1::::<>Control<><>0<>0<><>::
 WinScreen.gd::GDScript::5275217465158032268::1777213277::0::1::::<>Control<><>0<>0<><>::
 WinScreen.tscn::PackedScene::30136640::1777126504::0::1::::<><><>0<>0<><>::uid://chfmcco467uqm::::res://scenes/ui/WinScreen.gd
-::res://Sounds/::1777247902
+::res://Sounds/::1777258185
 daviddumaisaudio-explosive-glass-shattering-09-190267.mp3::AudioStreamMP3::3216878900216825068::1777066945::1777066946::1::::<><><>0<>0<>3db6d978da2735af6828ee13b3de5a15<>res://.godot/imported/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3-282eb26f359c626b580b7ccf6a734875.mp3str::
 dragon-studio-cinematic-boom-454254.mp3::AudioStreamMP3::3576778643801580521::1776896174::1777244491::1::::<><><>0<>0<>e3ea326ce03597d9be90fa10bda39d1b<>res://.godot/imported/dragon-studio-cinematic-boom-454254.mp3-ac03a14a5af2c0deff3ab081f08a9a8d.mp3str::
 dragon-studio-gun-reload-2-504027.mp3::AudioStreamMP3::4449330926157421273::1777246553::1777246565::1::::<><><>0<>0<>841913cb25f65617e0f97bc226c40500<>res://.godot/imported/dragon-studio-gun-reload-2-504027.mp3-e164f64efb62b54677d84875d0d00021.mp3str::
@@ -114,6 +117,7 @@ freesound_community-matrix-jump-sound-fx-77277.mp3::AudioStreamMP3::364486748921
 freesound_community-matrix-redux-78819.mp3::AudioStreamMP3::7001751978947676501::1777066945::1777067210::1::::<><><>0<>0<>e17d613491172d37e52af04c82e9548e<>res://.godot/imported/freesound_community-matrix-redux-78819.mp3-05fc9f6fb7322e6794f74f7e371da990.mp3str::
 freesound_community-pixel-sound-effect-3-82880.mp3::AudioStreamMP3::7329524060889360836::1777247751::1777247904::1::::<><><>0<>0<>517f856259b1744d488286f214628e19<>res://.godot/imported/freesound_community-pixel-sound-effect-3-82880.mp3-e5cf6fd05dbe074daa63cff96ffeb852.mp3str::
 Hive - Ultrasonic Sound (The Matrix).wav::AudioStreamWAV::2033030252096270177::1777229143::1777229169::1::::<><><>0<>0<>35f6a900f36e7bf64850c95d2a2d8956<>res://.godot/imported/Hive - Ultrasonic Sound (The Matrix).wav-caad7085cb6923017afa43652cdccda7.sample::
+lumora_studios-pixel-explosion-319166.mp3::AudioStreamMP3::4688273781744348679::1777258185::1777258185::1::::<><><>0<>0<>a71d8b3de5227e30a298e12d011d1d9a<>res://.godot/imported/lumora_studios-pixel-explosion-319166.mp3-c2c51172e3c5df0d64dcf1897c1b2a19.mp3str::
 miraclei-sample_hover_subtle02_kofi_by_miraclei-364170.mp3::AudioStreamMP3::7218461726393214537::1777066945::1777066946::1::::<><><>0<>0<>88c1cfbd1044404debbe067c3f9b8c84<>res://.godot/imported/miraclei-sample_hover_subtle02_kofi_by_miraclei-364170.mp3-e34628c6339bca494765646171130331.mp3str::
 miraclei-sample_hover_subtle04_kofi_by_miraclei-364171.mp3::AudioStreamMP3::7473192517678795951::1777066945::1777066946::1::::<><><>0<>0<>b215d1290999ad83248a0e49591477f2<>res://.godot/imported/miraclei-sample_hover_subtle04_kofi_by_miraclei-364171.mp3-b775543e23113403f7990fb040196076.mp3str::
 Prime Audio Soup.mp3::AudioStreamMP3::2795575992469768364::1777215594::1777216748::1::::<><><>0<>0<>21951ea931ff4d531b5fee7963efb7cc<>res://.godot/imported/Prime Audio Soup.mp3-94e85aca8e4e685b1886784fa6daec69.mp3str::

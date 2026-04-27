@@ -40,6 +40,10 @@ func _ready() -> void:
 	)
 
 func take_damage(amount: int) -> bool:
+	$AudioStreamPlayer2D.play()
+	$AnimationPlayer.play("hit")
+	$GPUParticles2D.restart()
+	$GPUParticles2D.emitting = true
 	if _defeated:
 		return false
 	var final_damage: int = maxi(1, amount)
@@ -48,7 +52,7 @@ func take_damage(amount: int) -> bool:
 	_play_hit_flash()
 	if _health > 0:
 		return false
-	AudioManager.play_sfx("freesound_community-glass-shatter")
+	AudioManager.play_sfx_with_volume("freesound_community-glass-shatter", 0)
 	shatter()
 	return true
 

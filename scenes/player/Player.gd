@@ -21,7 +21,7 @@ const SHATTER_ROWS := 4
 const SHATTER_COLS := 4
 const SHATTER_DURATION := 2.2
 const SHATTER_FORCE := 120.0
-const SHOOT_SHAKE_INTENSITY := 1.2
+const SHOOT_SHAKE_INTENSITY := 5
 const SHOOT_SHAKE_DURATION := 0.06
 const DASH_SHAKE_INTENSITY := 3.2
 const DASH_SHAKE_DURATION := 0.1
@@ -106,10 +106,6 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_facing_to_mouse()
 	
-	if _is_lightsaber and is_instance_valid(gun_sprite):
-		_lightsaber_time += delta * 1.5
-		var hue = fmod(_lightsaber_time, 1.0)
-		gun_sprite.modulate = Color.from_hsv(hue, 0.7, 1.2) # Glowing shifting colors
 
 	_dash_cd = max(0.0, _dash_cd - delta)
 	_dash_timer = max(0.0, _dash_timer - delta)
@@ -183,12 +179,24 @@ func _update_facing_to_mouse() -> void:
 		return
 	if is_instance_valid(gun_sprite):
 		var angle: float = aim_dir.angle()
+
+		# Get the particle material once
+		var particles := $Sprite2D/GPUParticles2D
+		var mat := particles.process_material as ParticleProcessMaterial
+
 		if abs(angle) > PI / 2:
 			gun_sprite.flip_h = true
 			gun_sprite.rotation = angle - sign(angle) * PI
+			# ✅ Fix: set direction on the material, not the node
+			if mat:
+				mat.direction = Vector3(-1, 0, 0)
 		else:
 			gun_sprite.flip_h = false
 			gun_sprite.rotation = angle
+			# ✅ Fix: set direction on the material, not the node
+			if mat:
+				mat.direction = Vector3(1, 0, 0)
+
 		var gun_distance: float = 30.0
 		gun_sprite.position = aim_dir.normalized() * gun_distance
 	hint_label.rotation = -aim_dir.angle()
@@ -224,6 +232,9 @@ func _shoot() -> void:
 	if bullet.has_method("set_damage"):
 		bullet.set_damage(damage)
 	AudioManager.play_sfx("universfield-gunshot")
+	$AnimationPlayer.play("shoot")
+	$Sprite2D/GPUParticles2D.restart()
+	$Sprite2D/GPUParticles2D.emitting = true
 	ScreenFX.screen_shake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION)
 
 func _do_interact() -> void:
@@ -479,6 +490,7 @@ func _spawn_death_binary_cataclysm() -> void:
 	)
 
 func _play_shatter_effect() -> void:
+	$AudioStreamPlayer.play()
 	var scene_root: Node = get_tree().current_scene
 	if scene_root == null:
 		return
@@ -491,6 +503,7 @@ func _play_shatter_effect() -> void:
 		gun_sprite.visible = false
 
 func _spawn_shatter_from_sprite(source_sprite: Node2D, rows: int, cols: int, duration: float, force: float) -> void:
+	AudioManager.play_sfx("res://Sounds/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3")
 	if source_sprite == null:
 		return
 	var texture: Texture2D = null
@@ -584,6 +597,11 @@ func _load_selected_gun() -> void:
 	
 	if not _is_lightsaber:
 		gun_sprite.modulate = Color.WHITE
+		$Sprite2D/greenglowpointlight.visible = true
+		$Sprite2D/greenglow.visible = false
+	else:
+		$Sprite2D/greenglowpointlight.visible = false
+		$Sprite2D/greenglow.visible = false
 
 	# Apply stats if they exist
 	if gun.has("damage"):

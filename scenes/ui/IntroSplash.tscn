@@ -40,17 +40,17 @@ texture = ExtResource("2")
 
 [node name="Title" type="Label" parent="Center/VBox" unique_id=2045486002]
 layout_mode = 2
-text = "SYSTEM//BREACH"
+text = "Made for the Pixel Forge Game Jam"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Center/VBox" unique_id=389249177]
 layout_mode = 2
-text = "BOOT SEQUENCE INITIALIZING"
+text = "Coding done by George and Nimansh"
 horizontal_alignment = 1
 
 [node name="Status" type="Label" parent="Center/VBox" unique_id=1548782098]
 layout_mode = 2
-text = "ESTABLISHING CONTROL CHANNEL"
+text = "Art Done by Bryan and Delisha"
 horizontal_alignment = 1
 
 [node name="Scanline" type="ColorRect" parent="." unique_id=1613322751]
