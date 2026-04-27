@@ -62,11 +62,6 @@ custom_minimum_size = Vector2(170, 22)
 layout_mode = 2
 text = "START FLOOR 5"
 
-[node name="QuitBtn" type="Button" parent="VBox" unique_id=73877338]
-custom_minimum_size = Vector2(170, 22)
-layout_mode = 2
-text = "TERMINATE"
-
 [node name="SelectWeaponBtn" type="Button" parent="VBox" unique_id=1854518489]
 layout_mode = 2
 text = "SELECT WEAPON"
@@ -78,5 +73,4 @@ texture = ExtResource("2_6jbdy")
 
 [connection signal="pressed" from="VBox/PlayBtn" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="VBox/Floor5Btn" to="." method="_on_floor_5_pressed"]
-[connection signal="pressed" from="VBox/QuitBtn" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="VBox/SelectWeaponBtn" to="." method="_on_select_weapon_pressed"]

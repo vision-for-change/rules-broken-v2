@@ -40,7 +40,6 @@ func _ready() -> void:
 	# Create debug buttons (Tutorial and Boss only)
 	_create_menu_buttons()
 	
-	_style_button($VBox/QuitBtn, 20)
 	if has_node("VBox/SelectWeaponBtn"):
 		_style_button($VBox/SelectWeaponBtn, 20)
 
@@ -49,8 +48,7 @@ func _ready() -> void:
 
 func _create_menu_buttons() -> void:
 	var vbox = $VBox
-	var quit_idx = $VBox/QuitBtn.get_index()
-	
+
 	# Tutorial Button
 	var tutorial_btn: Button
 	if has_node("VBox/TutorialBtn"):
@@ -60,8 +58,8 @@ func _create_menu_buttons() -> void:
 		tutorial_btn.name = "TutorialBtn"
 		tutorial_btn.text = "PLAY TUTORIAL"
 		vbox.add_child(tutorial_btn)
-		vbox.move_child(tutorial_btn, quit_idx)
-		
+		vbox.move_child(tutorial_btn, 2)
+
 	_style_button(tutorial_btn, 20, Color(0.4, 0.9, 1.0))
 	if not tutorial_btn.pressed.is_connected(_on_tutorial_pressed):
 		tutorial_btn.pressed.connect(_on_tutorial_pressed)
@@ -74,19 +72,18 @@ func _create_menu_buttons() -> void:
 		boss_btn = Button.new()
 		boss_btn.name = "Floor5Btn"
 		vbox.add_child(boss_btn)
-		vbox.move_child(boss_btn, quit_idx + 1)
-		
+		vbox.move_child(boss_btn, 3)
+
 	boss_btn.text = "BOSS: ROGUE AI"
 	_style_button(boss_btn, 18, Color(0.8, 0.2, 0.2))
 	if not boss_btn.pressed.is_connected(_on_floor_5_pressed):
 		boss_btn.pressed.connect(_on_floor_5_pressed)
-	
+
 	# Ensure Floor 1-4 buttons are removed if they were created via script previously
 	for i in range(1, 5):
 		var btn_name = "Floor%dBtn" % i
 		if has_node("VBox/" + btn_name):
 			get_node("VBox/" + btn_name).queue_free()
-
 func _connect_button_hover_sounds() -> void:
 	var buttons = []
 	for child in $VBox.get_children():
@@ -232,9 +229,6 @@ func _on_floor_5_pressed() -> void:
 
 func _on_select_weapon_pressed() -> void:
 	ScreenFX.transition_to_scene("res://scenes/ui/GunSelectScreen.tscn")
-
-func _on_quit_pressed() -> void:
-	get_tree().quit()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:

@@ -69,7 +69,7 @@ color = Color(0.3, 1, 0.7, 0.4)
 
 [node name="Hint" type="Label" parent="Panel/Margin/VBox" unique_id=251667642]
 layout_mode = 2
-text = "[ SPACE ] KEEP GOING    [ ENTER ] PLAY AGAIN    [ ESC ] TERMINATE"
+text = "[ SPACE ] KEEP GOING    [ ENTER ] PLAY AGAIN"
 horizontal_alignment = 1
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=724851136]
@@ -87,11 +87,5 @@ custom_minimum_size = Vector2(180, 46)
 layout_mode = 2
 text = "PLAY AGAIN"
 
-[node name="QuitBtn" type="Button" parent="Panel/Margin/VBox/Buttons" unique_id=1714630506]
-custom_minimum_size = Vector2(180, 46)
-layout_mode = 2
-text = "TERMINATE"
-
 [connection signal="pressed" from="Panel/Margin/VBox/Buttons/ContinueBtn" to="." method="_on_continue_pressed"]
 [connection signal="pressed" from="Panel/Margin/VBox/Buttons/ReplayBtn" to="." method="_on_replay_pressed"]
-[connection signal="pressed" from="Panel/Margin/VBox/Buttons/QuitBtn" to="." method="_on_quit_pressed"]
