@@ -6,3 +6,5 @@ res://scenes/enemy/RogueAI.gd
 res://autoloads/GunDatabase.gd
 res://scenes/enemy/EnemyLaser.tscn
 res://scenes/enemy/EnemyLaser.gd
+res://scenes/player/Player.tscn
+res://scenes/player/Player.gd
