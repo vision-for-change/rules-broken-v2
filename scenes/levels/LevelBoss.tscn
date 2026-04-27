@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://chnhtswgyo7lv" path="res://scenes/levels/LevelBoss.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="3"]
+[ext_resource type="Theme" path="res://themes/default_theme.tres" id="4_g8odr"]
+[ext_resource type="FontFile" uid="uid://22ew4q7c4l5v" path="res://Minecraft.ttf" id="5_sp350"]
 
 [node name="LevelBoss" type="Node2D" unique_id=156095162]
 script = ExtResource("1")
@@ -33,3 +35,20 @@ color = Color(0.06, 0.06, 0.13, 1)
 
 [node name="Player" parent="." unique_id=589444354 instance=ExtResource("2")]
 position = Vector2(30, 90)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=2049775431]
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer" unique_id=2077349635]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 31.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_g8odr")
+theme_type_variation = &"HeaderSmall"
+theme_override_colors/font_color = Color(0, 1, 0.16666651, 1)
+theme_override_fonts/font = ExtResource("5_sp350")
+theme_override_font_sizes/font_size = 32
+text = "SECTOR 02"
+horizontal_alignment = 1
