@@ -148,7 +148,7 @@ func start_reload() -> void:
 	is_reloading = true
 	_reload_timer = float(gun.get("reload_time", 1.5))
 	reload_state_changed.emit(true, gun["ammo"], gun["max_ammo"], _reload_timer)
-	AudioManager.play_sfx("res://Sounds/dragon-studio-gun-reload-2-504027.mp3")
+	Sounds.playsound("res://Sounds/dragon-studio-gun-reload-2-504027.mp3")
 
 func can_shoot() -> bool:
 	if slots.is_empty() or is_reloading or _fire_timer > 0.0:

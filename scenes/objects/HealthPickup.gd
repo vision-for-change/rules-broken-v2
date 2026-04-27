@@ -34,8 +34,8 @@ func _on_body_entered(body: Node) -> void:
 	
 	# Heal the player as well
 	if body.has_method("heal"):
-		body.call("heal", 15)
-	
-	EventBus.log("HEALTH POWER-UP +15", "info")
-	ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.12)
+		body.call("heal", 30)
+		
+		ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.12)
+		Sounds.playsound("res://Sounds/47313572-8-bit-game-sfx-sound-21-269970.mp3")
 	queue_free()

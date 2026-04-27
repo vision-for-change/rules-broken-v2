@@ -75,6 +75,7 @@ func _ready() -> void:
 	level_number = _floor_index
 	PlayerState.record_level_reached(_floor_index)
 	level_title_text = "FLOOR %d" % _floor_index
+	$CanvasLayer/TitleLabel.text = "FLOOR %d" % _floor_index
 	_transitioning = false
 	_bug_spawn_index = 0
 	_rng.randomize()

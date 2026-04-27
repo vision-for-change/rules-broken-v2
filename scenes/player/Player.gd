@@ -23,7 +23,7 @@ const SHATTER_DURATION := 2.2
 const SHATTER_FORCE := 120.0
 const SHOOT_SHAKE_INTENSITY := 5
 const SHOOT_SHAKE_DURATION := 0.06
-const DASH_SHAKE_INTENSITY := 3.2
+const DASH_SHAKE_INTENSITY := 20
 const DASH_SHAKE_DURATION := 0.1
 const FOOTSTEP_INT = 0.38
 const DEATH_SHAKE_INTENSITY := 22.0
@@ -98,6 +98,14 @@ func _ready() -> void:
 	_start_teleport_in_effect()
 
 func _physics_process(delta: float) -> void:
+	print(velocity)
+	if velocity.x != 0 or velocity.y != 0:
+		if !$AudioStreamPlayer3.playing:
+			$AudioStreamPlayer3.playing = true
+	else:
+		$AudioStreamPlayer3.playing = false
+			
+	
 	if not is_alive:
 		if _death_anim_active:
 			_update_facing_to_mouse()
@@ -265,7 +273,7 @@ func take_damage(amount: int) -> void:
 	if not is_alive or _invincible:
 		return
 	health -= amount
-	AudioManager.play_sfx_with_volume("res://Sounds/freesound_community-pixel-sound-effect-3-82880.mp3", 10)
+	$AudioStreamPlayer2.play()
 	EventBus.player_health_changed.emit(health, 100)
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 	if health <= 0:

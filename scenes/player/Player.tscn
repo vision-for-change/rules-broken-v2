@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://mk2lre3523uj" path="res://assets/sprites/pixilart-sprite.webp" id="4_524rm"]
 [ext_resource type="Texture2D" uid="uid://c6rx5wui55fw3" path="res://assets/sprites/costume3.svg" id="6_c3xxp"]
 [ext_resource type="AudioStream" uid="uid://bl3jr4qbpxc57" path="res://Sounds/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3" id="7_npwbq"]
+[ext_resource type="AudioStream" uid="uid://bbedi33b2r616" path="res://Sounds/freesound_community-hurt_c_08-102842.mp3" id="8_v42im"]
+[ext_resource type="AudioStream" uid="uid://dmmigehda3lx8" path="res://Sounds/soundreality-footsteps-walking-boots-parquet-1-420135 (1).mp3" id="9_pn6s4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wr5hl"]
 size = Vector2(15, 21)
@@ -255,4 +257,15 @@ libraries/ = SubResource("AnimationLibrary_npwbq")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=35488850]
 stream = ExtResource("7_npwbq")
 pitch_scale = 0.75
+bus = &"SFX"
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="." unique_id=1402373548]
+stream = ExtResource("8_v42im")
+volume_db = -5.0
+bus = &"SFX"
+
+[node name="AudioStreamPlayer3" type="AudioStreamPlayer" parent="." unique_id=22651375]
+stream = ExtResource("9_pn6s4")
+volume_db = -15.0
+pitch_scale = 2.0
 bus = &"SFX"

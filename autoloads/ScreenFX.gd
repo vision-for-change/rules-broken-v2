@@ -71,7 +71,7 @@ func slow_motion_pulse(scale: float = 0.3, duration: float = 0.22) -> void:
 	var now_ms := Time.get_ticks_msec()
 	var duration_ms := int(maxf(duration, 0.01) * 1000.0)
 	_slowmo_end_ms = max(_slowmo_end_ms, now_ms) + duration_ms
-	AudioManager.play_sfx("freesound_community-matrix-jump")
+	Sounds.playsound("res://Sounds/freesound_community-matrix-jump-sound-fx-77277 (1).mp3")
 
 func set_time_scale_override(scale: float) -> void:
 	_timescale_override_active = true
@@ -171,6 +171,7 @@ func spawn_hit_flash(global_pos: Vector2, color: Color = Color(1, 1, 1, 1), size
 	t.tween_callback(s.queue_free)
 
 func transition_to_scene(scene_path: String, fade_in_time: float = -1.0, fade_out_time: float = -1.0) -> void:
+	Sounds.playsound("res://alex_jauk-reality-distortion-rift-8bit-293073.mp3")
 	if _scene_transitioning:
 		return
 	var in_time = fade_in_time if fade_in_time >= 0 else TRANSITION_FADE_IN
@@ -204,7 +205,7 @@ func transition_to_scene_with_black_fade(scene_path: String, black_in_time: floa
 	if _scene_transitioning:
 		return
 	_scene_transitioning = true
-	
+	Sounds.playsound("res://alex_jauk-reality-distortion-rift-8bit-293073.mp3")
 	# Create black fade overlay
 	var black_rect = ColorRect.new()
 	black_rect.color = Color.BLACK

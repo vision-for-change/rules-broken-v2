@@ -236,7 +236,7 @@ func _explode_segments() -> void:
 	if is_instance_valid(health_bar):
 		health_bar.visible = false
 	
-	var total_damage = int(max_health * EXPLOSION_DAMAGE_PER_SEGMENT)
+	var total_damage = int(max_health * 0.2)
 	
 	# Explode head first
 	_spawn_shards_from_sprite(head_sprite)

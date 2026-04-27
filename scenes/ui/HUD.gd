@@ -709,7 +709,7 @@ func _create_enemy_counter_label() -> void:
 	var status := _get_enemy_kill_status()
 	_enemy_counter_label = Label.new()
 	_enemy_counter_label.text = "TARGETS: 0/%d" % int(status.get("required", 0))
-	_enemy_counter_label.add_theme_font_size_override("font_size", 18)
+	_enemy_counter_label.add_theme_font_size_override("font_size", 45)
 	_enemy_counter_label.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 	_enemy_counter_label.add_theme_color_override("outline_color", Color.BLACK)
 	_enemy_counter_label.add_theme_font_override("font", MINECRAFT_FONT)
