@@ -64,10 +64,9 @@ func _ready() -> void:
 	
 	var tier_mult := float(floor_idx) / 5.0
 	if _is_clone:
-		# Clones have 40 health per tier level
-		max_health = 40 * floor_idx
+		max_health = 40
 	else:
-		max_health = int(1000.0 * tier_mult)
+		max_health = int(1500.0 * tier_mult)
 	move_speed = 50.0
 	
 	_health = max_health
@@ -131,6 +130,7 @@ func _physics_process(delta: float) -> void:
 	# Rotation
 	var aim_dir = (_player_ref.global_position - global_position).normalized()
 	sprite.rotation = lerp_angle(sprite.rotation, aim_dir.angle(), 10.0 * delta)
+	$LightOccluder2D.rotation = lerp_angle(sprite.rotation, aim_dir.angle(), 10.0 * delta)
 	
 	if not _is_clone:
 		ui.global_position = global_position
@@ -241,9 +241,7 @@ func take_damage(amount: int) -> bool:
 		_flash_blocked_hit()
 		return false
 	
-	# Set damage to exactly 15 per hit as requested
-	var damage_to_deal = 5
-	_health = maxi(0, _health - damage_to_deal)
+	_health = maxi(0, _health - amount)
 	
 	# Hit effect
 	var tween := create_tween()

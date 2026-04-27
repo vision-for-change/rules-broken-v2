@@ -15,7 +15,7 @@ var _ghost_timer := 0.0
 var _player_ref: Node2D = null
 var _dash_dodge_armed := false
 var _dash_dodge_triggered := false
-var _player_damage := 15
+var _player_damage := 5
 
 @onready var beam: Sprite2D = $Beam
 

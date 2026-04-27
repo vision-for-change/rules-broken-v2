@@ -28,7 +28,6 @@ func _ready() -> void:
 	level_title_text = "FLOOR %d // CORE ANOMALY" % _floor_index
 	
 	super._ready()
-	_show_welcome_message()
 
 func get_stage_number() -> int:
 	return _floor_index
@@ -49,28 +48,6 @@ func _build_wall_material() -> ShaderMaterial:
 	mat.set_shader_parameter("fall_speed", 4.5 + (float(_floor_index) * 0.5))
 	return mat
 
-func _show_welcome_message() -> void:
-	_welcome_banner = CanvasLayer.new()
-	_welcome_banner.layer = 100
-	add_child(_welcome_banner)
-	
-	var label = Label.new()
-	var tier = _floor_index / 5
-	label.text = "BOSS TIER %d DETECTED\nSYSTEM INTEGRITY CRITICAL\nCOLLECT OVERRIDE KEYS TO DROP SHIELD" % tier
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.set_anchors_preset(Control.PRESET_CENTER)
-	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	label.add_theme_font_override("font", preload("res://Minecraft.ttf"))
-	label.add_theme_font_size_override("font_size", 26)
-	label.add_theme_color_override("font_color", Color(1, 0.1, 0.1))
-	label.add_theme_color_override("outline_color", Color.BLACK)
-	label.add_theme_constant_override("outline_size", 4)
-	_welcome_banner.add_child(label)
-	
-	await get_tree().create_timer(4.0).timeout
-	var t = create_tween()
-	t.tween_property(label, "modulate:a", 0.0, 0.5)
-	t.tween_callback(_welcome_banner.queue_free)
 
 func _populate_floor(main_room: Rect2i, rooms: Array[Rect2i]) -> void:
 	_rooms_list = rooms
@@ -123,7 +100,6 @@ func _configure_player_for_boss_fight(player: Node2D) -> void:
 		if hud_node.has_method("set_boss_encounter_mode"):
 			hud_node.call("set_boss_encounter_mode", true)
 		
-	EventBus.log("BOSS ENCOUNTER // NO HOTBAR // ANALYZING PATTERNS", "error")
 
 func _spawn_boss(parent: Node2D) -> void:
 	var boss = ROGUE_AI_SCENE.instantiate()
@@ -139,7 +115,7 @@ func _spawn_boss(parent: Node2D) -> void:
 		var new_hp = int(1500.0 * tier_mult)
 		boss.set("max_health", new_hp)
 	if boss.get("move_speed") != null:
-		var new_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
+		var new_speed = 50.0
 		boss.set("move_speed", new_speed)
 	if boss.has_method("set_combat_active"):
 		boss.call("set_combat_active", false)

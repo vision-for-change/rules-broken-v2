@@ -7,7 +7,7 @@ const GUNS := {
 		"id": "pistol",
 		"display_name": "Pistol",
 		"description": "Reliable. Silent enough.",
-		"damage": 15,
+		"damage": 75,
 		"fire_rate": 0.35,
 		"max_ammo": 12,
 		"reload_time": 1.0,
@@ -54,7 +54,7 @@ const GUNS := {
 		"id": "lightsaber",
 		"display_name": "Lightsaber",
 		"description": "Dynamic energy blade. Cuts through bugs like butter.",
-		"damage": 30,
+		"damage": 50,
 		"fire_rate": 0.12,
 		"max_ammo": 0, # Infinite
 		"reload_time": 0.0,

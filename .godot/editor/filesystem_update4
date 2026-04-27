@@ -1,1 +1,8 @@
 res://default_bus_layout.tres
+res://scenes/levels/LevelBoss.tscn
+res://scenes/levels/LevelBoss.gd
+res://scenes/enemy/RogueAI.tscn
+res://scenes/enemy/RogueAI.gd
+res://autoloads/GunDatabase.gd
+res://scenes/enemy/EnemyLaser.tscn
+res://scenes/enemy/EnemyLaser.gd
