@@ -4,7 +4,7 @@ signal shield_disabled(duration: float)
 signal shield_restored
 signal defeated
 
-@export var move_speed := 215.0
+@export var move_speed := 100.0
 @export var duplication_rate := 6.0
 @export var fire_rate := 1.05
 @export var max_health := 420

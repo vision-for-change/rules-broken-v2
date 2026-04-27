@@ -23,3 +23,4 @@ res://scenes/player/Inventory.gd
 res://autoloads/ScreenFX.gd
 res://scenes/ui/HUD.gd
 res://scenes/levels/LevelBoss.tscn
+res://scenes/enemy/RogueAI.gd
