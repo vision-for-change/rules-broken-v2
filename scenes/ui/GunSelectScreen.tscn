@@ -46,7 +46,6 @@ offset_right = 637.0
 offset_bottom = 409.0
 grow_horizontal = 2
 grow_vertical = 2
-text = ""
 
 [node name="GunGrid" type="HBoxContainer" parent="." unique_id=1300802493]
 layout_mode = 1

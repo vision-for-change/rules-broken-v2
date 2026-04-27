@@ -13,7 +13,7 @@ var is_reloading: bool = false
 var max_slots: int = 3
 
 func _ready() -> void:
-	var gun_id: String = "pistol"
+	var gun_id: String = "ump"
 	if get_node_or_null("/root/GunDatabase") != null:
 		gun_id = GunDatabase.selected_gun_id
 	if get_node_or_null("/root/PlayerState") != null:

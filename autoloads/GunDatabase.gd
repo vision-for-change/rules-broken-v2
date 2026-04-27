@@ -1,6 +1,6 @@
 extends Node
 
-var selected_gun_id: String = "pistol"
+var selected_gun_id: String = "ump"
 
 const GUNS := {
 	"pistol": {

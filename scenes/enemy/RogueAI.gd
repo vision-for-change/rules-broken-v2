@@ -4,7 +4,7 @@ signal shield_disabled(duration: float)
 signal shield_restored
 signal defeated
 
-@export var move_speed := 100.0
+@export var move_speed := 50.0
 @export var duplication_rate := 6.0
 @export var fire_rate := 1.05
 @export var max_health := 420
@@ -67,8 +67,8 @@ func _ready() -> void:
 		# Clones have 40 health per tier level
 		max_health = 40 * floor_idx
 	else:
-		max_health = int(1500.0 * tier_mult)
-	move_speed = 215.0 * (1.0 + (tier_mult - 1.0) * 0.15)
+		max_health = int(1000.0 * tier_mult)
+	move_speed = 50.0
 	
 	_health = max_health
 	
@@ -119,7 +119,7 @@ func _physics_process(delta: float) -> void:
 			if distance < 120.0:
 				dir_to_player = -dir_to_player
 			elif distance > 300.0:
-				target_speed *= 1.5
+				target_speed *= 1
 				
 			if _dash_cooldown <= 0.0 and distance > 200.0 and _shielded:
 				_start_dash(offset.normalized())
@@ -242,7 +242,7 @@ func take_damage(amount: int) -> bool:
 		return false
 	
 	# Set damage to exactly 15 per hit as requested
-	var damage_to_deal = 15
+	var damage_to_deal = 5
 	_health = maxi(0, _health - damage_to_deal)
 	
 	# Hit effect

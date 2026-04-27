@@ -1,6 +1,6 @@
 extends Control
 
-var _selected_id := "pistol"
+var _selected_id := "ump"
 var _cards := {}
 var _card_tweens := {}
 var _matrix_bg: Control

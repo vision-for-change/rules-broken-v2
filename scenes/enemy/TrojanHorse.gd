@@ -46,7 +46,6 @@ func shatter() -> void:
 	
 	# Play glass shatter sound with a bit of a boom
 	AudioManager.play_sfx("freesound_community-glass-shatter")
-	AudioManager.play_sfx_with_volume("dragon-studio-cinematic-boom", -10.0)
 	
 	# Visual effects
 	ScreenFX.flash_screen(Color(0.2, 1.0, 0.5, 0.3), 0.15)
