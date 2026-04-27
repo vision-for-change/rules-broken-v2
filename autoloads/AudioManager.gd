@@ -201,6 +201,14 @@ func play_sfx_with_options(name: String, volume_db: float = 0.0, pitch_min: floa
 					player.play()
 					return
 
+func stop_sfx_by_name(name: String) -> void:
+	var resolved_name: String = name
+	if SFX_ALIASES.has(name):
+		resolved_name = str(SFX_ALIASES[name])
+	for p in _sfx_pool:
+		if p.playing and p.stream and p.stream.resource_path.get_file().get_basename() == resolved_name:
+			p.stop()
+
 func _free_sfx() -> AudioStreamPlayer:
 	# Try to find a free player in the pool
 	for p in _sfx_pool:

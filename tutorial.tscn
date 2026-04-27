@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cwy2l3xoqxs2t"]
+[gd_scene format=3 uid="uid://cn1vyt7kaf2y7"]
 
 [ext_resource type="Script" uid="uid://cmdq0wupyhvlw" path="res://scenes/levels/TutorialLevel.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="2_ehuit"]
