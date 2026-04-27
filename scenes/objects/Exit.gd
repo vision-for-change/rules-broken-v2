@@ -13,9 +13,12 @@ extends Area2D
 var _triggered := false
 var _initial_enemy_count := 0
 var _defeated_enemy_count := 0
+var _is_ringing := false
+var _in_exit_area := false
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
 	_update_visual()
 	EventBus.rule_removed.connect(_on_rule_removed)
 	EventBus.entity_tag_changed.connect(_on_tag_changed)
@@ -57,6 +60,8 @@ func _update_visual() -> void:
 func _on_body_entered(body: Node) -> void:
 	if _triggered or not body.is_in_group("player"): return
 
+	_in_exit_area = true
+
 	# Check enemy defeat requirement
 	var enemies_killed = _defeated_enemy_count
 	var enemies_required = (_initial_enemy_count + 1) / 2
@@ -73,6 +78,20 @@ func _on_body_entered(body: Node) -> void:
 		ScreenFX.flash_screen(Color(1, 0.2, 0.1, 0.3), 0.2)
 		return
 
+	_is_ringing = true
+	AudioManager.play_sfx("TelephoneRinging")
+
+func _on_body_exited(body: Node) -> void:
+	if body.is_in_group("player"):
+		_in_exit_area = false
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _in_exit_area and event.is_action_pressed("interact"):
+		_complete_level()
+
+func _complete_level() -> void:
+	if _triggered: return
+	
 	var result = ActionBus.submit(ActionBus.ACCESS,
 		EntityRegistry.get_tags("player"),
 		{"actor_id": "player", "target_id": exit_id,
@@ -80,6 +99,9 @@ func _on_body_entered(body: Node) -> void:
 	)
 
 	if result["allowed"] or result["loophole"] != "":
+		if _is_ringing:
+			AudioManager.stop_sfx_by_name("TelephoneRinging")
+			_is_ringing = false
 		_triggered = true
 		EventBus.level_complete.emit()
 		AudioManager.play_sfx("level_complete")
