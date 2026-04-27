@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dgnitueod5hgx" path="res://scenes/levels/Level2.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/player/Player.tscn" id="2"]
+[ext_resource type="FontFile" uid="uid://22ew4q7c4l5v" path="res://Minecraft.ttf" id="3_1xtnv"]
 [ext_resource type="PackedScene" uid="uid://hud002" path="res://scenes/ui/HUD.tscn" id="6"]
 
 [node name="Level2" type="Node2D" unique_id=156095161]
@@ -20,6 +21,7 @@ offset_left = -80.0
 offset_top = 10.0
 offset_right = 80.0
 offset_bottom = 24.0
+theme_override_fonts/font = ExtResource("3_1xtnv")
 text = "SECTOR 02"
 horizontal_alignment = 1
 

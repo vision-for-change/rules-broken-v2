@@ -712,6 +712,7 @@ func _create_enemy_counter_label() -> void:
 	_enemy_counter_label.add_theme_font_size_override("font_size", 18)
 	_enemy_counter_label.add_theme_color_override("font_color", Color(0.8, 1.0, 0.9))
 	_enemy_counter_label.add_theme_color_override("outline_color", Color.BLACK)
+	_enemy_counter_label.add_theme_font_override("font", MINECRAFT_FONT)
 	_enemy_counter_label.add_theme_constant_override("outline_size", 2)
 	_enemy_counter_label.position = Vector2(12, 12)
 	_enemy_counter_label.z_index = 100

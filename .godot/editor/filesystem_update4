@@ -5,3 +5,8 @@ res://tutorial.tscn
 res://scenes/levels/LevelBoss.gd
 res://scenes/levels/TutorialLevel.gd
 res://scenes/enemy/TrojanHorse.tscn
+res://scenes/player/Player.tscn
+res://scenes/player/Inventory.gd
+res://scenes/ui/HUD.tscn
+res://scenes/ui/HUD.gd
+res://scenes/player/Player.gd

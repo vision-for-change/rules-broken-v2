@@ -254,6 +254,7 @@ func take_damage(amount: int) -> void:
 	if not is_alive or _invincible:
 		return
 	health -= amount
+	AudioManager.play_sfx_with_volume("res://Sounds/freesound_community-pixel-sound-effect-3-82880.mp3", 10)
 	EventBus.player_health_changed.emit(health, 100)
 	ScreenFX.flash_screen(Color(1, 0.3, 0.1, 0.3), 0.15)
 	if health <= 0:
