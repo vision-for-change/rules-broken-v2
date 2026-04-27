@@ -332,6 +332,7 @@ func _shatter_sprite() -> void:
 
 func _finish_death_sequence() -> void:
 	if not _is_clone:
+		Music.stopsound()
 		defeated.emit()
 	queue_free()
 

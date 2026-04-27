@@ -7,8 +7,8 @@ const SHIELD_DOWN_TIME := 9.0
 const BOSS_LOADOUT_BwASE: Array[String] = ["pistol", "ump", "ak47", "lightsaber"]
 const INTRO_REVEAL_ZOOM := Vector2(0.6, 0.6)
 const INTRO_REVEAL_DURATION := 1.0
-const INTRO_RETURN_DURATION := 0.8
-const INTRO_HOLD_TIME := 0.45
+const INTRO_RETURN_DURATION := 1.0
+const INTRO_HOLD_TIME := 1.0
 
 var _welcome_banner: CanvasLayer
 var _boss: Node2D
