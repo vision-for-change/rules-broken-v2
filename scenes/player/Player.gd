@@ -98,7 +98,6 @@ func _ready() -> void:
 	_start_teleport_in_effect()
 
 func _physics_process(delta: float) -> void:
-	print(velocity)
 	if velocity.x != 0 or velocity.y != 0:
 		if !$AudioStreamPlayer3.playing:
 			$AudioStreamPlayer3.playing = true

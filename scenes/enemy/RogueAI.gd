@@ -64,7 +64,7 @@ func _ready() -> void:
 	
 	var tier_mult := float(floor_idx) / 5.0
 	if _is_clone:
-		max_health = int(200.0 * tier_mult)
+		max_health = int(75.0 * tier_mult)
 	else:
 		max_health = int(1500.0 * tier_mult)
 	move_speed = 50.0

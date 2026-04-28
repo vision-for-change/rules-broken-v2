@@ -195,6 +195,7 @@ func _make_card(gid: String, gun: Dictionary) -> PanelContainer:
 		_selected_id = gid
 		GunDatabase.selected_gun_id = gid
 		PlayerState.selected_gun_id = gid
+		print(gid)
 		_refresh()
 	)
 	vbox.add_child(btn)

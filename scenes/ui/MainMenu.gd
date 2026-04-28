@@ -207,8 +207,6 @@ func _style_button(btn: Button, size: int, color: Color = Color(0.2, 1.0, 0.5)) 
 		btn.pressed.connect(func(): AudioManager.play_sfx_with_options("click", -15.0, 0.7, 1.3))
 
 func _on_play_pressed() -> void:
-	GunDatabase.selected_gun_id = "ump"
-	PlayerState.selected_gun_id = "ump"
 	Music.stopsound()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.reset_start_floor()
@@ -220,8 +218,6 @@ func _on_tutorial_pressed() -> void:
 	ScreenFX.transition_to_scene_with_black_fade("res://tutorial.tscn", 0.6, 1.0, 0.6)
 
 func _on_floor_5_pressed() -> void:
-	GunDatabase.selected_gun_id = "ump"
-	PlayerState.selected_gun_id = "ump"
 	Music.stopsound()
 	PlayerState.reset_run_progression()
 	LEVEL2_SCRIPT.queue_start_floor(5)

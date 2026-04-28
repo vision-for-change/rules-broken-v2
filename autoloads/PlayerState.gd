@@ -1,6 +1,6 @@
 extends Node
 
-var selected_gun_id: String = "pistol"
+var selected_gun_id: String = "ump"
 var current_health: int = 300
 var max_health: int = 300
 var boss_defeated_this_run := false
