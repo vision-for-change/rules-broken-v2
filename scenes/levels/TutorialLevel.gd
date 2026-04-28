@@ -58,63 +58,12 @@ func _setup_tutorial_ui() -> void:
 	_instr_label.visible = false
 	_tutorial_canvas.add_child(_instr_label)
 
-	# Background dim for the bottom area
-	var bg = ColorRect.new()
-	bg.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bg.offset_top = -180
-	bg.color = Color(0, 0, 0, 0.5)
-	_tutorial_canvas.add_child(bg)
-
-	# Morpheus UI Container - Anchored to Bottom Right
-	var morpheus_container := HBoxContainer.new()
-	morpheus_container.name = "MorpheusContainer"
-	morpheus_container.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	morpheus_container.offset_left = -800
-	morpheus_container.offset_top = -170
-	morpheus_container.offset_right = -20
-	morpheus_container.offset_bottom = -20
-	morpheus_container.alignment = BoxContainer.ALIGNMENT_END
-	_tutorial_canvas.add_child(morpheus_container)
-
-	# Portrait
-	var morpheus_texrect := TextureRect.new()
-	morpheus_texrect.name = "MorpheusSprite"
-	var morpheus_tex := load("res://assets/addmorpheus.png")
-	if morpheus_tex:
-		morpheus_texrect.texture = morpheus_tex
-	morpheus_texrect.custom_minimum_size = Vector2(140, 140)
-	morpheus_texrect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	morpheus_texrect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	morpheus_container.add_child(morpheus_texrect)
-
-	# Text Box with Enhanced Style
-	var morpheus_box := PanelContainer.new()
-	morpheus_box.name = "MorpheusTextBox"
-	morpheus_box.custom_minimum_size = Vector2(600, 140)
-	
-	var box_style = StyleBoxFlat.new()
-	box_style.bg_color = Color(0, 0.05, 0.02, 0.85)
-	box_style.border_width_left = 4
-	box_style.border_color = Color(0.1, 1.0, 0.4, 0.8)
-	box_style.set_corner_radius_all(4)
-	morpheus_box.add_theme_stylebox_override("panel", box_style)
-	morpheus_container.add_child(morpheus_box)
 
 	var margin = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 20)
 	margin.add_theme_constant_override("margin_top", 15)
 	margin.add_theme_constant_override("margin_right", 15)
 	margin.add_theme_constant_override("margin_bottom", 15)
-	morpheus_box.add_child(margin)
-
-	var morpheus_label := RichTextLabel.new()
-	morpheus_label.name = "MorpheusLabel"
-	morpheus_label.bbcode_enabled = true
-	morpheus_label.add_theme_font_override("normal_font", preload("res://Minecraft.ttf"))
-	morpheus_label.add_theme_font_size_override("normal_font_size", 24)
-	morpheus_label.add_theme_color_override("default_color", Color(0.2, 1.0, 0.5))
-	morpheus_label.text = ""
-	margin.add_child(morpheus_label)
 
 	var esc_hint = Label.new()
 	esc_hint.text = "[ESC] TO EXIT"
@@ -126,34 +75,26 @@ func _setup_tutorial_ui() -> void:
 	esc_hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.6))
 	_tutorial_canvas.add_child(esc_hint)
 
-func _set_instruction(text: String) -> void:
-	_instr_label.text = text
-	var label = _tutorial_canvas.find_child("MorpheusLabel", true, false)
-	if label:
-		label.clear()
-		label.append_text(text)
 
 func _start_stage(stage: Stage) -> void:
 	_current_stage = stage
-	_clear_stage_nodes()
 
 	match stage:
 		Stage.MOVEMENT:
-			_set_instruction("Use WASD For movement.")
-			EventBus.log("SYSTEM: Awaiting movement signature...", "info")
+			$CanvasLayer/Label.visible = true
 
 		Stage.BUG_COMBAT:
-			_set_instruction("A Big Bug spotted, Use your mouse to aim and kill it with a mouse click.")   
+			$CanvasLayer/Label2.visible = true
+			$CanvasLayer/Label.visible = false
 			var bug = BUG_SCENE.instantiate()
-			bug.position = $Player.position + Vector2(250, 0)
 			bug.set("entity_id", "tutorial_bug")
-			if bug.has_method("set_scale"): bug.call("set_scale", Vector2(2, 2))
-			elif "scale" in bug: bug.scale = Vector2(2, 2)
+			bug.position = $Player.position + Vector2(250, 0)
 			add_child(bug)
 			_stage_nodes.append(bug)
 
 		Stage.SNAKE_COMBAT:
-			_set_instruction("A new enemy snake spotted. Use speed+dash to kill it.")
+			$CanvasLayer/Label2.visible = false
+			$CanvasLayer/Label3.visible = true
 			var snake = SNAKE_SCENE.instantiate()
 			snake.position = $Player.position + Vector2(200, 0)
 			snake.set("entity_id", "tutorial_snake")
@@ -164,11 +105,11 @@ func _start_stage(stage: Stage) -> void:
 			var players = get_tree().get_nodes_in_group("player")
 			if not players.is_empty():
 				var player = players[0]
-				# Enable super speed automatically for this part so dash-kill works
-				player.call("set_hacked_client_modes", true, false, false, false, false, false)
+				player.call("set_hacked_client_modes", false, false, false, false, false, false)
 
 		Stage.HACK_MENU:
-			_set_instruction("Use the numbers to start hacks in the hacked client to break the matrix, They help for defeating harder enemies")
+			$CanvasLayer/Label3.visible = false
+			$CanvasLayer/Label4.visible = true
 			EventBus.log("HACKING INTERFACE ONLINE", "exploit")
 			# Reset hacks so they have to try one
 			var players = get_tree().get_nodes_in_group("player")
@@ -178,7 +119,9 @@ func _start_stage(stage: Stage) -> void:
 			_check_for_hack_activation()
 
 		Stage.DONE:
-			_set_instruction("You are ready to go!")
+			$CanvasLayer/Label4.visible = false
+			$CanvasLayer/Label5.visible = true
+			Music.tutorialFinished = true
 			_show_advanced_completion_ui()
 
 func _check_for_hack_activation() -> void:
@@ -275,7 +218,7 @@ func _show_advanced_completion_ui() -> void:
 	vbox.add_child(title)
 
 	var desc = Label.new()
-	desc.text = "System initialized. Agent certified for field operations.\n\nReady to enter the Mainframe?"
+	desc.text = "You are the one. Ready to hack the Matrix?"
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD
 	desc.add_theme_font_override("font", preload("res://Minecraft.ttf"))
@@ -283,7 +226,7 @@ func _show_advanced_completion_ui() -> void:
 	vbox.add_child(desc)
 
 	var menu_btn = Button.new()
-	menu_btn.text = " PROCEED TO MAIN MENU "
+	menu_btn.text = "Main Menu"
 	menu_btn.custom_minimum_size = Vector2(250, 50)
 	menu_btn.add_theme_font_override("font", preload("res://Minecraft.ttf"))
 	menu_btn.add_theme_font_size_override("font_size", 20)
@@ -295,8 +238,6 @@ func _show_advanced_completion_ui() -> void:
 	_completion_popup.pivot_offset = Vector2(250, 150)
 	create_tween().tween_property(_completion_popup, "scale", Vector2.ONE, 0.4).set_trans(Tween.TRANS_BACK)
 	
-	AudioManager.play_sfx("dragon-studio-cinematic-boom")
-
 func _clear_stage_nodes() -> void:
 	for n in _stage_nodes:
 		if is_instance_valid(n):

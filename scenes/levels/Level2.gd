@@ -822,7 +822,7 @@ func _play_level_intro() -> void:
 			intro_subtext = "SYSTEM STABILITY: COMPROMISED"
 		5:
 			intro_text = "FINAL BOSS: ROGUE AI"
-			intro_subtext = "STAY ALIVE"
+			intro_subtext = "TACTICAL ADVICE: TAKE OVERRIDE KEYS TO BREAK SHIELD"
 		_:
 			return
 

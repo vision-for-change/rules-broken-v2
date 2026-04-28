@@ -14,6 +14,8 @@ config/name="SYSTEM//BREACH"
 config/description="A systemic rule-exploitation stealth game."
 run/main_scene="res://scenes/ui/IntroSplash.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/image="uid://wqxwrs55qkrw"
 config/icon="res://icon.svg"
 
 [audio]
@@ -40,6 +42,7 @@ Sounds="*res://Sounds.tscn"
 
 window/size/mode=3
 window/stretch/mode="canvas_items"
+window/vsync/vsync_mode=0
 window/mode=3
 
 [gui]

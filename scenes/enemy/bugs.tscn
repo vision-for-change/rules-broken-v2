@@ -40,8 +40,8 @@ initial_velocity_max = 500.0
 gravity = Vector3(0, 0, 0)
 damping_min = 5.0
 damping_max = 10.0
-scale_min = 0.03
-scale_max = 0.049999997
+scale_min = 0.02
+scale_max = 0.04
 scale_curve = SubResource("CurveTexture_6m3hg")
 color_ramp = SubResource("GradientTexture1D_5eowu")
 
@@ -155,13 +155,13 @@ show_percentage = false
 position = Vector2(-1, 0)
 rect = Rect2(-12, -12, 24, 24)
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=675254091]
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=1801651990]
 position = Vector2(-3, 0)
 emitting = false
-amount = 15
 texture = ExtResource("2_5eowu")
 one_shot = true
 explosiveness = 1.0
+randomness = 1.0
 process_material = SubResource("ParticleProcessMaterial_6m3hg")
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=2033731805]

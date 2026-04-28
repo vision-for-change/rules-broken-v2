@@ -1,5 +1,7 @@
 extends Node2D
 
+var tutorialFinished = false
+
 func playglobalsound(filename, volume = -20):
 	print(load(filename))
 	print($AudioStreamPlayer.stream)

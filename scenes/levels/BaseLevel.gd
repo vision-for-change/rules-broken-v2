@@ -119,7 +119,6 @@ func _on_player_caught(_catcher_id: String) -> void:
 
 func _on_integrity_changed(new_val: float, _delta: float) -> void:
 	if new_val <= 0.0:
-		EventBus.log("!! SYSTEM FAILURE — PLAYER CAUGHT !!", "error")
 		return
 	var max_integrity := RuleManager.get_max_integrity() if RuleManager.has_method("get_max_integrity") else 1.0
 	var lockdown_threshold := max_integrity * 0.15
@@ -127,7 +126,6 @@ func _on_integrity_changed(new_val: float, _delta: float) -> void:
 		var rule = RuleDefinitions.get_rule("integrity_lockdown")
 		if not rule.is_empty():
 			RuleManager.register_rule(rule)
-			EventBus.log("!! INTEGRITY LOCKDOWN TRIGGERED !!", "error")
 			ScreenFX.screen_shake(8.0, 0.4)
 			AudioManager.play_sfx("lockdown")
 
