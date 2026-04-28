@@ -37,5 +37,5 @@ func _on_body_entered(body: Node) -> void:
 		body.call("heal", 30)
 		
 		ScreenFX.flash_screen(Color(0.2, 1.0, 0.3, 0.2), 0.12)
-		Sounds.playsound("res://Sounds/47313572-8-bit-game-sfx-sound-21-269970.mp3")
+		AudioManager.play_sfx("47313572-8-bit-game-sfx-sound-21-269970")
 	queue_free()
