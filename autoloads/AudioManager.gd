@@ -13,6 +13,7 @@ const INITIAL_POOL_SIZE = 16
 const SFX_DIRS := [
 	"res://assets/audio/sfx",
 	"res://Sounds",
+	"res://",
 ]
 const SFX_EXTS := [".wav", ".ogg", ".mp3"]
 const SFX_ALIASES := {

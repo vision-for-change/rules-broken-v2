@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1777305274
+::res://::1777380469
 alex_jauk-reality-distortion-rift-8bit-293073.mp3::AudioStreamMP3::8625338053529624698::1777262298::1777305295::1::::<><><>0<>0<>a6d67bea4bcff07e591fa655acf08391<>res://.godot/imported/alex_jauk-reality-distortion-rift-8bit-293073.mp3-12482da6e1006ca802931bf1ef0093ee.mp3str::
 default_bus_layout.tres::AudioBusLayout::-1::1777262298::0::1::::<><><>0<>0<><>::
 Dungeon_Tileset.png::CompressedTexture2D::2656631835447733967::1776637101::1776738556::1::::<><><>0<>0<>1a3bd291b5ebfdd008ca87fc3263330e<>res://.godot/imported/Dungeon_Tileset.png-5bddb36c069ab266c123a680ead86ce1.ctex::
@@ -12,8 +12,8 @@ music.tscn::PackedScene::-1::1777229551::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1776738548::0::1::::<><><>0<>0<><>::
 sounds.gd::GDScript::-1::1777262298::0::1::::<>Node2D<><>0<>0<><>::
 Sounds.tscn::PackedScene::-1::1777262321::0::1::::<><><>0<>0<><>::
-tutorial.tscn::PackedScene::5740289120019967396::1777305269::0::1::::<><><>0<>0<><>::uid://cmdq0wupyhvlw::::res://scenes/levels/TutorialLevel.gd<>uid://hud002::::res://scenes/ui/HUD.tscn<>uid://player001::::res://scenes/player/Player.tscn
-::res://assets/::1777305269
+tutorial.tscn::PackedScene::5740289120019967396::1777380128::0::1::::<><><>0<>0<><>::uid://cmdq0wupyhvlw::::res://scenes/levels/TutorialLevel.gd<>uid://hud002::::res://scenes/ui/HUD.tscn<>uid://player001::::res://scenes/player/Player.tscn
+::res://assets/::1777305295
 addmorpheus.png::CompressedTexture2D::1095267565280434868::1777241037::1777241044::1::::<><><>0<>0<>4af3841e8e6143c47391b1f00f45c8d4<>res://.godot/imported/addmorpheus.png-09dc466db97cfcf126d3c15c89ebd641.ctex::
 bullet.webp::CompressedTexture2D::8561439898735283185::1776718642::1776738556::1::::<><><>0<>0<>f84cfa6460ac8a4887df6c41be120ec0<>res://.godot/imported/bullet.webp-b60c1397b07773253e6a330feb966c2e.ctex::
 chatgpt.png::CompressedTexture2D::4512064113252704705::1776964111::1776964120::1::::<><><>0<>0<>7fa689c7126e582bca25ee87e1009836<>res://.godot/imported/chatgpt.png-b977c5ddcc41099a8ab83d50941e7ceb.ctex::
@@ -26,7 +26,7 @@ TelephoneUp.webp::CompressedTexture2D::4242728648179670248::1777222637::17772226
 trojan_horse.webp::CompressedTexture2D::8504329212033190589::1777074745::1777074746::1::::<><><>0<>0<>3665287945ab705655334fc9a5692c8e<>res://.godot/imported/trojan_horse.webp-b3fe0188f920ea22f2df551ae53958ee.ctex::
 UMP.webp::CompressedTexture2D::3902296875884929521::1777085106::1777085109::1::::<><><>0<>0<>323575dbd83ca3a40debd7b668c4a15f<>res://.godot/imported/UMP.webp-c14badaf868d73edf0ac7a3ac982176e.ctex::
 Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png::CompressedTexture2D::1612181789121899957::1777217261::1777217295::1::::<><><>0<>0<>802f1b3503f226699033197582a28363<>res://.godot/imported/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png-60478e552eb8a881e419b40f32914bea.ctex::
-::res://assets/sprites/::1777305269
+::res://assets/sprites/::1777305296
 65bd3cd054af5c81b917a77e_Green Gradient Image (1).png::CompressedTexture2D::4470294031886174710::1777262298::1777305296::1::::<><><>0<>0<>178c8823a5ce9602756a489a97f2d8ba<>res://.godot/imported/65bd3cd054af5c81b917a77e_Green Gradient Image (1).png-efa958edb7745d5d7b0b2102e98ad9c7.ctex::
 Assault rifle.png::CompressedTexture2D::6179233912457772487::1776806730::1776806882::1::::<><><>0<>0<>af82cf6e05313386966c652f350933d6<>res://.godot/imported/Assault rifle.png-b4a618c726c21f54bdbc4b4e9a6d5e89.ctex::
 bug.webp::CompressedTexture2D::5180193860152076698::1776781931::1776781960::1::::<><><>0<>0<>bd2e95bb3a53b06e4e950e93ffbafcb1<>res://.godot/imported/bug.webp-880176d2de63e747bc2a45214865fd3f.ctex::
@@ -47,7 +47,7 @@ system_breach.webp::CompressedTexture2D::5062427785461709038::1777054665::177707
 USP.jpg::CompressedTexture2D::9185243717968667606::1776867326::1776867352::1::::<><><>0<>0<>30b99e9b17812a95495ee84087fb1c37<>res://.godot/imported/USP.jpg-6044899e2d43b1bff86c64603a1f7a2c.ctex::
 ::res://autoloads/::1777305274
 ActionBus.gd::GDScript::5511848218225349285::1776623917::0::1::::<>Node<><>0<>0<><>::
-AudioManager.gd::GDScript::8761143838600416605::1777305269::0::1::::<>Node<><>0<>0<><>::
+AudioManager.gd::GDScript::8761143838600416605::1777306302::0::1::::<>Node<><>0<>0<><>::
 EntityRegistry.gd::GDScript::5579581290131691289::1776624105::0::1::::<>Node<><>0<>0<><>::
 EventBus.gd::GDScript::4756298897421493578::1777075990::0::1::::<>Node<><>0<>0<><>::
 GunDatabase.gd::GDScript::1630672618138133104::1777305274::0::1::::<>Node<><>0<>0<><>::
@@ -57,14 +57,14 @@ RuleDefinitions.gd::GDScript::2604223371126349401::1776623917::0::1::::<>Node<><
 RuleManager.gd::GDScript::8708556405985986970::1777217357::0::1::::<>Node<><>0<>0<><>::
 ScreenFX.gd::GDScript::1273802142910077051::1777262298::0::1::::<>Node<><>0<>0<><>::
 ::res://scenes/::1776718642
-::res://scenes/enemy/::1777305274
+::res://scenes/enemy/::1777310127
 bugs.gd::GDScript::7785072835121590431::1777262298::0::1::::<>CharacterBody2D<><>0<>0<><>::
 bugs.tscn::PackedScene::45450356689119872::1777262298::0::1::::<><><>0<>0<><>::uid://di6faoc1am880::::res://scenes/enemy/bugs.gd<>uid://c6rx5wui55fw3::::res://assets/sprites/costume3.svg<>uid://cf2lbhws1a23w::::res://assets/sprites/bug.webp<>uid://b72bgi7t047x8::::res://Sounds/lumora_studios-pixel-explosion-319166.mp3
 chatgpt.gd::GDScript::5455526401810255034::1777152891::0::1::::<>CharacterBody2D<><>0<>0<><>::
 chatgpt.tscn::PackedScene::1529695930530629416::1776995249::0::1::::<><><>0<>0<><>::uid://b5jxbipohggeb::::res://assets/chatgpt.png<>uid://cjyxytr73hxe5::::res://scenes/enemy/chatgpt.gd
 EnemyLaser.gd::GDScript::8390610287867762802::1777305274::0::1::::<>Area2D<><>0<>0<><>::
 EnemyLaser.tscn::PackedScene::1243795217775936088::1777077966::0::1::::<><><>0<>0<><>::uid://drsqeje6ij8nm::::res://scenes/enemy/EnemyLaser.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
-RogueAI.gd::GDScript::6447157350650578166::1777305274::0::1::::<>CharacterBody2D<><>0<>0<><>::
+RogueAI.gd::GDScript::6447157350650578166::1777310127::0::1::::<>CharacterBody2D<><>0<>0<><>::
 RogueAI.tscn::PackedScene::1057536209973520::1777305274::0::1::::<><><>0<>0<><>::uid://cx4b0faf3efr7::::res://scenes/enemy/RogueAI.gd<>uid://b5jxbipohggeb::::res://assets/chatgpt.png
 Snake.gd::GDScript::1371790092041211308::1777262298::0::1::::<>CharacterBody2D<><>0<>0<><>::
 Snake.tscn::PackedScene::965516310352::1777262298::0::1::::<><><>0<>0<><>::uid://tsrgg333vbng::::res://scenes/enemy/Snake.gd<>uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
@@ -72,18 +72,18 @@ TrojanHorse.gd::GDScript::540566633676242220::1777305274::0::1::::<>CharacterBod
 TrojanHorse.tscn::PackedScene::34845017866840::1777262298::0::1::::<><><>0<>0<><>::uid://hx4b2260k525::::res://scenes/enemy/TrojanHorse.gd<>uid://dtftca6p5bcuf::::res://assets/trojan_horse.webp
 worm.gd::GDScript::3041239432624138156::1777237749::0::1::::<>CharacterBody2D<><>0<>0<><>::
 worm.tscn::PackedScene::7063425510668276734::1777054665::0::1::::<><><>0<>0<><>::uid://b5fmjihl4uqeg::::res://assets/sprites/snake_segment.webp
-::res://scenes/levels/::1777305274
+::res://scenes/levels/::1777310127
 BaseLevel.gd::GDScript::8642037785361387650::1777169524::0::1::::<>Node2D<><>0<>0<><>::
 BossInteractable.gd::GDScript::1961293717532816798::1776982172::0::1::::<>StaticBody2D<><>0<>0<><>::
 FloorDoor.gd::GDScript::5246231945155492596::1777222764::0::1::::<>StaticBody2D<><>0<>0<><>::
 Level2.gd::GDScript::7607752747024112223::1777263154::0::1::::<>Node2D<><>0<>0<><>::
-Level2.tscn::PackedScene::5445090935181075138::1777262298::0::1::::<><><>0<>0<><>::uid://dgnitueod5hgx::::res://scenes/levels/Level2.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://hud002::::res://scenes/ui/HUD.tscn
-LevelBoss.gd::GDScript::5291460112400036155::1777305274::0::1::::<>Node2D<><>0<>0<><>::
+Level2.tscn::PackedScene::5445090935181075138::1777262298::0::1::::<><><>0<>0<><>::uid://dgnitueod5hgx::::res://scenes/levels/Level2.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://22ew4q7c4l5v::::res://Minecraft.ttf<>res://themes/default_theme.tres<>uid://hud002::::res://scenes/ui/HUD.tscn
+LevelBoss.gd::GDScript::5291460112400036155::1777310127::0::1::::<>Node2D<><>0<>0<><>::
 LevelBoss.tscn::PackedScene::2190936384168707225::1777176003::0::1::::<><><>0<>0<><>::uid://chnhtswgyo7lv::::res://scenes/levels/LevelBoss.gd<>uid://player001::::res://scenes/player/Player.tscn<>uid://hud002::::res://scenes/ui/HUD.tscn
 TerrainPainter.gd::GDScript::-1::1776637101::0::1::::<>TileMapLayer<><>0<>1<><>::
 TutorialLevel.gd::GDScript::5622317928160350584::1777246829::0::1::::<>Node2D<><>0<>0<><>::
 ::res://scenes/objects/::1777262298
-Exit.gd::GDScript::1620526890335362651::1777168796::0::1::::<>Area2D<><>0<>0<><>::
+Exit.gd::GDScript::1620526890335362651::1777305779::0::1::::<>Area2D<><>0<>0<><>::
 Exit.tscn::PackedScene::7235699657::1776623918::0::1::::<><><>0<>0<><>::res://scenes/objects/Exit.gd
 HealthPickup.gd::GDScript::3889708876367515446::1777262298::0::1::::<>Area2D<><>0<>0<><>::
 HealthPickup.tscn::PackedScene::1446517215331179857::1777262298::0::1::::<><><>0<>0<><>::uid://bvog64b6ps7tq::::res://scenes/objects/HealthPickup.gd<>uid://c1k4pgioylld5::::res://assets/sprites/medkit.webp
@@ -96,7 +96,7 @@ Bullet.gd::GDScript::304173446287126993::1777237743::0::1::::<>Area2D<><>0<>0<><
 Bullet.tscn::PackedScene::2853759667912::1777217357::0::1::::<><><>0<>0<><>::uid://ellxshattwdl::::res://scenes/player/Bullet.gd<>uid://dt8hwt6i3p842::::res://assets/bullet.webp
 Inventory.gd::GDScript::7107585837491994424::1777305274::0::1::::<>Node<><>0<>0<><>::
 Player.gd::GDScript::2752255572433044543::1777262298::0::1::::<>CharacterBody2D<><>0<>0<><>::
-Player.tscn::PackedScene::27365761918488::1777305274::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://5thoi1jvta6w::::res://assets/matrix_gun.webp<>uid://b4xpdbtem356a::::res://assets/sprites/65bd3cd054af5c81b917a77e_Green Gradient Image (1).png<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp<>uid://c6rx5wui55fw3::::res://assets/sprites/costume3.svg<>uid://bl3jr4qbpxc57::::res://Sounds/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3<>uid://bbedi33b2r616::::res://Sounds/freesound_community-hurt_c_08-102842.mp3<>uid://dmmigehda3lx8::::res://Sounds/soundreality-footsteps-walking-boots-parquet-1-420135 (1).mp3
+Player.tscn::PackedScene::27365761918488::1777305274::0::1::::<><><>0<>0<><>::uid://bfhhinyybc56j::::res://scenes/player/Player.gd<>uid://b4xpdbtem356a::::res://assets/sprites/65bd3cd054af5c81b917a77e_Green Gradient Image (1).png<>uid://c8i75u04u3dmu::::res://scenes/player/Inventory.gd<>uid://mk2lre3523uj::::res://assets/sprites/pixilart-sprite.webp<>uid://bvuki248c6gc4::::res://assets/UMP.webp<>uid://c6rx5wui55fw3::::res://assets/sprites/costume3.svg<>uid://bl3jr4qbpxc57::::res://Sounds/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3<>uid://bbedi33b2r616::::res://Sounds/freesound_community-hurt_c_08-102842.mp3<>uid://dmmigehda3lx8::::res://Sounds/soundreality-footsteps-walking-boots-parquet-1-420135 (1).mp3
 ::res://scenes/ui/::1777305274
 GameOver.gd::GDScript::2710332240927150708::1777169524::0::1::::<>Control<><>0<>0<><>::
 GameOver.tscn::PackedScene::8598048::1777262298::0::1::::<><><>0<>0<><>::uid://beu51nc3iecrk::::res://scenes/ui/GameOver.gd<>uid://w77nsxue3whp::::res://assets/Your game crashed. We are collecting some error info. You can either go try again to fight again or go to main menu and change guns and fight again..png
@@ -106,12 +106,12 @@ HUD.gd::GDScript::6494486643168512901::1777305269::0::1::::<>CanvasLayer<><>0<>0
 HUD.tscn::PackedScene::344922377::1777152557::0::1::::<><><>0<>0<><>::uid://cyr8ims67bdar::::res://scenes/ui/HUD.gd<>uid://bs1bdjaj2wbfa::::res://scenes/ui/WeaponDisplay.gd
 IntroSplash.gd::GDScript::1957122655313307541::1777262298::0::1::::<>Control<><>0<>0<><>::
 IntroSplash.tscn::PackedScene::-1::1777262298::0::1::::<><><>0<>0<><>::
-MainMenu.gd::GDScript::6262768379189366262::1777305274::0::1::::<>Control<><>0<>0<><>::
-MainMenu.tscn::PackedScene::16537456::1777217357::0::1::::<><><>0<>0<><>::uid://cvhy46rrn3uxi::::res://scenes/ui/MainMenu.gd
+MainMenu.gd::GDScript::6262768379189366262::1777309742::0::1::::<>Control<><>0<>0<><>::
+MainMenu.tscn::PackedScene::16537456::1777309314::0::1::::<><><>0<>0<><>::uid://cvhy46rrn3uxi::::res://scenes/ui/MainMenu.gd<>uid://ceejpftpks03c::::res://assets/sprites/system_breach.webp
 WeaponDisplay.gd::GDScript::3703560238313736494::1777152557::0::1::::<>Control<><>0<>0<><>::
-WinScreen.gd::GDScript::5275217465158032268::1777217358::0::1::::<>Control<><>0<>0<><>::
-WinScreen.tscn::PackedScene::30136640::1777216995::0::1::::<><><>0<>0<><>::uid://chfmcco467uqm::::res://scenes/ui/WinScreen.gd
-::res://Sounds/::1777305269
+WinScreen.gd::GDScript::5275217465158032268::1777309772::0::1::::<>Control<><>0<>0<><>::
+WinScreen.tscn::PackedScene::30136640::1777309324::0::1::::<><><>0<>0<><>::uid://chfmcco467uqm::::res://scenes/ui/WinScreen.gd
+::res://Sounds/::1777305295
 47313572-8-bit-game-sfx-sound-21-269970.mp3::AudioStreamMP3::9185643172631610072::1777262298::1777305295::1::::<><><>0<>0<>78fbcb4a4f3baaeec7f880b39a8cd2a2<>res://.godot/imported/47313572-8-bit-game-sfx-sound-21-269970.mp3-e69bf114341fe70e620eb17ddc34b1a9.mp3str::
 daviddumaisaudio-explosive-glass-shattering-09-190267.mp3::AudioStreamMP3::3216878900216825068::1777070454::1777070721::1::::<><><>0<>0<>3db6d978da2735af6828ee13b3de5a15<>res://.godot/imported/daviddumaisaudio-explosive-glass-shattering-09-190267.mp3-282eb26f359c626b580b7ccf6a734875.mp3str::
 dragon-studio-cinematic-boom-454254.mp3::AudioStreamMP3::3576778643801580521::1776952283::1776952283::1::::<><><>0<>0<>95514746dacef3d77c4aa50700fe5a27<>res://.godot/imported/dragon-studio-cinematic-boom-454254.mp3-ac03a14a5af2c0deff3ab081f08a9a8d.mp3str::
